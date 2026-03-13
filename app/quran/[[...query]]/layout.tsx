@@ -11,12 +11,14 @@ import QuranSettings from './client-components/settings'
 import MetricsCollector from './mini-components/metrics-collector'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { QuranPlayer } from '@/app/quran/[[...query]]/client-components/now-playing-bar'
+// import { wsApi } from '@/src/api/client'
 
 export default async function QuranLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // const { data, error } = await wsApi.GET('')
   const chaptersResult = await ws.supabase.from('ws_quran_chapters').select('*')
   const appendicesResult = await ws.supabase
     .from('ws_quran_appendices')
@@ -34,7 +36,7 @@ export default async function QuranLayout({
           {/* Main content (right space) */}
           <SidebarInset>
             {/* Header */}
-            <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+            <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b">
               <SidebarTrigger className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden" />
               <PageSwitcher currentPage="quran" />
               <QuranSearchbar />

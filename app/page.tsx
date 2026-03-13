@@ -104,7 +104,7 @@ export default function Home() {
             height={48}
             className="rounded-full size-6 lg:size-10"
           />
-          <h1 className="text-md lg:text-2xl font-bold tracking-tight">
+          <h1 className="text-[0.9rem] lg:text-2xl font-bold tracking-tight">
             WikiSubmission
           </h1>
         </div>
@@ -176,7 +176,7 @@ export default function Home() {
 
       {/* about  */}
       <footer className="pt-10 border-t space-y-8 flex flex-col items-center">
-        <div className="max-w-2xl text-center text-sm text-muted-foreground space-y-4">
+        <div className="max-w-2xl text-center text-sm text-muted-foreground space-y-4 text-ellipsis">
           <p>
             WikiSubmission is a faith-based 501(c)(3) nonprofit organization...
             <Link

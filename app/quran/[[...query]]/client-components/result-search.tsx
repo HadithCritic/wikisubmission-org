@@ -2,452 +2,542 @@
 
 import { ws } from '@/lib/wikisubmission-sdk'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { QueryResultSuccess } from 'wikisubmission-sdk'
+import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
-import { ArrowRightIcon, SearchIcon } from 'lucide-react'
-import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
+import {
+  ArrowRightIcon,
+  ArrowUpRightIcon,
+  ChevronRight,
+  SearchIcon,
+} from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { SearchItemWord } from '../mini-components/search-item-word'
-import { SearchItemChapter } from '../mini-components/search-item-chapter-match'
-import { StandardResult } from './result-standard'
-import { SearchItemTitle } from '../mini-components/search-item-title'
-import { SearchItemAllMatches } from '../mini-components/search-item-all-maches'
+import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import {
+  useVerseSearch,
+  LANG_TO_CODE,
+  type ChapterResult,
+  type VerseResult,
+} from '@/hooks/use-verse-search'
+import { SearchItemWord } from '../mini-components/search-item-word'
+import { StandardResult } from './result-standard'
 import Link from 'next/link'
+
+// ─── New API renderers ────────────────────────────────────────────────────────
+
+/** Parses <b>…</b> from backend highlights into styled spans (no dangerouslySetInnerHTML) */
+function HighlightText({ text }: { text?: string | null }) {
+  if (!text) return null
+  return (
+    <>
+      {text.split(/(<b>.*?<\/b>)/g).map((part, i) => {
+        if (part.startsWith('<b>') && part.endsWith('</b>')) {
+          return (
+            <span
+              key={i}
+              className="bg-violet-600/10 text-violet-600 dark:text-violet-400 rounded-sm font-bold"
+            >
+              {part.slice(3, -4)}
+            </span>
+          )
+        }
+        return part || null
+      })}
+    </>
+  )
+}
+
+function SearchResultChapter({
+  chapter,
+  primaryCode,
+}: {
+  chapter: ChapterResult
+  primaryCode: string
+}) {
+  const title =
+    chapter.titles?.[primaryCode] ??
+    chapter.titles?.['en'] ??
+    `Sura ${chapter.cn}`
+  return (
+    <Link href={`/quran/${chapter.cn}`}>
+      <div className="flex items-center gap-1 bg-muted/50 p-4 rounded-2xl w-fit hover:bg-muted/80">
+        <p>
+          <strong>Sura {chapter.cn}:</strong> {title}
+        </p>
+        <ChevronRight className="size-4" />
+      </div>
+    </Link>
+  )
+}
+
+function SearchResultVerse({
+  verse,
+  primaryCode,
+  showArabic,
+  showSubtitles,
+  showFootnotes,
+  showText,
+}: {
+  verse: VerseResult
+  primaryCode: string
+  showArabic: boolean
+  showSubtitles: boolean
+  showFootnotes: boolean
+  showText: boolean
+}) {
+  const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
+  const tr = verse.tr?.[primaryCode]
+  const arTr = verse.tr?.['ar']
+
+  return (
+    <div className="space-y-2 bg-muted/50 rounded-2xl p-4">
+      <Link
+        href={`/quran/${chNum}?verse=${vNum}`}
+        target="_blank"
+        className="flex items-center gap-1 w-fit text-xs text-muted-foreground tracking-wider text-violet-600 hover:cursor-pointer"
+      >
+        <p>{verse.vk}</p>
+        <ArrowUpRightIcon className="size-4" />
+      </Link>
+
+      {showText && tr && (
+        <p>
+          <strong>[{verse.vk}]</strong>{' '}
+          {tr.hl ? <HighlightText text={tr.hl} /> : tr.tx}
+        </p>
+      )}
+
+      {showSubtitles && tr?.s && (
+        <p className="text-sm text-muted-foreground italic">
+          <HighlightText text={tr.s} />
+        </p>
+      )}
+
+      {showFootnotes && tr?.f && (
+        <p className="text-sm text-muted-foreground">
+          <HighlightText text={tr.f} />
+        </p>
+      )}
+
+      {showArabic && arTr?.tx && (
+        <p className="text-right text-xl tracking-widest" dir="rtl">
+          {arTr.tx}
+        </p>
+      )}
+    </div>
+  )
+}
 
 export default function SearchResult({ props }: { props: { query: string } }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const searchQuery = props.query
+  const searchQuery = decodeURIComponent(props.query)
+  const strict = searchParams.get('strict') === 'true'
   const forceTab = searchParams.get('tab')
 
-  const quranPreferences = useQuranPreferences()
+  const prefs = useQuranPreferences()
+  const verseSearch = useVerseSearch()
 
-  const [loading, setLoading] = useState(false)
-  const [loadingWordByWord, setLoadingWordByWord] = useState(false)
+  // SDK path: chapter / multiple_verses direct lookup
+  const [sdkResult, setSdkResult] = useState<QueryResultSuccess | null>(null)
+  const [sdkLoading, setSdkLoading] = useState(false)
 
-  const [results, setResults] = useState<QueryResultSuccess | null>(null)
+  // Word search (still SDK — backend word scope is a different feature)
   const [searchTab, setSearchTab] = useState<'all' | 'words'>('all')
-  const [searchWordByWordMatches, setSearchWordByWordMatches] = useState<
-    SearchHitWordByWord[]
-  >([])
+  const [wordMatches, setWordMatches] = useState<SearchHitWordByWord[]>([])
+  const [wordLoading, setWordLoading] = useState(false)
 
-  const didInitRef = useRef(false)
   const lastQueryRef = useRef<string | null>(null)
-  const lastStrictRef = useRef<string | null>(searchParams.get('strict'))
+  const lastStrictRef = useRef<string | null>(null)
+  const didInitRef = useRef(false)
 
-  const runQuery = useCallback(async () => {
-    setSearchTab('all')
-    setSearchWordByWordMatches([])
-
-    if (!searchQuery) return
-
-    setLoading(true)
-
-    const strict = searchParams.get('strict') === 'true'
-
-    const query = await ws.Quran.query(decodeURIComponent(searchQuery), {
-      language: quranPreferences.primaryLanguage,
-      strategy: strict ? 'strict' : 'default',
-      highlight: true,
-      normalizeGodCasing: true,
-      adjustments: {
-        index: true,
-        chapters: true,
-        subtitles: true,
-        footnotes: true,
-        wordByWord: false,
-      },
-    })
-
-    if (strict) {
-      if (query.status !== 'success') {
-        toast.error('No matches with strict search', {
-          description: 'Switching back to standard search',
-        })
-        const params = new URLSearchParams(searchParams.toString())
-        params.delete('strict')
-        router.replace(`${window.location.pathname}?${params.toString()}`, {
-          scroll: false,
-        })
-        return
-      }
-    }
-
-    if (query.status === 'success') {
-      if (query.type === 'verse') {
-        router.replace(
-          `/quran/${query.data[0].chapter_number}?verse=${query.data[0].verse_number}`,
-          { scroll: false }
-        )
-      } else {
-        setResults(query)
-      }
-    } else {
-      toast.error(decodeURIComponent(query.error))
-    }
-
-    setLoading(false)
-  }, [searchQuery, router, quranPreferences.primaryLanguage, searchParams])
-
-  const runWordByWordQuery = useCallback(
-    async (field: 'english' | 'meanings') => {
-      if (searchWordByWordMatches.length > 0) return
-      if (!searchQuery) {
-        toast.error('No search query provided')
-        return
-      }
-
-      setLoadingWordByWord(true)
-      setSearchWordByWordMatches([])
-
-      const dbQuery = await ws.Quran.query(decodeURIComponent(searchQuery), {
-        language: 'english',
-        strategy: 'default',
-        highlight: true,
-        normalizeGodCasing: true,
-        adjustments: {
-          index: false,
-          chapters: false,
-          subtitles: false,
-          footnotes: false,
-          wordByWord: { field },
-        },
-      })
-
-      if (
-        dbQuery.status === 'success' &&
-        dbQuery.type === 'search' &&
-        dbQuery.data?.some((i) => i.hit === 'word_by_word')
-      ) {
-        setSearchWordByWordMatches(
-          dbQuery.data.filter((i) => i.hit === 'word_by_word')
-        )
-      } else if (dbQuery.status === 'error') {
-        toast.error(decodeURIComponent(dbQuery.error))
-      } else {
-        toast.error(`No results found for '${decodeURIComponent(searchQuery)}'`)
-      }
-
-      setLoadingWordByWord(false)
-    },
-    [searchQuery, searchWordByWordMatches]
-  )
-
+  // ── Primary query effect ─────────────────────────────────────────────────────
   useEffect(() => {
     const currentStrict = searchParams.get('strict')
     const isNewQuery = searchQuery !== lastQueryRef.current
     const isNewStrict = currentStrict !== lastStrictRef.current
 
-    if (isNewQuery || isNewStrict) {
-      lastQueryRef.current = searchQuery
-      lastStrictRef.current = currentStrict
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (searchQuery) runQuery()
-      return
+    if (!isNewQuery && !isNewStrict) return
+
+    lastQueryRef.current = searchQuery
+    lastStrictRef.current = currentStrict
+
+    if (!searchQuery) return
+
+    setSdkResult(null)
+    verseSearch.reset()
+    setWordMatches([])
+    setSearchTab('all')
+
+    const parsed = ws.Quran.Methods.parseQuery(searchQuery)
+
+    if (parsed.valid && parsed.type === 'verse') {
+      // Direct verse → redirect to reader
+      ws.Quran.query(searchQuery, {
+        language: prefs.primaryLanguage,
+        strategy: 'default',
+        highlight: false,
+        normalizeGodCasing: true,
+        adjustments: {
+          index: true,
+          chapters: false,
+          subtitles: false,
+          footnotes: false,
+          wordByWord: false,
+        },
+      }).then((result) => {
+        if (result.status === 'success' && result.type === 'verse') {
+          router.replace(
+            `/quran/${result.data[0].chapter_number}?verse=${result.data[0].verse_number}`,
+            { scroll: false }
+          )
+        }
+      })
+    } else if (
+      parsed.valid &&
+      (parsed.type === 'chapter' || parsed.type === 'multiple_verses')
+    ) {
+      // Direct chapter/range → SDK
+      setSdkLoading(true)
+      ws.Quran.query(searchQuery, {
+        language: prefs.primaryLanguage,
+        strategy: 'default',
+        highlight: false,
+        normalizeGodCasing: true,
+        adjustments: {
+          index: true,
+          chapters: true,
+          subtitles: true,
+          footnotes: true,
+          wordByWord: false,
+        },
+      }).then((result) => {
+        if (result.status === 'success') setSdkResult(result)
+        else toast.error(decodeURIComponent(result.error))
+        setSdkLoading(false)
+      })
+    } else {
+      // Text search → new API
+      verseSearch.search(searchQuery, {
+        primaryLang: prefs.primaryLanguage,
+        secondaryLang: prefs.secondaryLanguage,
+        includeArabic: prefs.arabic,
+        strict,
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, searchParams])
+
+  // ── Word search (SDK) ────────────────────────────────────────────────────────
+  const runWordByWordQuery = useCallback(async () => {
+    if (wordMatches.length > 0) return
+    if (!searchQuery) return
+
+    setWordLoading(true)
+    setWordMatches([])
+
+    const result = await ws.Quran.query(searchQuery, {
+      language: 'english',
+      strategy: 'default',
+      highlight: true,
+      normalizeGodCasing: true,
+      adjustments: {
+        index: false,
+        chapters: false,
+        subtitles: false,
+        footnotes: false,
+        wordByWord: { field: 'english' },
+      },
+    })
+
+    if (
+      result.status === 'success' &&
+      result.type === 'search' &&
+      result.data?.some((i) => i.hit === 'word_by_word')
+    ) {
+      setWordMatches(result.data.filter((i) => i.hit === 'word_by_word'))
+    } else if (result.status === 'error') {
+      toast.error(decodeURIComponent(result.error))
+    } else {
+      toast.error(`No word matches for '${searchQuery}'`)
     }
 
+    setWordLoading(false)
+  }, [searchQuery, wordMatches])
+
+  // ── Init tab from URL ────────────────────────────────────────────────────────
+  useEffect(() => {
     if (!didInitRef.current) {
       didInitRef.current = true
       if (forceTab === 'words') {
         setSearchTab('words')
-        runWordByWordQuery('english')
+        runWordByWordQuery()
       }
     }
-  }, [searchQuery, forceTab, runQuery, runWordByWordQuery, searchParams])
+  }, [forceTab, runWordByWordQuery])
 
-  const searchAllMatches = results?.type === 'search' ? results.data : []
-  const searchChapterMatches =
-    results?.type === 'search'
-      ? searchAllMatches.filter((r) => r.hit === 'chapter')
-      : []
-  const searchSubtitleMatches =
-    results?.type === 'search'
-      ? searchAllMatches.filter((r) => r.hit === 'subtitle')
-      : []
-  const searchTextMatches =
-    results?.type === 'search'
-      ? searchAllMatches.filter((r) => r.hit === 'text')
-      : []
-  const searchFootnoteMatches =
-    results?.type === 'search'
-      ? searchAllMatches.filter((r) => r.hit === 'footnote')
-      : []
+  // ── Derived ──────────────────────────────────────────────────────────────────
+  const primaryCode = LANG_TO_CODE[prefs.primaryLanguage] ?? 'en'
+  const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
+  const allVerses =
+    verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+  const isLoading = sdkLoading || (verseSearch.loading && !verseSearch.data)
 
-  return (
-    <div>
-      {loading && (
-        <div className="p-4 flex justify-center items-center">
-          <Spinner />
-        </div>
-      )}
+  // ── Render ───────────────────────────────────────────────────────────────────
 
-      {results &&
-        (results.type === 'chapter' ||
-          results.type === 'verse' ||
-          results.type === 'multiple_verses') && (
-          <StandardResult props={{ query: props.query, data: results }} />
-        )}
+  if (isLoading) {
+    return (
+      <div className="p-4 flex justify-center items-center">
+        <Spinner />
+      </div>
+    )
+  }
 
-      {results &&
-        results.type === 'search' &&
-        (searchQuery?.length ?? 0) > 0 && (
-          <div className="space-y-2">
-            <section>
-              <SearchItemTitle props={{ results }} />
-            </section>
-            <section>
-              <Tabs
-                value={searchTab}
-                onValueChange={(v) => {
-                  const tab = v as typeof searchTab
-                  setSearchTab(tab)
+  // Chapter / verse direct lookup (SDK)
+  if (sdkResult) {
+    return <StandardResult props={{ query: searchQuery, data: sdkResult }} />
+  }
 
+  // Text search results (new API)
+  if (verseSearch.data) {
+    return (
+      <div className="space-y-2">
+        <h2 className="text-xl font-bold">{searchQuery}</h2>
+
+        <Tabs
+          value={searchTab}
+          onValueChange={(v) => {
+            const tab = v as typeof searchTab
+            setSearchTab(tab)
+            const params = new URLSearchParams(searchParams.toString())
+            params.set('tab', tab)
+            router.replace(`${window.location.pathname}?${params.toString()}`, {
+              scroll: false,
+            })
+            if (tab === 'words') runWordByWordQuery()
+          }}
+          className="space-y-2"
+        >
+          {/* Tab header */}
+          <div className="flex justify-between items-center">
+            <TabsList className="flex [&>*]:text-xs">
+              <TabsTrigger value="all">
+                Results ({verseSearch.total})
+              </TabsTrigger>
+              <TabsTrigger value="words">
+                <SearchIcon className="size-3" />
+                Word Search
+                {wordMatches.length > 0
+                  ? wordMatches.length > 2999
+                    ? ' (3,000+)'
+                    : ` (${wordMatches.length})`
+                  : ''}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Strict mode */}
+            <div className="flex items-center gap-2">
+              <Switch
+                id="strict-mode"
+                checked={strict}
+                onCheckedChange={(checked) => {
                   const params = new URLSearchParams(searchParams.toString())
-                  params.set('tab', tab)
+                  if (checked) params.set('strict', 'true')
+                  else params.delete('strict')
                   router.replace(
                     `${window.location.pathname}?${params.toString()}`,
                     { scroll: false }
                   )
-
-                  if (tab === 'words') runWordByWordQuery('english')
                 }}
-                className="space-y-2"
+                disabled={searchQuery.split(' ').length <= 1}
+              />
+              <Label
+                htmlFor="strict-mode"
+                className="text-xs text-muted-foreground select-none cursor-pointer"
               >
-                {/* Tab Selection */}
-                <div className="flex justify-between items-center">
-                  <TabsList className="flex [&>*]:text-xs">
-                    <TabsTrigger value="all">
-                      Results (
-                      {(
-                        searchTextMatches.length +
-                        searchChapterMatches.length +
-                        searchSubtitleMatches.length +
-                        searchFootnoteMatches.length
-                      ).toString()}
-                      )
-                    </TabsTrigger>
-                    <TabsTrigger value="words">
-                      <SearchIcon />
-                      Word Search
-                      {searchWordByWordMatches.length > 0
-                        ? searchWordByWordMatches.length > 2999
-                          ? ' (3,000+)'
-                          : ` (${searchWordByWordMatches.length})`
-                        : ''}
-                    </TabsTrigger>
-                  </TabsList>
+                Strict Search
+              </Label>
+            </div>
+          </div>
 
-                  {/* Strict Mode Toggle */}
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="strict-mode"
-                      checked={searchParams.get('strict') === 'true'}
-                      onCheckedChange={(checked) => {
-                        const params = new URLSearchParams(
-                          searchParams.toString()
-                        )
-                        if (checked) {
-                          params.set('strict', 'true')
-                        } else {
-                          params.delete('strict')
-                        }
-                        router.replace(
-                          `${window.location.pathname}?${params.toString()}`,
-                          { scroll: false }
-                        )
-                      }}
-                      disabled={searchQuery.split(' ').length <= 1}
-                    />
-                    <Label
-                      htmlFor="strict-mode"
-                      className="text-xs text-muted-foreground select-none cursor-pointer"
-                    >
-                      Strict Search
-                    </Label>
-                  </div>
-                </div>
+          {/* Display filters — toggle what fields are shown per verse */}
+          <section className="flex items-center gap-4">
+            <div className="flex items-center gap-2 [&>*]:text-xs">
+              <Checkbox
+                checked={prefs.text}
+                onCheckedChange={(v) =>
+                  prefs.setPreferences({ ...prefs, text: !!v })
+                }
+                id="filter-text"
+              />
+              <Label htmlFor="filter-text">Text</Label>
+            </div>
+            <div className="flex items-center gap-2 [&>*]:text-xs">
+              <Checkbox
+                checked={prefs.subtitles}
+                onCheckedChange={(v) =>
+                  prefs.setPreferences({ ...prefs, subtitles: !!v })
+                }
+                id="filter-subtitles"
+              />
+              <Label htmlFor="filter-subtitles">Subtitles</Label>
+            </div>
+            <div className="flex items-center gap-2 [&>*]:text-xs">
+              <Checkbox
+                checked={prefs.footnotes}
+                onCheckedChange={(v) =>
+                  prefs.setPreferences({ ...prefs, footnotes: !!v })
+                }
+                id="filter-footnotes"
+              />
+              <Label htmlFor="filter-footnotes">Footnotes</Label>
+            </div>
+          </section>
 
-                {/* Tab Filters */}
-                {searchTab === 'all' && (
-                  <section className="flex items-center gap-4">
-                    {searchTextMatches.length > 0 && (
-                      <div className="flex items-center gap-2 [&>*]:text-xs">
-                        <Checkbox
-                          checked={quranPreferences.text}
-                          onCheckedChange={(v) =>
-                            quranPreferences.setPreferences({
-                              ...quranPreferences,
-                              text: v ? true : false,
-                            })
-                          }
-                          id="text"
-                        />
-                        <Label htmlFor="text">
-                          Text ({searchTextMatches.length})
-                        </Label>
+          {/* Main results */}
+          <TabsContent value="all" className="space-y-2">
+            {titleMatches.map((ch) => (
+              <SearchResultChapter
+                key={`title:${ch.cn}`}
+                chapter={ch}
+                primaryCode={primaryCode}
+              />
+            ))}
+
+            {allVerses.map((verse, index) => (
+              <SearchResultVerse
+                key={`${index}-${verse.vk}`}
+                verse={verse}
+                primaryCode={primaryCode}
+                showText={prefs.text}
+                showSubtitles={prefs.subtitles}
+                showFootnotes={prefs.footnotes}
+                showArabic={prefs.arabic}
+              />
+            ))}
+
+            {verseSearch.loading && (
+              <div className="flex justify-center py-4">
+                <Spinner />
+              </div>
+            )}
+
+            {verseSearch.hasMore && !verseSearch.loading && (
+              <div className="flex justify-center pt-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => verseSearch.loadMore()}
+                >
+                  Load more ({verseSearch.loadedCount} / {verseSearch.total})
+                </Button>
+              </div>
+            )}
+
+            {!verseSearch.hasMore && allVerses.length > 0 && (
+              <p className="text-center text-xs text-muted-foreground py-2">
+                All {verseSearch.total} results shown
+              </p>
+            )}
+          </TabsContent>
+
+          {/* Word search (SDK) */}
+          <TabsContent value="words">
+            <div className="space-y-2">
+              {wordLoading && <Spinner />}
+
+              {wordMatches.length === 0 && !wordLoading && (
+                <div className="space-y-2">
+                  <p className="text-muted-foreground">No matches</p>
+                  {searchQuery.split(' ').length > 1 && (
+                    <div className="bg-muted/50 p-4 rounded-2xl space-y-2">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <SearchIcon className="size-4" />
+                        <p>Try searching:</p>
                       </div>
-                    )}
-
-                    {searchSubtitleMatches.length > 0 && (
-                      <div className="flex items-center gap-2 [&>*]:text-xs">
-                        <Checkbox
-                          checked={quranPreferences.subtitles}
-                          onCheckedChange={(v) =>
-                            quranPreferences.setPreferences({
-                              ...quranPreferences,
-                              subtitles: v ? true : false,
-                            })
-                          }
-                          id="subtitles"
-                        />
-                        <Label htmlFor="subtitles">
-                          Subtitles ({searchSubtitleMatches.length})
-                        </Label>
-                      </div>
-                    )}
-
-                    {searchFootnoteMatches.length > 0 && (
-                      <div className="flex items-center gap-2 [&>*]:text-xs">
-                        <Checkbox
-                          checked={quranPreferences.footnotes}
-                          onCheckedChange={(v) =>
-                            quranPreferences.setPreferences({
-                              ...quranPreferences,
-                              footnotes: v ? true : false,
-                            })
-                          }
-                          id="footnotes"
-                        />
-                        <Label htmlFor="footnotes">
-                          Footnotes ({searchFootnoteMatches.length})
-                        </Label>
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {/* Content */}
-                {/* Main Results */}
-                <TabsContent value="all" className="space-y-2">
-                  {searchChapterMatches.length > 0 && (
-                    <section className="space-y-2">
-                      {searchChapterMatches.map((r) => (
-                        <div key={`chapter:${r.hit}:${r.chapter_number}`}>
-                          <SearchItemChapter chapter={r} />
-                        </div>
-                      ))}
-                    </section>
-                  )}
-                  {searchAllMatches.map((r) => (
-                    <div
-                      key={`all:${r.hit}:${'verse_id' in r ? r.verse_id : ''}:${'word_index' in r ? r.word_index : ''}`}
-                    >
-                      <SearchItemAllMatches props={{ results: r }} />
-                    </div>
-                  ))}
-                </TabsContent>
-                {/* Word Search Results */}
-                <TabsContent value="words">
-                  <div className="space-y-2">
-                    {loadingWordByWord && <Spinner />}
-                    {searchWordByWordMatches.length === 0 &&
-                      !loadingWordByWord && (
-                        <div className="space-y-2">
-                          <p className="text-muted-foreground">No matches</p>
-                          {decodeURIComponent(props.query).split(' ').length >
-                            1 && (
-                            <div className="bg-muted/50 p-4 rounded-2xl space-y-2">
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <SearchIcon className="size-4" />
-                                <p>Try searching:</p>
-                              </div>
-                              <div>
-                                {decodeURIComponent(props.query)
-                                  .split(' ')
-                                  .map((q) => (
-                                    <div
-                                      key={q}
-                                      className="flex items-center gap-2 text-violet-600 hover:text-violet-700 hover:cursor-pointer"
-                                    >
-                                      <a href={`?q=${q}&tab=words`}>{q}</a>
-                                      <ArrowRightIcon className="size-4" />
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    {searchWordByWordMatches.length > 0 && (
-                      <div className="space-y-2">
-                        {Array.from(
-                          new Map(
-                            searchWordByWordMatches.map((item) => [
-                              item.root_word,
-                              item,
-                            ])
-                          ).values()
-                        ).map((item) => (
-                          <section
-                            key={item.root_word}
-                            className="bg-muted/50 p-4 rounded-2xl space-y-2"
+                      <div>
+                        {searchQuery.split(' ').map((q) => (
+                          <div
+                            key={q}
+                            className="flex items-center gap-2 text-violet-600 hover:text-violet-700 hover:cursor-pointer"
                           >
-                            <p className="text-xl text-muted-foreground tracking-wider">
-                              {item.transliterated} / {item.arabic}
-                            </p>
-                            <p className="w-fit rounded-2xl">
-                              <strong>Root word:</strong> {item.root_word}
-                            </p>
-                            <p className="w-fit rounded-2xl gap-1 flex flex-wrap">
-                              <strong>
-                                Verses (
-                                {
-                                  searchWordByWordMatches.filter(
-                                    (r) => r.root_word === item.root_word
-                                  ).length
-                                }
-                                ):
-                              </strong>{' '}
-                              {searchWordByWordMatches
-                                .filter((r) => r.root_word === item.root_word)
-                                .map((r) => (
-                                  <Link
-                                    key={`root:${r.verse_id}:${r.word_index}`}
-                                    href={`/quran/${r.chapter_number}?verse=${r.verse_number}&word=${r.word_index}`}
-                                    target="_blank"
-                                    className="hover:cursor-pointer underline text-violet-500"
-                                  >
-                                    {r.verse_id}
-                                  </Link>
-                                ))}
-                            </p>
-                            {item.meanings && (
-                              <p className="rounded-2xl">
-                                <strong>Meanings:</strong> {item.meanings}
-                              </p>
-                            )}
-                          </section>
+                            <a href={`?q=${q}&tab=words`}>{q}</a>
+                            <ArrowRightIcon className="size-4" />
+                          </div>
                         ))}
                       </div>
-                    )}
-                    {searchWordByWordMatches.map((r) => (
-                      <div key={`word_by_word:${r.index}`}>
-                        <SearchItemWord verse={r} />
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </section>
-          </div>
-        )}
-    </div>
-  )
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {wordMatches.length > 0 && (
+                <div className="space-y-2">
+                  {Array.from(
+                    new Map(
+                      wordMatches.map((item) => [item.root_word, item])
+                    ).values()
+                  ).map((item) => (
+                    <section
+                      key={item.root_word}
+                      className="bg-muted/50 p-4 rounded-2xl space-y-2"
+                    >
+                      <p className="text-xl text-muted-foreground tracking-wider">
+                        {item.transliterated} / {item.arabic}
+                      </p>
+                      <p className="w-fit rounded-2xl">
+                        <strong>Root word:</strong> {item.root_word}
+                      </p>
+                      <p className="w-fit rounded-2xl gap-1 flex flex-wrap">
+                        <strong>
+                          Verses (
+                          {
+                            wordMatches.filter(
+                              (r) => r.root_word === item.root_word
+                            ).length
+                          }
+                          ):
+                        </strong>{' '}
+                        {wordMatches
+                          .filter((r) => r.root_word === item.root_word)
+                          .map((r) => (
+                            <Link
+                              key={`root:${r.verse_id}:${r.word_index}`}
+                              href={`/quran/${r.chapter_number}?verse=${r.verse_number}&word=${r.word_index}`}
+                              target="_blank"
+                              className="hover:cursor-pointer underline text-violet-500"
+                            >
+                              {r.verse_id}
+                            </Link>
+                          ))}
+                      </p>
+                      {item.meanings && (
+                        <p className="rounded-2xl">
+                          <strong>Meanings:</strong> {item.meanings}
+                        </p>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              )}
+
+              {wordMatches.map((r) => (
+                <div key={`word_by_word:${r.index}`}>
+                  <SearchItemWord verse={r} />
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    )
+  }
+
+  return null
 }
