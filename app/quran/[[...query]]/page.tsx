@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { Suspense } from 'react'
 import { Spinner } from '@/components/ui/spinner'
 import SearchResult from './client-components/result-search'

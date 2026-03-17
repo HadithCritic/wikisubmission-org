@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import {
   SidebarInset,
   SidebarProvider,
@@ -24,11 +26,7 @@ export default async function QuranLayout({
     wsApiServer.GET('/languages'),
   ])
 
-  console.log('[layout] baseUrl:', process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL)
-  console.log('[layout] chapters:', chaptersRes.data ? `ok (${chaptersRes.data.length})` : `error: ${JSON.stringify(chaptersRes.error)}`)
-  console.log('[layout] appendices:', appendicesRes.data ? `ok (${appendicesRes.data.length})` : `error: ${JSON.stringify(appendicesRes.error)}`)
-
-  if (chaptersRes.data && appendicesRes.data) {
+if (chaptersRes.data && appendicesRes.data) {
     return (
       <QuranPlayerProvider>
         <SidebarProvider>
