@@ -529,9 +529,11 @@ export interface operations {
     };
     search: {
         parameters: {
-            query: {
-                /** @description Search query (2–200 characters). Supports quoted phrases and exclusions. */
-                q: string;
+            query?: {
+                /** @description Search query (2–200 characters). Supports quoted phrases and exclusions. Optional when `root` is provided with scope=words. */
+                q?: string;
+                /** @description Arabic root string (e.g. رحم). When provided with scope=words, performs an exact match on word_root instead of full-text search. Takes priority over q. */
+                root?: string;
                 /** @description Language codes to search in. Omit for all languages. */
                 langs?: string[];
                 /** @description Whether to search verse translations or word-level text. */

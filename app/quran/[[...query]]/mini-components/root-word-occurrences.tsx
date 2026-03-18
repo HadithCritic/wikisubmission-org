@@ -62,7 +62,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
       .GET('/search', {
         params: {
           query: {
-            q: rootWord,
+            root: rootWord,
             scope: 'words',
             include_words: true,
             include_root: true,
@@ -95,7 +95,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
       .GET('/search', {
         params: {
           query: {
-            q: rootWord,
+            root: rootWord,
             scope: 'words',
             include_words: true,
             include_root: true,
