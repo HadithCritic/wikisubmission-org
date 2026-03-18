@@ -13,15 +13,13 @@ import type { paths } from './types.gen'
 
 const baseUrl = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
 
-export const wsApiServer = createClient<paths>({ baseUrl })
+// Quran data never changes — cache server-side responses for 24h.
+// Next.js data cache is separate from the page cache, so this works even
+// with force-dynamic pages. Subsequent requests skip the API entirely.
+const cachedFetch: typeof globalThis.fetch = (url, init) =>
+  globalThis.fetch(url, {
+    ...init,
+    next: { revalidate: 86400 },
+  } as RequestInit)
 
-wsApiServer.use({
-  async onRequest({ request }) {
-    console.log(`[wsApiServer] ${request.method} ${request.url}`)
-    return undefined
-  },
-  async onResponse({ response }) {
-    console.log(`[wsApiServer] ${response.status} ${response.url}`)
-    return undefined
-  },
-})
+export const wsApiServer = createClient<paths>({ baseUrl, fetch: cachedFetch })

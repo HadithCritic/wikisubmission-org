@@ -44,14 +44,19 @@ function flattenWords(
   return result
 }
 
+const PAGE_LIMIT = 100
+
 export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   const [occurrences, setOccurrences] = useState<WordOccurrence[]>([])
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   useEffect(() => {
     if (!rootWord) return
 
     setLoading(true)
+    setOccurrences([])
 
     wsApi
       .GET('/search', {
@@ -63,16 +68,42 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
             include_root: true,
             include_meaning: true,
             word_langs: ['ar', 'en'],
-            limit: 100,
+            limit: PAGE_LIMIT,
+            offset: 0,
           },
         },
       })
       .then(({ data }) => {
         setOccurrences(data ? flattenWords(data) : [])
+        setTotal(data?.info?.total ?? 0)
       })
       .catch(() => setOccurrences([]))
       .finally(() => setLoading(false))
   }, [rootWord])
+
+  const loadMore = () => {
+    setLoadingMore(true)
+    wsApi
+      .GET('/search', {
+        params: {
+          query: {
+            q: rootWord,
+            scope: 'words',
+            include_words: true,
+            include_root: true,
+            include_meaning: true,
+            word_langs: ['ar', 'en'],
+            limit: PAGE_LIMIT,
+            offset: occurrences.length,
+          },
+        },
+      })
+      .then(({ data }) => {
+        setOccurrences((prev) => [...prev, ...(data ? flattenWords(data) : [])])
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMore(false))
+  }
 
   if (loading) {
     return (
@@ -148,6 +179,22 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
           )
         })}
       </div>
+      {occurrences.length < total && (
+        <div className="pt-3 pb-1 flex justify-center">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="text-xs text-violet-600 hover:underline disabled:opacity-50 flex items-center gap-1"
+          >
+            {loadingMore ? (
+              <Loader2 className="animate-spin size-3" />
+            ) : null}
+            {loadingMore
+              ? 'Loading…'
+              : `Load more (${occurrences.length} of ${total})`}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -13,6 +13,8 @@ servers:
     description: Development server
   - url: https://ws-backend.wikisubmission.org/api/v1
     description: Production Server
+  - url: http://ws-backend.railway.internal/api/v1
+    description: Internal Production Server
 
 tags:
   - name: Reader
@@ -38,8 +40,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Language'
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
 
   /chapters:
     get:
@@ -48,10 +50,10 @@ paths:
       summary: fetches chapter Metadata
       description: Fetches list of quranic chapter titles, with Metadata and multilingual support
       parameters:
-        - name: lang 
+        - name: lang
           in: query
-          required: false 
-          schema: 
+          required: false
+          schema:
             type: string
       responses:
         '200':
@@ -60,14 +62,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChapterMetadata'
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
   /appendices:
@@ -77,10 +79,10 @@ paths:
       summary: fetches appendix Metadata
       description: Fetches list of appendices, with Metadata and multilingual support
       parameters:
-        - name: lang 
+        - name: lang
           in: query
-          required: false 
-          schema: 
+          required: false
+          schema:
             type: string
       responses:
         '200':
@@ -89,17 +91,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AppendixMetadata'
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
-        
+
   /quran:
     get:
       tags: [Reader]
@@ -146,14 +148,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuranResponse'
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
 
@@ -214,10 +216,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuranResponse'
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
 
@@ -236,14 +238,14 @@ paths:
       responses:
         '200':
           description: OK
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
     post:
@@ -260,14 +262,14 @@ paths:
       responses:
         '201':
           description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
 
@@ -289,14 +291,14 @@ paths:
           description: OK
         '201':
           description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
 
@@ -310,14 +312,14 @@ paths:
           description: Updated
         '201':
           description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
     delete:
@@ -330,14 +332,14 @@ paths:
           description: Deleted
         '201':
           description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
 
@@ -358,14 +360,14 @@ paths:
           description: Successfully published.
         '201':
           description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
 
@@ -398,14 +400,14 @@ paths:
                   $ref: '#/components/schemas/VerseTextHistory'
         '201':
           description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
         '501':
           $ref: '#/components/responses/NotImplementedError'
 
@@ -522,7 +524,7 @@ components:
           description: verse_index
         vk:
           type: string
-          example: "1:1"
+          example: '1:1'
           description: verse_key
         sc:
           type: number
@@ -542,12 +544,12 @@ components:
     TranslationContent:
       type: object
       properties:
-        li: { type: integer, description: "lang_id" }
-        lc: { type: string, description: "lang_code" }
-        d:  { type: string, enum: [ltr, rtl], description: "direction" }
-        tx: { type: string, description: "text" }
-        s:  { type: string, nullable: true, description: "subtitle" }
-        f:  { type: string, nullable: true, description: "footer" }
+        li: { type: integer, description: 'lang_id' }
+        lc: { type: string, description: 'lang_code' }
+        d: { type: string, enum: [ltr, rtl], description: 'direction' }
+        tx: { type: string, description: 'text' }
+        s: { type: string, nullable: true, description: 'subtitle' }
+        f: { type: string, nullable: true, description: 'footer' }
         hl:
           type: string
           nullable: true
@@ -558,8 +560,8 @@ components:
     WordData:
       type: object
       properties:
-        wi: { type: integer, description: "word_index" }
-        gi: { type: integer, description: "global_index" }
+        wi: { type: integer, description: 'word_index' }
+        gi: { type: integer, description: 'global_index' }
         tx:
           type: object
           description: word text keyed by language code
@@ -574,9 +576,9 @@ components:
           additionalProperties:
             type: string
           nullable: true
-        r: { type: string, nullable: true, description: "root" }
-        m: { type: string, nullable: true, description: "meaning" }
-        meta: { type: object, nullable: true, description: "metadata" }
+        r: { type: string, nullable: true, description: 'root' }
+        m: { type: string, nullable: true, description: 'meaning' }
+        meta: { type: object, nullable: true, description: 'metadata' }
 
     # -----------------------------------------------------------------------
     # Editor / History schemas
@@ -589,44 +591,44 @@ components:
       type: object
       properties:
         id: { type: integer }
-        at: { type: string, format: date-time, description: "archived_at" }
-        tx: { type: string, description: "text/content" }
+        at: { type: string, format: date-time, description: 'archived_at' }
+        tx: { type: string, description: 'text/content' }
 
     VerseTextDraft:
       type: object
       properties:
-        vi: { type: integer, description: "verse_id" }
-        li: { type: integer, description: "lang_id" }
-        tx: { type: string, description: "text/content" }
+        vi: { type: integer, description: 'verse_id' }
+        li: { type: integer, description: 'lang_id' }
+        tx: { type: string, description: 'text/content' }
     Language:
       type: object
       properties:
-        id:        { type: integer }
-        code:      { type: string }
-        name:      { type: string }
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
         direction: { type: string, enum: [ltr, rtl] }
 
     ChapterMetadata:
       type: array
-      items: 
+      items:
         $ref: '#/components/schemas/Chapter'
     Chapter:
       type: object
       properties:
-        chapter_number: { type: integer}
-        verse_count: {type: integer}
-        revelation_order: {type: integer}
-        title: {type: string}
-        
+        chapter_number: { type: integer }
+        verse_count: { type: integer }
+        revelation_order: { type: integer }
+        title: { type: string }
+
     AppendixMetadata:
       type: array
-      items: 
+      items:
         $ref: '#/components/schemas/Appendix'
     Appendix:
       properties:
         code: { type: integer }
         title: { type: string }
-        snippet:  {type: string }
+        snippet: { type: string }
 
   responses:
     Conflict:
@@ -688,7 +690,7 @@ components:
             properties:
               message:
                 type: string
-                example: "This endpoint is under development."
+                example: 'This endpoint is under development.'
               code:
                 type: string
-                example: "NOT_IMPLEMENTED"
+                example: 'NOT_IMPLEMENTED'

@@ -2,7 +2,7 @@ import { Sora, Geist_Mono, Amiri } from 'next/font/google'
 
 const sora = Sora({
   subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 const geistMono = Geist_Mono({

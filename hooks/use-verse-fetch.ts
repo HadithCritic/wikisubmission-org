@@ -48,18 +48,24 @@ export function useVerseFetch() {
     if (lang !== 'xl') langs.push(lang)
     if (!langs.includes('ar')) langs.push('ar')
 
+    // verse 0 = Basmallah. Fetch the first 2 verses (0 and 1) and filter,
+    // since some backends don't accept verse_start: 0 as an explicit param.
+    const isBasmallah = parsed.vs === 0
     const { data, error: err } = await wsApi.GET('/quran', {
       params: {
         query: {
           chapter_number_start: parsed.cn,
-          verse_start: parsed.vs,
-          verse_end: parsed.ve,
+          ...(isBasmallah ? { verse_end: 1 } : { verse_start: parsed.vs, verse_end: parsed.ve }),
           langs,
         },
       },
     })
 
-    setVerses(data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? [])
+    const allVerses = data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+    const filtered = isBasmallah
+      ? allVerses.filter((v) => v.vk === `${parsed.cn}:0`)
+      : allVerses
+    setVerses(filtered)
     setError(err ? 'Failed to fetch verse.' : null)
     setLoading(false)
   }, [])

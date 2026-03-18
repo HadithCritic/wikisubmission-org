@@ -91,7 +91,6 @@ export default async function QuranPage({
         query: {
           chapter_number_start: parsed.chapterNumber,
           langs: ['en', 'ar'],
-          verse_start: 1,
           verse_end: 50,
           include_words: true,
           include_root: true,
