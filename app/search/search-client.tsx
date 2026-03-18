@@ -147,9 +147,7 @@ function SearchContent() {
 
         setPerformedQuery(q)
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : tCommon('error')
-        )
+        setError(err instanceof Error ? err.message : tCommon('error'))
         setMediaResults(null)
         setNewsletterResults(null)
         setQuranResults(null)
@@ -258,9 +256,7 @@ function SearchContent() {
                   <p className="text-lg">
                     {t('noResults', { query: performedQuery })}
                   </p>
-                  <p className="text-sm opacity-60">
-                    {t('noResultsHelp')}
-                  </p>
+                  <p className="text-sm opacity-60">{t('noResultsHelp')}</p>
                 </div>
               )
             }
@@ -307,9 +303,7 @@ function SearchContent() {
 
                 {qCount > 0 && quranResults && (
                   <TabsContent value="quran">
-                    <QuranSection
-                      results={quranResults}
-                    />
+                    <QuranSection results={quranResults} />
                   </TabsContent>
                 )}
 
@@ -384,7 +378,13 @@ function HighlightText({ text }: { text?: string | null }) {
   )
 }
 
-function QuranChapterResult({ chapter, primaryCode }: { chapter: ChapterData; primaryCode: string }) {
+function QuranChapterResult({
+  chapter,
+  primaryCode,
+}: {
+  chapter: ChapterData
+  primaryCode: string
+}) {
   const tQuran = useTranslations('quran')
   const sura = tQuran('sura', { number: chapter.cn ?? '' })
   const title = chapter.titles?.[primaryCode] ?? chapter.titles?.['en'] ?? sura
@@ -392,7 +392,9 @@ function QuranChapterResult({ chapter, primaryCode }: { chapter: ChapterData; pr
     <Link href={`/quran/${chapter.cn}`}>
       <div className="flex items-center gap-2 bg-muted/50 p-3 rounded-xl hover:bg-muted/80 transition-colors w-fit">
         <BookIcon className="size-4 text-violet-600" />
-        <span className="font-medium">{sura}: {title}</span>
+        <span className="font-medium">
+          {sura}: {title}
+        </span>
       </div>
     </Link>
   )
@@ -433,15 +435,12 @@ function QuranVerseResult({
   )
 }
 
-function QuranSection({
-  results,
-}: {
-  results: QuranResponse
-}) {
+function QuranSection({ results }: { results: QuranResponse }) {
   const prefs = useQuranPreferences()
   const t = useTranslations('search')
   const tSettings = useTranslations('settings')
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const fieldLabels: Record<string, string> = {
     text: t('text'),
     subtitles: tSettings('subtitles'),
@@ -456,10 +455,15 @@ function QuranSection({
       {/* Display toggles */}
       <section className="flex flex-wrap items-center gap-3 px-1">
         {(['text', 'subtitles', 'footnotes'] as const).map((field) => (
-          <div key={field} className="flex items-center gap-2 *:text-[10px] uppercase tracking-widest font-bold">
+          <div
+            key={field}
+            className="flex items-center gap-2 *:text-[10px] uppercase tracking-widest font-bold"
+          >
             <Checkbox
               checked={prefs[field]}
-              onCheckedChange={(v) => prefs.setPreferences({ ...prefs, [field]: !!v })}
+              onCheckedChange={(v) =>
+                prefs.setPreferences({ ...prefs, [field]: !!v })
+              }
               id={`qs-${field}`}
               className="border-violet-600/30 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
             />
@@ -472,7 +476,11 @@ function QuranSection({
 
       {/* Chapter title matches */}
       {titleMatches.map((ch) => (
-        <QuranChapterResult key={`tm:${ch.cn}`} chapter={ch} primaryCode={primaryCode} />
+        <QuranChapterResult
+          key={`tm:${ch.cn}`}
+          chapter={ch}
+          primaryCode={primaryCode}
+        />
       ))}
 
       {/* Verse results */}
@@ -491,7 +499,10 @@ function QuranSection({
 
       {results.info && (
         <p className="text-xs text-muted-foreground text-center py-1">
-          {t('resultsSummary', { shown: results.info.result_count, total: results.info.total ?? results.info.result_count })}
+          {t('resultsSummary', {
+            shown: results.info.result_count ?? 0,
+            total: results.info.total ?? results.info.result_count ?? 0,
+          })}
         </p>
       )}
     </div>
