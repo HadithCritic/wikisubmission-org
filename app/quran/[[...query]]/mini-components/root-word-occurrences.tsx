@@ -1,16 +1,15 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
-import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { Loader2 } from 'lucide-react'
 import { QuranRef } from '@/components/quran-ref'
 
 type WordData = components['schemas']['WordData']
 
 interface WordOccurrence {
-  verse_key: string        // "1:7"
+  verse_key: string
   chapter_number: number
   verse_number: number
   word_index: number
@@ -19,7 +18,6 @@ interface WordOccurrence {
   root: string
 }
 
-/** Flattens a QuranResponse (chapters → verses → words) into a flat list of occurrences */
 function flattenWords(
   data: components['schemas']['QuranResponse']
 ): WordOccurrence[] {
@@ -54,10 +52,8 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
 
   useEffect(() => {
     if (!rootWord) return
-
     setLoading(true)
     setOccurrences([])
-
     wsApi
       .GET('/search', {
         params: {
@@ -80,14 +76,6 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
       .catch(() => setOccurrences([]))
       .finally(() => setLoading(false))
   }, [rootWord])
-
-  const listRef = useRef<HTMLDivElement>(null)
-  const virtualizer = useWindowVirtualizer({
-    count: occurrences.length,
-    estimateSize: () => 88,
-    overscan: 5,
-    scrollMargin: listRef.current?.offsetTop ?? 0,
-  })
 
   const loadMore = () => {
     setLoadingMore(true)
@@ -130,54 +118,34 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   }
 
   return (
-    <div className="max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar" ref={listRef}>
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
-        }}
-      >
-        {virtualizer.getVirtualItems().map((item) => {
-          const occ = occurrences[item.index]
-          return (
-            <div
-              key={item.key}
-              data-index={item.index}
-              ref={virtualizer.measureElement}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                transform: `translateY(${item.start - virtualizer.options.scrollMargin}px)`,
-              }}
-              className="pb-3"
-            >
-              <div className="group relative bg-muted/20 hover:bg-muted/40 transition-all p-4 rounded-2xl border border-border/50 hover:border-violet-600/30">
-                <div className="flex justify-between items-center gap-4">
-                  <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <QuranRef reference={occ.verse_key} />
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                        WORD #{occ.word_index}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold text-foreground leading-tight line-clamp-1 group-hover:text-violet-600 transition-colors">
-                      {occ.english}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter italic">
-                      {occ.root}
-                    </p>
-                  </div>
-                  <div className="text-3xl font-arabic text-right text-foreground group-hover:text-violet-600 transition-colors shrink-0">
-                    {occ.arabic}
-                  </div>
+    <div className="max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar">
+      <div className="flex flex-col gap-3">
+        {occurrences.map((occ, i) => (
+          <div
+            key={`${occ.verse_key}:${occ.word_index}:${i}`}
+            className="group relative bg-muted/20 hover:bg-muted/40 transition-all p-4 rounded-2xl border border-border/50 hover:border-violet-600/30"
+          >
+            <div className="flex justify-between items-center gap-4">
+              <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <QuranRef reference={occ.verse_key} />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                    WORD #{occ.word_index}
+                  </span>
                 </div>
+                <p className="text-sm font-semibold text-foreground leading-tight line-clamp-1 group-hover:text-violet-600 transition-colors">
+                  {occ.english}
+                </p>
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter italic">
+                  {occ.root}
+                </p>
+              </div>
+              <div className="text-3xl font-arabic text-right text-foreground group-hover:text-violet-600 transition-colors shrink-0">
+                {occ.arabic}
               </div>
             </div>
-          )
-        })}
+          </div>
+        ))}
       </div>
       {occurrences.length < total && (
         <div className="pt-3 pb-1 flex justify-center">
@@ -186,9 +154,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
             disabled={loadingMore}
             className="text-xs text-violet-600 hover:underline disabled:opacity-50 flex items-center gap-1"
           >
-            {loadingMore ? (
-              <Loader2 className="animate-spin size-3" />
-            ) : null}
+            {loadingMore && <Loader2 className="animate-spin size-3" />}
             {loadingMore
               ? 'Loading…'
               : `Load more (${occurrences.length} of ${total})`}
