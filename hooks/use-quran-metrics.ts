@@ -43,7 +43,7 @@ export const useQuranMetrics = create(
       clearHistory: () => set({ recentlyNavigated: [] }),
     }),
     {
-      name: 'quran-metrics',
+      name: 'quran-metrics-v2',
       storage: createJSONStorage(() => localStorage),
     }
   )

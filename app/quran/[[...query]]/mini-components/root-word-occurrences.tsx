@@ -81,6 +81,14 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
       .finally(() => setLoading(false))
   }, [rootWord])
 
+  const listRef = useRef<HTMLDivElement>(null)
+  const virtualizer = useWindowVirtualizer({
+    count: occurrences.length,
+    estimateSize: () => 88,
+    overscan: 5,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  })
+
   const loadMore = () => {
     setLoadingMore(true)
     wsApi
@@ -112,14 +120,6 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
       </div>
     )
   }
-
-  const listRef = useRef<HTMLDivElement>(null)
-  const virtualizer = useWindowVirtualizer({
-    count: occurrences.length,
-    estimateSize: () => 88,
-    overscan: 5,
-    scrollMargin: listRef.current?.offsetTop ?? 0,
-  })
 
   if (occurrences.length === 0) {
     return (

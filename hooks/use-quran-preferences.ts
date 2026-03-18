@@ -47,7 +47,7 @@ export const useQuranPreferences = create(
       setPreferences: (preferences: QuranPreferences) => set(preferences),
     }),
     {
-      name: 'quran-preferences',
+      name: 'quran-preferences-v2',
       storage: createJSONStorage(() => localStorage),
     }
   )

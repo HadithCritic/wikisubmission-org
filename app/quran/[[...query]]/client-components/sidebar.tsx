@@ -122,7 +122,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                   asChild
                   className="h-auto py-2 px-2.5 hover:bg-accent/50"
                 >
-                  <Link href="/proclamation" target="_blank">
+                  <Link href="/proclamation" target="_blank" prefetch={false}>
                     <p className="text-xs">Proclamation</p>
                     <ChevronRight className="size-4 mr-2" />
                   </Link>
@@ -133,7 +133,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                   asChild
                   className="h-auto py-2 px-2.5 hover:bg-accent/50"
                 >
-                  <Link href="/introduction" target="_blank">
+                  <Link href="/introduction" target="_blank" prefetch={false}>
                     <p className="text-xs">Introduction</p>
                     <ChevronRight className="size-4 mr-2" />
                   </Link>
