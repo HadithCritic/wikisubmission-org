@@ -52,7 +52,10 @@ export default function QuranSettings() {
               {languages.map(({ code, name }) => (
                 <DropdownMenuItem
                   key={code}
-                  onClick={() => setLocale(code)}
+                  disabled={code !== 'en'}
+                  onClick={() => {
+                    if (code) setLocale(code)
+                  }}
                 >
                   {name}
                   {uiLocale === code && <CheckIcon className="size-4" />}
