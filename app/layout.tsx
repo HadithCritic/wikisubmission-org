@@ -8,33 +8,42 @@ import { GeometryDots } from '@/components/geometry-dots'
 import Providers from '@/components/providers'
 import type { Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale } from 'next-intl/server'
 
 export const metadata = Metadata
 
-export default function RootLayout({
+const RTL_LOCALES = ['ar', 'fa', 'ur']
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = await getLocale()
+  const dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
+
   return (
     <ClerkProvider signInUrl="/auth/sign-in" signUpUrl="/auth/sign-up">
-      <html lang="en" suppressHydrationWarning>
+      <html lang={locale} dir={dir} suppressHydrationWarning>
         <body
           className={`${Fonts.sora.className} ${Fonts.amiri.variable} antialiased wrap-break-words`}
           suppressHydrationWarning
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            disableTransitionOnChange
-          >
-            <Providers>
-              <GeometryDots />
-              {children}
-              <ScrollToTop />
-              <Toaster />
-            </Providers>
-          </ThemeProvider>
+          <NextIntlClientProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              disableTransitionOnChange
+            >
+              <Providers>
+                <GeometryDots />
+                {children}
+                <ScrollToTop />
+                <Toaster />
+              </Providers>
+            </ThemeProvider>
+          </NextIntlClientProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -33,6 +33,13 @@ export type QuranPreferences = {
   setPreferences: (preferences: QuranPreferences) => void
 }
 
+/** Read the UI locale cookie — used only to seed the initial primaryLanguage default. */
+function getLocaleCookie(): LangCode {
+  if (typeof document === 'undefined') return 'en'
+  const match = document.cookie.match(/(?:^|; )locale=([^;]*)/)
+  return (match?.[1] as LangCode) ?? 'en'
+}
+
 export const useQuranPreferences = create(
   persist<QuranPreferences>(
     (set) => ({
@@ -42,12 +49,12 @@ export const useQuranPreferences = create(
       transliteration: false,
       text: true,
       wordByWord: false,
-      primaryLanguage: 'en',
+      primaryLanguage: getLocaleCookie(),
       secondaryLanguage: undefined,
       setPreferences: (preferences: QuranPreferences) => set(preferences),
     }),
     {
-      name: 'quran-preferences-v2',
+      name: 'quran-preferences-v3',
       storage: createJSONStorage(() => localStorage),
     }
   )

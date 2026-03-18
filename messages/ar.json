@@ -1,0 +1,58 @@
+{
+  "common": {
+    "loading": "جارٍ التحميل…",
+    "loadMore": "تحميل المزيد ({shown} من {total})",
+    "error": "حدث خطأ",
+    "noResults": "لا نتائج",
+    "close": "إغلاق",
+    "word": "كلمة #{index}"
+  },
+  "nav": {
+    "quran": "القرآن",
+    "search": "بحث",
+    "music": "موسيقى",
+    "downloads": "تنزيلات",
+    "contact": "تواصل",
+    "donate": "تبرع"
+  },
+  "quran": {
+    "title": "القرآن",
+    "chapter": "سورة {number}: {title}",
+    "prevChapter": "الفصل {number}",
+    "nextChapter": "الفصل {number}",
+    "loadingVerses": "جارٍ التحميل…",
+    "rootWord": "الجذر",
+    "occurrences": "الآيات ({count})",
+    "noOccurrences": "لا توجد نتائج أخرى",
+    "meanings": "المعاني"
+  },
+  "search": {
+    "placeholder": "ابحث في القرآن…",
+    "globalPlaceholder": "بحث…",
+    "results": "{count} نتيجة",
+    "noResults": "لا نتائج لـ \"{query}\"",
+    "tabs": {
+      "quran": "القرآن",
+      "media": "وسائط",
+      "newsletters": "النشرات"
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "secondaryLanguage": "لغة ثانوية",
+    "none": "لا شيء",
+    "arabic": "النص العربي",
+    "wordByWord": "كلمة بكلمة",
+    "transliteration": "النقحرة",
+    "theme": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام"
+  },
+  "sidebar": {
+    "chapters": "السور",
+    "appendices": "الملاحق",
+    "search": "ابحث في السور…"
+  }
+}

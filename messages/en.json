@@ -1,0 +1,58 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "loadMore": "Load more ({shown} of {total})",
+    "error": "Something went wrong",
+    "noResults": "No results found",
+    "close": "Close",
+    "word": "Word #{index}"
+  },
+  "nav": {
+    "quran": "Quran",
+    "search": "Search",
+    "music": "Music",
+    "downloads": "Downloads",
+    "contact": "Contact",
+    "donate": "Donate"
+  },
+  "quran": {
+    "title": "Quran",
+    "chapter": "Sura {number}: {title}",
+    "prevChapter": "Chapter {number}",
+    "nextChapter": "Chapter {number}",
+    "loadingVerses": "Loading…",
+    "rootWord": "Root word",
+    "occurrences": "Verses ({count})",
+    "noOccurrences": "No other occurrences found",
+    "meanings": "Meanings"
+  },
+  "search": {
+    "placeholder": "Search the Quran…",
+    "globalPlaceholder": "Search…",
+    "results": "{count} results",
+    "noResults": "No results for \"{query}\"",
+    "tabs": {
+      "quran": "Quran",
+      "media": "Media",
+      "newsletters": "Newsletters"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "secondaryLanguage": "Secondary language",
+    "none": "None",
+    "arabic": "Arabic text",
+    "wordByWord": "Word by word",
+    "transliteration": "Transliteration",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "sidebar": {
+    "chapters": "Chapters",
+    "appendices": "Appendices",
+    "search": "Search chapters…"
+  }
+}

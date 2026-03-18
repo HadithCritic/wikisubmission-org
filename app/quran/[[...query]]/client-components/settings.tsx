@@ -19,10 +19,13 @@ import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
+import { setLocale } from '@/app/actions/locale'
+import { useLocale } from 'next-intl'
 
 export default function QuranSettings() {
   const quranPreferences = useQuranPreferences()
   const languages = useLanguagesStore((s) => s.languages)
+  const uiLocale = useLocale()
 
   return (
     <DropdownMenu modal={false}>
@@ -35,13 +38,32 @@ export default function QuranSettings() {
         <div className="flex justify-end items-center gap-2 px-2 py-1">
           <ThemeToggle />
         </div>
+        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
+          <LanguagesIcon className="size-4" />
+          <strong>Language</strong>
+        </DropdownMenuLabel>
         <DropdownMenuSub>
-          <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
-            <LanguagesIcon className="size-4" />
-            <strong>Language</strong>
-          </DropdownMenuLabel>
           <DropdownMenuSubTrigger>
-            <strong>Primary Language</strong>
+            <strong>Interface Language</strong>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              {languages.map(({ code, name }) => (
+                <DropdownMenuItem
+                  key={code}
+                  onClick={() => setLocale(code)}
+                >
+                  {name}
+                  {uiLocale === code && <CheckIcon className="size-4" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <strong>Quran Translation</strong>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
@@ -67,7 +89,7 @@ export default function QuranSettings() {
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <strong>Secondary Language</strong>
+            <strong>Secondary Translation</strong>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
