@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -199,8 +200,29 @@ export function VerseCard({
   const audioVerse = toQuranVerse(verse)
   const audioQueue = allVerses.map(toQuranVerse)
 
+  // Sync URL ?verse=N with the verse currently in the center of the viewport.
+  // Uses window.history.replaceState directly — no React re-render on scroll.
+  const containerRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        const params = new URLSearchParams(window.location.search)
+        if (params.get('verse') === String(vNum)) return
+        params.set('verse', String(vNum))
+        window.history.replaceState(null, '', `${window.location.pathname}?${params}`)
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [vNum])
+
   return (
     <div
+      ref={containerRef}
       id={verseId}
       className={`transition-colors duration-500 ${
         isScrollTarget || isCurrentAudio ? 'bg-violet-600/10' : ''

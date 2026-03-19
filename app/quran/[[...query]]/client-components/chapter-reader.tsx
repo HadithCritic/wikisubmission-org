@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
@@ -25,6 +26,8 @@ export function ChapterReader({
   const reader = useChapterReader(chapterNumber, initialData)
   const t = useTranslations('quran')
   const tCommon = useTranslations('common')
+  const verseParam = useSearchParams().get('verse')
+  const [scrolled, setScrolled] = useState(false)
 
   const opts: ChapterReaderOptions = {
     primaryLang: prefs.primaryLanguage,
@@ -55,14 +58,27 @@ export function ChapterReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Scroll to ?verse=N once it's rendered.
+  // Re-runs every time a new batch of verses arrives, until the element exists.
+  useEffect(() => {
+    if (!verseParam || scrolled) return
+    const el = document.getElementById(`${chapterNumber}:${verseParam}`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setScrolled(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reader.verses.length, verseParam, chapterNumber])
+
   // Auto-preload: silently fetch next batch while user reads.
-  // Loads the full chapter in background → smooth scrolling with no glitch.
+  // When seeking a specific verse, skip the delay so we reach it as fast as possible.
   useEffect(() => {
     if (!reader.hasMore || reader.loading) return
-    const timer = setTimeout(() => reader.loadMore(opts), 800)
+    const isSeekingVerse = !!verseParam && !scrolled
+    const timer = setTimeout(() => reader.loadMore(opts), isSeekingVerse ? 50 : 800)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reader.verses.length, reader.hasMore, reader.loading])
+  }, [reader.verses.length, reader.hasMore, reader.loading, verseParam, scrolled])
 
   // Reveal the prev/next footer once the user reaches (or nearly reaches) the end.
   const [showNav, setShowNav] = useState(false)
