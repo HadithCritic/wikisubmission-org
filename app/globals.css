@@ -119,14 +119,13 @@
   }
 
   html {
-    overflow-x: hidden;
+    /* clip: prevents horizontal overflow without creating a scroll container,
+       so body remains the vertical scroll container (unlike overflow-x: hidden). */
+    overflow-x: clip;
   }
 
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
-    /* Prevent scroll from bleeding out of child scroll containers on mobile */
-    overscroll-behavior: none;
   }
 }
 
