@@ -25,7 +25,7 @@ import {
 //            chapter title bar (~3rem) + space-y-2 gap (0.5rem).
 // Reduced from 16rem → 13rem so the reader extends closer to the screen edge
 // (the previous 16rem was overly conservative by ~3rem).
-const VIEWPORT_HEIGHT = 'calc(100svh - 13rem)'
+const VIEWPORT_HEIGHT = 'calc(100svh - 10rem)'
 
 export function ChapterReader({
   chapterNumber,
@@ -311,7 +311,7 @@ export function ChapterReader({
         {/* Fixed-height scrollable container — the document never scrolls */}
         <div
           ref={parentRef}
-          className="flex-1 min-w-0 h-full bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-y-auto"
+          className="flex-1 min-w-0 h-full bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-y-auto overscroll-contain"
           style={{ scrollbarWidth: 'none' }}
         >
           {reader.verses.length === 0 ? (

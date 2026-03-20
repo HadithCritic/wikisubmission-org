@@ -118,8 +118,15 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    /* Prevent scroll from bleeding out of child scroll containers on mobile */
+    overscroll-behavior: none;
   }
 }
 
