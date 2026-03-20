@@ -3,7 +3,7 @@
 import { memo, useMemo, useCallback } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
-import { useQuranPlayer, type QuranVerse } from '@/lib/quran-audio-context'
+import { useQuranPlayerCallbacks, type QuranVerse } from '@/lib/quran-audio-context'
 import { RootWordOccurrences } from './root-word-occurrences'
 import { Play, Pause, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -167,23 +167,37 @@ const WordByWordView = memo(
 
 // ─── Verse Card ───────────────────────────────────────────────────────────────
 
+// Props type for VerseCard — named so arePropsEqual can reference it cleanly.
+type VerseCardProps = {
+  verse: VerseData
+  isLast: boolean
+  isScrollTarget: boolean
+  /** Stable key derived from language prefs — forces re-render on reload. */
+  optsKey: string
+  /** Whether this verse is the currently playing audio track. */
+  isCurrentAudio: boolean
+  /** Global play state — only relevant when isCurrentAudio is true. */
+  isPlaying: boolean
+  /** Buffering state — only relevant when isCurrentAudio is true. */
+  isBuffering: boolean
+}
+
 export const VerseCard = memo(
   function VerseCard({
     verse,
     isLast,
     isScrollTarget,
     optsKey,
-  }: {
-    verse: VerseData
-    isLast: boolean
-    isScrollTarget: boolean
-    /** Stable key derived from language prefs — forces re-render on reload. */
-    optsKey: string
-  }) {
+    isCurrentAudio,
+    isPlaying,
+    isBuffering,
+  }: VerseCardProps) {
   const prefs = useQuranPreferences()
   const { isRtl } = useLanguagesStore()
-  const { playFromVerse, currentVerse, isPlaying, isBuffering, togglePlayPause } =
-    useQuranPlayer()
+  // Only subscribe to the stable callbacks context — this component never
+  // re-renders due to player STATE changes (currentVerse, isPlaying, etc.)
+  // because those are now passed as props from ChapterReader.
+  const { playFromVerse, togglePlayPause } = useQuranPlayerCallbacks()
 
   const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const tr = verse.tr?.[primaryCode]
@@ -195,13 +209,10 @@ export const VerseCard = memo(
 
   const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
   const verseId = verse.vk ?? ''
-  const isCurrentAudio = currentVerse?.verse_id === verseId
 
   const audioVerse = useMemo(
-    () => toQuranVerse(verse),
-    // verse reference is stable within a batch; vk is sufficient identity
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [verse.vk]
+    () => ({ verse_id: verseId, ws_quran_text: {} } satisfies QuranVerse),
+    [verseId]
   )
 
   const handlePlay = useCallback(() => {
@@ -320,9 +331,13 @@ export const VerseCard = memo(
     </div>
   )
   },
-  (prev, next) =>
+  (prev: VerseCardProps, next: VerseCardProps) =>
     prev.verse.vk === next.verse.vk &&
     prev.isLast === next.isLast &&
     prev.isScrollTarget === next.isScrollTarget &&
-    prev.optsKey === next.optsKey
+    prev.optsKey === next.optsKey &&
+    prev.isCurrentAudio === next.isCurrentAudio &&
+    // Non-playing cards don't care about isPlaying/isBuffering (they always show Play).
+    // Only check those for the active card to avoid re-rendering all cards on pause/resume.
+    (!next.isCurrentAudio || (prev.isPlaying === next.isPlaying && prev.isBuffering === next.isBuffering))
 )

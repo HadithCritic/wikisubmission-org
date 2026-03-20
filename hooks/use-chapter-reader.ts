@@ -82,6 +82,13 @@ export function useChapterReader(
     lastOpts: null,
   })
 
+  // Ref synced each render — lets callbacks (loadMore, prefetch, seekToVerse)
+  // read current state without closing over it. Without this, each callback
+  // would need `state` in its dep array, causing a new function reference on
+  // every state update and making downstream useEffects re-fire constantly.
+  const stateRef = useRef(state)
+  stateRef.current = state
+
   // Cache for in-flight prefetch promises: cacheKey → Promise<FetchResult>
   const prefetchCacheRef = useRef(new Map<string, Promise<FetchResult>>())
 
@@ -148,8 +155,8 @@ export function useChapterReader(
   )
 
   const loadMore = useCallback(async (fallbackOpts?: ChapterReaderOptions) => {
-    const { lastVerseEnd } = state
-    const lastOpts = state.lastOpts ?? fallbackOpts
+    const { lastVerseEnd, lastOpts: storedOpts } = stateRef.current
+    const lastOpts = storedOpts ?? fallbackOpts
     if (!lastOpts) return
 
     const nextStart = lastVerseEnd + 1
@@ -176,7 +183,7 @@ export function useChapterReader(
       reachedEnd: result.reachedEnd ?? false,
       lastOpts,
     }))
-  }, [state, fetchVerses])
+  }, [fetchVerses]) // stable — reads state from stateRef
 
   /**
    * Fire-and-forget prefetch for the verse window around `targetVerse`.
@@ -185,8 +192,9 @@ export function useChapterReader(
    */
   const prefetch = useCallback(
     (targetVerse: number, fallbackOpts?: ChapterReaderOptions) => {
-      const opts = state.lastOpts ?? fallbackOpts
-      if (!opts || state.loading) return
+      const { lastOpts, loading } = stateRef.current
+      const opts = lastOpts ?? fallbackOpts
+      if (!opts || loading) return
 
       const windowStart = Math.max(0, targetVerse - 5)
       const cacheKey = `${chapterNumber}:${windowStart}`
@@ -199,7 +207,7 @@ export function useChapterReader(
       // Evict after 30 s to avoid holding stale data
       setTimeout(() => prefetchCacheRef.current.delete(cacheKey), 30_000)
     },
-    [chapterNumber, state.lastOpts, state.loading, fetchVerses]
+    [chapterNumber, fetchVerses] // stable — reads state from stateRef
   )
 
   /**
@@ -209,7 +217,7 @@ export function useChapterReader(
    */
   const seekToVerse = useCallback(
     async (targetVerse: number, fallbackOpts?: ChapterReaderOptions) => {
-      const opts = state.lastOpts ?? fallbackOpts
+      const opts = stateRef.current.lastOpts ?? fallbackOpts
       if (!opts) return
 
       const windowStart = Math.max(0, targetVerse - 5)
@@ -243,7 +251,7 @@ export function useChapterReader(
         lastOpts: opts,
       })
     },
-    [chapterNumber, state.lastOpts, fetchVerses]
+    [chapterNumber, fetchVerses] // stable — reads state from stateRef
   )
 
   const hasMore = state.verses.length > 0 && !state.reachedEnd

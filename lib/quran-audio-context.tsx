@@ -18,6 +18,9 @@ export interface QuranVerse {
 
 export type Reciter = 'mishary' | 'basit' | 'minshawi'
 
+// ─── State context — re-renders when player state changes ─────────────────────
+// Includes callbacks for backward compat with NowPlayingBar (they're stable refs
+// so listing them here doesn't cause extra re-renders beyond state changes).
 interface QuranPlayerContextType {
   currentVerse: QuranVerse | null
   isPlaying: boolean
@@ -25,9 +28,20 @@ interface QuranPlayerContextType {
   reciter: Reciter
   isBuffering: boolean
   volume: number
+  playFromVerse: (verse: QuranVerse, fullQueue?: QuranVerse[]) => void
+  setChapterQueue: (verses: QuranVerse[]) => void
+  togglePlayPause: () => void
+  nextVerse: () => void
+  prevVerse: () => void
+  seek: (progress: number) => void
+  setReciter: (reciter: Reciter) => void
+  setVolume: (volume: number) => void
+}
 
-  // Pass fullQueue on first call, or pre-set it with setChapterQueue so cards
-  // don't need to hold the entire verse list as a prop.
+// ─── Callbacks-only context — stable forever, NEVER causes consumer re-renders ─
+// All functions read live state from refs instead of closing over React state.
+// VerseCard subscribes to this context so it never re-renders from player state.
+interface QuranPlayerCallbacksContextType {
   playFromVerse: (verse: QuranVerse, fullQueue?: QuranVerse[]) => void
   setChapterQueue: (verses: QuranVerse[]) => void
   togglePlayPause: () => void
@@ -44,12 +58,9 @@ interface QuranProgressContextType {
   currentTime: number
 }
 
-const QuranPlayerContext = createContext<QuranPlayerContextType | undefined>(
-  undefined
-)
-const QuranProgressContext = createContext<
-  QuranProgressContextType | undefined
->(undefined)
+const QuranPlayerContext = createContext<QuranPlayerContextType | undefined>(undefined)
+const QuranPlayerCallbacksContext = createContext<QuranPlayerCallbacksContextType | undefined>(undefined)
+const QuranProgressContext = createContext<QuranProgressContextType | undefined>(undefined)
 
 const RECITER_METADATA_NAMES: Record<Reciter, string> = {
   mishary: 'Mishary Rashid Alafasy',
@@ -65,7 +76,7 @@ export function QuranPlayerProvider({
   const [currentVerse, setCurrentVerse] = useState<QuranVerse | null>(null)
   const [queue, setQueue] = useState<QuranVerse[]>([])
   const [isPlaying, setIsPlaying] = useState(false)
-  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'mishary') // Default reciter
+  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'mishary')
   const [volume, setVolume] = useState(1)
 
   const [progress, setProgress] = useState(0)
@@ -77,7 +88,18 @@ export function QuranPlayerProvider({
   const nextAudioRef = useRef<HTMLAudioElement | null>(null)
   const lastUrlRef = useRef<string | null>(null)
 
-  // Use Refs for callbacks to avoid stale closures in event listeners
+  // ─── Refs synced each render so stable callbacks can read current state ────────
+  // This pattern avoids adding state to useCallback deps (which would destabilize
+  // the functions and force re-renders in every VerseCard subscriber).
+  const currentVerseRef = useRef(currentVerse)
+  const queueRef = useRef(queue)
+  const currentTimeRef = useRef(currentTime)
+  currentVerseRef.current = currentVerse
+  queueRef.current = queue
+  currentTimeRef.current = currentTime
+
+  // Used to call the latest nextVerse from the audio 'ended' event handler,
+  // which is registered once in a [] effect.
   const nextVerseRef = useRef<() => void>(() => {})
 
   // Initialize Audio
@@ -161,7 +183,6 @@ export function QuranPlayerProvider({
       const nextVerseObj = queue[currentIdx + 1]
       const nextUrl = getAudioUrl(nextVerseObj, reciter)
 
-      // Avoid duplicate loading if already loaded
       if (nextAudioRef.current?.src !== nextUrl) {
         const nextAudio = new Audio()
         nextAudio.src = nextUrl
@@ -197,16 +218,15 @@ export function QuranPlayerProvider({
     }
   }, [isPlaying, currentVerse])
 
-  // Allow callers to pre-populate the queue (from ChapterReader) so individual
-  // VerseCards don't need to hold allVerses as a prop.
+  // ─── Stable callbacks — deps intentionally [] (read live state from refs) ─────
+
   const setChapterQueue = useCallback((verses: QuranVerse[]) => {
     setQueue(verses)
   }, [])
 
   const playFromVerse = useCallback(
     (verse: QuranVerse, fullQueue?: QuranVerse[]) => {
-      // Use the provided queue or fall back to the already-stored queue
-      const q = fullQueue && fullQueue.length > 0 ? fullQueue : queue
+      const q = fullQueue && fullQueue.length > 0 ? fullQueue : queueRef.current
       const idx = q.findIndex((v) => v.verse_id === verse.verse_id)
       if (idx !== -1) {
         setQueue(q.slice(idx))
@@ -214,55 +234,46 @@ export function QuranPlayerProvider({
         setIsPlaying(true)
       }
     },
-    [queue]
+    [] // stable — reads queue from queueRef
   )
 
   const togglePlayPause = useCallback(() => {
-    if (!currentVerse) return
+    if (!currentVerseRef.current) return
     setIsPlaying((prev) => !prev)
-  }, [currentVerse])
+  }, []) // stable — reads currentVerse from currentVerseRef
 
   const nextVerse = useCallback(() => {
-    if (!currentVerse || queue.length === 0) return
-
-    const currentIdx = queue.findIndex(
-      (v) => v.verse_id === currentVerse.verse_id
-    )
-    if (currentIdx !== -1 && currentIdx < queue.length - 1) {
-      setCurrentVerse(queue[currentIdx + 1])
+    const cv = currentVerseRef.current
+    const q = queueRef.current
+    if (!cv || q.length === 0) return
+    const currentIdx = q.findIndex((v) => v.verse_id === cv.verse_id)
+    if (currentIdx !== -1 && currentIdx < q.length - 1) {
+      setCurrentVerse(q[currentIdx + 1])
       setIsPlaying(true)
     } else {
       setIsPlaying(false)
       setCurrentVerse(null)
       setProgress(0)
     }
-  }, [currentVerse, queue])
-
-  useEffect(() => {
-    nextVerseRef.current = nextVerse
-  }, [nextVerse])
+  }, []) // stable — reads state from refs
 
   const prevVerse = useCallback(() => {
-    if (!currentVerse || queue.length === 0) return
-
-    // If played more than 3 seconds, restart current
-    if (currentTime > 3 && audioRef.current) {
+    const cv = currentVerseRef.current
+    const q = queueRef.current
+    const ct = currentTimeRef.current
+    if (!cv || q.length === 0) return
+    if (ct > 3 && audioRef.current) {
       audioRef.current.currentTime = 0
       return
     }
-
-    const currentIdx = queue.findIndex(
-      (v) => v.verse_id === currentVerse.verse_id
-    )
-
+    const currentIdx = q.findIndex((v) => v.verse_id === cv.verse_id)
     if (currentIdx > 0) {
-      setCurrentVerse(queue[currentIdx - 1])
+      setCurrentVerse(q[currentIdx - 1])
       setIsPlaying(true)
     } else {
-      // Restart current
       if (audioRef.current) audioRef.current.currentTime = 0
     }
-  }, [currentVerse, queue, currentTime])
+  }, []) // stable — reads state from refs
 
   const seek = useCallback((newProgress: number) => {
     if (audioRef.current && audioRef.current.duration) {
@@ -271,22 +282,18 @@ export function QuranPlayerProvider({
     }
   }, [])
 
+  useEffect(() => {
+    nextVerseRef.current = nextVerse
+  }, [nextVerse])
+
   // Setup Media Session Action Handlers
   useEffect(() => {
     if (!('mediaSession' in navigator)) return
 
-    navigator.mediaSession.setActionHandler('play', () => {
-      togglePlayPause()
-    })
-    navigator.mediaSession.setActionHandler('pause', () => {
-      togglePlayPause()
-    })
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-      prevVerse()
-    })
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
-      nextVerse()
-    })
+    navigator.mediaSession.setActionHandler('play', () => togglePlayPause())
+    navigator.mediaSession.setActionHandler('pause', () => togglePlayPause())
+    navigator.mediaSession.setActionHandler('previoustrack', () => prevVerse())
+    navigator.mediaSession.setActionHandler('nexttrack', () => nextVerse())
     navigator.mediaSession.setActionHandler('seekto', (details) => {
       if (details.seekTime && audioRef.current?.duration) {
         seek(details.seekTime / audioRef.current.duration)
@@ -302,39 +309,34 @@ export function QuranPlayerProvider({
     }
   }, [togglePlayPause, prevVerse, nextVerse, seek])
 
-  // Memoize context value so that audio timeupdate (setProgress) does not
-  // re-render every VerseCard that subscribes to QuranPlayerContext.
+  // ─── Context values ────────────────────────────────────────────────────────────
+
+  // Callbacks context — all functions are stable ([] deps + ref-based reads).
+  // Created once; never causes re-renders in subscribers (e.g. VerseCard).
+  const callbacksContextValue = useMemo(
+    () => ({ playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume }),
+    [playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume]
+  )
+
+  // State + callbacks context — re-renders only when player STATE changes.
+  // Callbacks are stable refs so they don't add invalidation pressure.
+  // NowPlayingBar and ChapterReader subscribe here.
   const playerContextValue = useMemo(
     () => ({
-      currentVerse,
-      isPlaying,
-      queue,
-      reciter,
-      isBuffering,
-      volume,
-      playFromVerse,
-      setChapterQueue,
-      togglePlayPause,
-      nextVerse,
-      prevVerse,
-      seek,
-      setReciter,
-      setVolume,
-    }),
-    [
       currentVerse, isPlaying, queue, reciter, isBuffering, volume,
-      playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse,
-      seek, setReciter, setVolume,
-    ]
+      playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentVerse, isPlaying, queue, reciter, isBuffering, volume]
   )
 
   return (
     <QuranPlayerContext.Provider value={playerContextValue}>
-      <QuranProgressContext.Provider
-        value={{ progress, duration, currentTime }}
-      >
-        {children}
-      </QuranProgressContext.Provider>
+      <QuranPlayerCallbacksContext.Provider value={callbacksContextValue}>
+        <QuranProgressContext.Provider value={{ progress, duration, currentTime }}>
+          {children}
+        </QuranProgressContext.Provider>
+      </QuranPlayerCallbacksContext.Provider>
     </QuranPlayerContext.Provider>
   )
 }
@@ -343,6 +345,15 @@ export function useQuranPlayer() {
   const context = useContext(QuranPlayerContext)
   if (!context) {
     throw new Error('useQuranPlayer must be used within a QuranPlayerProvider')
+  }
+  return context
+}
+
+/** Subscribe to player callbacks only — stable references, never triggers re-renders. */
+export function useQuranPlayerCallbacks() {
+  const context = useContext(QuranPlayerCallbacksContext)
+  if (!context) {
+    throw new Error('useQuranPlayerCallbacks must be used within a QuranPlayerProvider')
   }
   return context
 }

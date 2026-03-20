@@ -28,6 +28,24 @@ import { Button } from '@/components/ui/button'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
+// Isolated sub-component: the only part of the sidebar that reads useSearchParams.
+// Keeping it separate means the 114 chapter Link elements don't re-render when
+// the URL changes (e.g. during the debounced ?verse= sync while reading a chapter).
+function BackToQuranLink({ alreadyShown }: { alreadyShown: boolean }) {
+  const t = useTranslations('nav')
+  const searchParams = useSearchParams()
+  if (alreadyShown || !searchParams.get('q')) return null
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild className="h-auto py-2 px-2.5 hover:bg-accent/50">
+        <Link href="/quran">
+          <p className="text-xs">{t('quran')}</p>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
 
@@ -55,7 +73,6 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
   )
 
   const { query: currentChapter } = useParams()
-  const searchParams = useSearchParams()
 
   const filteredChapters = chapters
     .filter((chapter) => chapter != null)
@@ -108,7 +125,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
-              {(currentChapter || searchParams.get('q')) && (
+              {currentChapter && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
@@ -120,6 +137,10 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
+              {/* Shows the back link when navigated via ?q= (search) — isolated
+                  in its own component so useSearchParams doesn't force the 114
+                  chapter Links above to re-render on every URL change. */}
+              <BackToQuranLink alreadyShown={!!currentChapter} />
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild

@@ -15,7 +15,7 @@ import { VerseCard, toQuranVerse } from '../mini-components/verse-card'
 import { VerseMinimap } from '../mini-components/verse-minimap'
 import { useTranslations } from 'next-intl'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useQuranPlayer } from '@/lib/quran-audio-context'
+import { useQuranPlayer, useQuranPlayerCallbacks } from '@/lib/quran-audio-context'
 
 // Height of the verse viewport container.
 // Subtracts: sticky header (4rem) + layout padding-top (1rem) +
@@ -36,7 +36,11 @@ export function ChapterReader({
   const reader = useChapterReader(chapterNumber, initialData)
   const t = useTranslations('quran')
   const tCommon = useTranslations('common')
-  const { setChapterQueue } = useQuranPlayer()
+  // State context: subscribe to currentVerse/isPlaying/isBuffering to compute
+  // per-card isCurrentAudio and pass play state as props (not read inside each card).
+  const { currentVerse, isPlaying, isBuffering } = useQuranPlayer()
+  // Callbacks context: stable reference, used for setChapterQueue.
+  const { setChapterQueue } = useQuranPlayerCallbacks()
 
   // Read the initial verse from the prop (passed by the Server Component),
   // NOT from useSearchParams(). useSearchParams() subscribes to Next.js router
@@ -51,14 +55,19 @@ export function ChapterReader({
   // Differentiate smooth (user minimap tap) from instant (programmatic/load) seeks.
   const seekBehaviorRef = useRef<'auto' | 'smooth'>('auto')
 
-  const opts: ChapterReaderOptions = {
-    primaryLang: prefs.primaryLanguage,
-    secondaryLang: prefs.secondaryLanguage,
-    includeArabic: prefs.arabic,
-    includeWords: prefs.arabic,
-    includeRoot: prefs.arabic,
-    includeMeaning: prefs.arabic,
-  }
+  // Memoized so that callbacks listing `opts` as a dep remain stable across
+  // renders where unrelated state changes (scroll position, seek target, etc.).
+  const opts = useMemo<ChapterReaderOptions>(
+    () => ({
+      primaryLang: prefs.primaryLanguage,
+      secondaryLang: prefs.secondaryLanguage,
+      includeArabic: prefs.arabic,
+      includeWords: prefs.arabic,
+      includeRoot: prefs.arabic,
+      includeMeaning: prefs.arabic,
+    }),
+    [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic]
+  )
 
   // Keep the audio player queue in sync with loaded verses.
   const audioQueue = useMemo(
@@ -69,23 +78,29 @@ export function ChapterReader({
     if (audioQueue.length > 0) setChapterQueue(audioQueue)
   }, [audioQueue, setChapterQueue])
 
-  // Re-fetch when API-relevant preferences change
-  const prevOptsRef = useRef(opts)
+  // Re-fetch when API-relevant preferences change. `opts` is memoized on the
+  // same deps, so it only gets a new reference when prefs actually change —
+  // the isFirstMount guard prevents a spurious reload on mount.
+  const isFirstMount = useRef(true)
   useEffect(() => {
-    const prev = prevOptsRef.current
-    const changed =
-      prev.primaryLang !== opts.primaryLang ||
-      prev.secondaryLang !== opts.secondaryLang ||
-      prev.includeArabic !== opts.includeArabic
-
-    if (changed) reader.reload(opts)
-    prevOptsRef.current = opts
+    if (isFirstMount.current) {
+      isFirstMount.current = false
+      return
+    }
+    reader.reload(opts)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic])
+  }, [opts])
 
-  // Initial load if SSR returned nothing
+  // Initial load if SSR returned nothing, or if SSR data (always en+ar) doesn't
+  // contain the user's primary language. SSR can't know client prefs, so it always
+  // fetches English + Arabic. If the user's stored pref is e.g. French, the verses
+  // would show in English until a preference is toggled. Reload immediately instead.
   useEffect(() => {
-    if (reader.verses.length === 0) reader.reload(opts)
+    const primaryCode = opts.primaryLang !== 'xl' ? opts.primaryLang : 'en'
+    const needsReload =
+      reader.verses.length === 0 ||
+      reader.verses[0]?.tr?.[primaryCode] === undefined
+    if (needsReload) reader.reload(opts)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -95,8 +110,13 @@ export function ChapterReader({
   const virtualizer = useVirtualizer({
     count: reader.verses.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 280,
-    overscan: 25,
+    // Conservative high estimate — better to overshoot than undershoot.
+    // Underestimates cause scroll-position jumps when items are measured;
+    // overshoots just leave a little extra space that self-corrects.
+    estimateSize: () => 400,
+    // 25 was too aggressive: it rendered 50 extra cards (25 above + 25 below)
+    // and biased the centre-verse calculation used by the URL sync and minimap.
+    overscan: 12,
   })
 
   const virtualItems = virtualizer.getVirtualItems()
@@ -104,22 +124,25 @@ export function ChapterReader({
   const firstVirtualIndex = virtualItems[0]?.index ?? 0
 
   // ── Minimap handlers ──────────────────────────────────────────────────────
+  // Destructure stable callbacks so ESLint can track them as deps directly.
+  // After the stateRef fix in use-chapter-reader, prefetch and seekToVerse are
+  // stable references (only change if chapterNumber changes).
+  const { prefetch: readerPrefetch, seekToVerse: readerSeekToVerse, verses: readerVerses } = reader
 
   // Prefetch a verse window while the user is hovering over the minimap.
   // The hook deduplicates concurrent requests via an internal promise cache.
   const handlePreview = useCallback(
     (verseNumber: number) => {
-      reader.prefetch(verseNumber, opts)
+      readerPrefetch(verseNumber, opts)
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [reader.prefetch]
+    [readerPrefetch, opts]
   )
 
   // On release: if the verse is already in the loaded window, smooth-scroll to
   // it. Otherwise do a direct seekToVerse jump (no incremental batch loading).
   const handleSeek = useCallback(
     (verseNumber: number) => {
-      const isLoaded = reader.verses.some(
+      const isLoaded = readerVerses.some(
         (v) => v.vk?.split(':')[1] === String(verseNumber)
       )
 
@@ -133,11 +156,10 @@ export function ChapterReader({
         seekBehaviorRef.current = 'auto'
         seekDoneRef.current = false
         setSeekTarget(String(verseNumber))
-        reader.seekToVerse(verseNumber, opts)
+        readerSeekToVerse(verseNumber, opts)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [reader.verses, reader.seekToVerse]
+    [readerVerses, readerSeekToVerse, opts]
   )
 
   // Scroll to seekTarget once the verse is in the loaded data
@@ -173,21 +195,29 @@ export function ChapterReader({
   // Debounced 200ms so replaceState only fires when scrolling pauses.
   // Uses window.history.replaceState directly (NOT router.replace) to avoid
   // triggering Next.js router context updates which would re-render all consumers.
+  //
+  // IMPORTANT: virtualItems includes overscan items (25 above + 25 below the
+  // viewport), so (firstVirtualIndex + lastVirtualIndex) / 2 is heavily biased —
+  // at the top of a chapter firstVirtualIndex=0 but lastVirtualIndex includes 25
+  // overscan items below the fold, making the centre land on verse ~13 instead of 1.
+  // Fix: use scroll position to find the item that actually straddles the viewport centre.
   useEffect(() => {
     if (lastVirtualIndex < 0 || reader.verses.length === 0) return
     const timer = setTimeout(() => {
-      const centerIndex = Math.floor((firstVirtualIndex + lastVirtualIndex) / 2)
-      const centerVerse = reader.verses[centerIndex]
-      if (!centerVerse?.vk) return
-      const vNum = centerVerse.vk.split(':')[1]
+      const container = parentRef.current
+      if (!container) return
+      const centerY = container.scrollTop + container.clientHeight / 2
+      const items = virtualizer.getVirtualItems()
+      const centerItem =
+        items.find((v) => v.start <= centerY && v.start + v.size > centerY) ??
+        items[Math.floor(items.length / 2)]
+      const verse = reader.verses[centerItem?.index ?? 0]
+      if (!verse?.vk) return
+      const vNum = verse.vk.split(':')[1]
       const params = new URLSearchParams(window.location.search)
       if (params.get('verse') === vNum) return
       params.set('verse', vNum)
-      window.history.replaceState(
-        null,
-        '',
-        `${window.location.pathname}?${params}`
-      )
+      window.history.replaceState(null, '', `${window.location.pathname}?${params}`)
     }, 200)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -197,9 +227,16 @@ export function ChapterReader({
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}`
 
-  // Current verse number for minimap highlight
-  const centerIndex = Math.floor((firstVirtualIndex + lastVirtualIndex) / 2)
-  const centerVerse = reader.verses[centerIndex]
+  // Current verse number for minimap highlight.
+  // Same overscan bias fix: use scroll position to find the item at the viewport centre
+  // rather than the midpoint of all rendered items (which includes overscan).
+  const scrollTop = parentRef.current?.scrollTop ?? 0
+  const clientH = parentRef.current?.clientHeight ?? 0
+  const centerY = scrollTop + clientH / 2
+  const centerVirtualItem =
+    virtualItems.find((v) => v.start <= centerY && v.start + v.size > centerY) ??
+    virtualItems[Math.floor(virtualItems.length / 2)]
+  const centerVerse = reader.verses[centerVirtualItem?.index ?? 0]
   const currentVerseNumber = centerVerse
     ? parseInt(centerVerse.vk?.split(':')[1] ?? '1')
     : 1
@@ -290,6 +327,9 @@ export function ChapterReader({
                           verse.vk?.split(':')[1] === seekTarget
                         }
                         optsKey={optsKey}
+                        isCurrentAudio={currentVerse?.verse_id === (verse.vk ?? '')}
+                        isPlaying={isPlaying}
+                        isBuffering={isBuffering}
                       />
                     </div>
                   )
