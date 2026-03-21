@@ -25,6 +25,7 @@ import {
 } from '@/hooks/use-verse-search'
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
+import { QuranRefText } from '@/components/quran-ref-text'
 import { useTranslations } from 'next-intl'
 
 // ─── New API renderers ────────────────────────────────────────────────────────
@@ -120,7 +121,7 @@ function SearchResultVerse({
 
       {showFootnotes && tr?.f && (
         <p className="text-sm text-muted-foreground">
-          <HighlightText text={tr.f} />
+          <QuranRefText text={tr.f} from={verse.vk ?? ''} />
         </p>
       )}
 
@@ -239,7 +240,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   }, [forceTab, runWordByWordQuery])
 
   // ── Derived ──────────────────────────────────────────────────────────────────
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
   const allVerses =
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
@@ -252,14 +254,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       <div className="p-4 flex justify-center items-center">
         <Spinner />
       </div>
-    )
-  }
-
-  if (verseSearch.error) {
-    return (
-      <p className="text-sm text-destructive text-center py-4">
-        {verseSearch.error}
-      </p>
     )
   }
 
@@ -397,7 +391,10 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                   size="sm"
                   onClick={() => verseSearch.loadMore()}
                 >
-                  {tCommon('loadMore', { shown: verseSearch.loadedCount, total: verseSearch.total })}
+                  {tCommon('loadMore', {
+                    shown: verseSearch.loadedCount,
+                    total: verseSearch.total,
+                  })}
                 </Button>
               </div>
             )}
@@ -462,7 +459,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                             count: wordMatches.filter(
                               (r) => r.root_word === item.root_word
                             ).length,
-                          })}:
+                          })}
+                          :
                         </strong>{' '}
                         {wordMatches
                           .filter((r) => r.root_word === item.root_word)
@@ -482,7 +480,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                   ))}
                 </div>
               )}
-
             </div>
           </TabsContent>
         </Tabs>
