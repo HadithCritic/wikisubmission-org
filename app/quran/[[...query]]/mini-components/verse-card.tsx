@@ -54,9 +54,9 @@ const WordByWordView = memo(
     return (
       <div dir="rtl" className="flex flex-wrap text-right justify-start gap-x-4 gap-y-6 py-2">
         {sorted.map((w) => {
-          const arabic = (w.tx as Record<string, unknown>)?.['ar'] as string | undefined
+          const arabic = (w.tx as Record<string, string>)?.['ar']
           const root = w.r
-          const meaning = w.m ?? ''
+          const meaning = (w.tx as Record<string, string>)?.['en'] ?? ''
           const wordIndex = w.wi ?? 0
 
           return (
@@ -112,9 +112,9 @@ const WordByWordView = memo(
   return (
     <div dir="rtl" className="flex flex-wrap justify-start gap-y-8 gap-x-2 py-4">
       {sorted.map((w) => {
-        const arabic = (w.tx as Record<string, unknown>)?.['ar'] as string | undefined
+        const arabic = (w.tx as Record<string, string>)?.['ar']
         const root = w.r
-        const meaning = w.m ?? ''
+        const meaning = (w.tx as Record<string, string>)?.['en'] ?? ''
         const wordIndex = w.wi ?? 0
 
         return (
@@ -125,7 +125,7 @@ const WordByWordView = memo(
                   {arabic}
                 </p>
                 <div className="flex flex-col items-center gap-0.5 pt-0.5" dir="ltr">
-                  <p className="text-[11px] text-muted-foreground font-medium text-center break-words max-w-[100px] italic">
+                  <p className="text-xs text-foreground/70 font-medium text-center break-words max-w-[100px]">
                     {meaning}
                   </p>
                 </div>
@@ -289,7 +289,7 @@ export const VerseCard = memo(
             )}
 
             {/* Arabic + word-by-word */}
-            {prefs.arabic && (
+            {(prefs.arabic || prefs.wordByWord) && (
               <div className="py-2">
                 {verse.w && verse.w.length > 0 ? (
                   <WordByWordView
@@ -332,7 +332,10 @@ export const VerseCard = memo(
   )
   },
   (prev: VerseCardProps, next: VerseCardProps) =>
-    prev.verse.vk === next.verse.vk &&
+    // Use reference equality on the verse object: after a reload (same vk, new data),
+    // verse is a new object reference — this lets the card re-render with the new language data.
+    // During normal scroll, the virtualizer passes the same reference → memo skips correctly.
+    prev.verse === next.verse &&
     prev.isLast === next.isLast &&
     prev.isScrollTarget === next.isScrollTarget &&
     prev.optsKey === next.optsKey &&

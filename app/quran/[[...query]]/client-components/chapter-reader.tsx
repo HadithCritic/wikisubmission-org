@@ -20,7 +20,6 @@ import {
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
 
-
 export function ChapterReader({
   chapterNumber,
   initialData,
@@ -55,16 +54,19 @@ export function ChapterReader({
 
   // Memoized so that callbacks listing `opts` as a dep remain stable across
   // renders where unrelated state changes (scroll position, seek target, etc.).
+  // wordByWord implies we need Arabic + word data even if `arabic` is toggled off.
+  const needsArabic = prefs.arabic || prefs.wordByWord
   const opts = useMemo<ChapterReaderOptions>(
     () => ({
       primaryLang: prefs.primaryLanguage,
       secondaryLang: prefs.secondaryLanguage,
-      includeArabic: prefs.arabic,
-      includeWords: prefs.arabic,
-      includeRoot: prefs.arabic,
-      includeMeaning: prefs.arabic,
+      includeArabic: needsArabic,
+      includeWords: needsArabic,
+      includeRoot: needsArabic,
+      includeMeaning: needsArabic,
     }),
-    [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic, prefs.wordByWord]
   )
 
   // Keep the audio player queue in sync with loaded verses.
@@ -90,14 +92,18 @@ export function ChapterReader({
   }, [opts])
 
   // Initial load if SSR returned nothing, or if SSR data (always en+ar) doesn't
-  // contain the user's primary language. SSR can't know client prefs, so it always
-  // fetches English + Arabic. If the user's stored pref is e.g. French, the verses
-  // would show in English until a preference is toggled. Reload immediately instead.
+  // contain the user's primary or secondary language. SSR can't know client prefs,
+  // so it always fetches English + Arabic. If the user's stored pref is e.g. French
+  // primary or a secondary language, reload immediately so the correct translation shows.
   useEffect(() => {
     const primaryCode = opts.primaryLang !== 'xl' ? opts.primaryLang : 'en'
+    const secondaryCode =
+      opts.secondaryLang && opts.secondaryLang !== 'xl' ? opts.secondaryLang : null
+    const firstVerse = reader.verses[0]
     const needsReload =
       reader.verses.length === 0 ||
-      reader.verses[0]?.tr?.[primaryCode] === undefined
+      firstVerse?.tr?.[primaryCode] === undefined ||
+      (secondaryCode !== null && firstVerse?.tr?.[secondaryCode] === undefined)
     if (needsReload) reader.reload(opts)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -242,7 +248,7 @@ export function ChapterReader({
 
   // Stable key that changes when language prefs change — propagated to VerseCard
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
-  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}`
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}`
 
   // Current verse number for minimap highlight.
   // Same overscan bias fix: use scroll position to find the item at the viewport centre
@@ -287,20 +293,13 @@ export function ChapterReader({
             </p>
           )}
         </div>
-        {reader.chapterTitles?.['ar'] && (
-          <h1 className="text-2xl font-bold font-arabic">
-            {reader.chapterTitles['ar']}
-          </h1>
-        )}
       </div>
 
       {/* Verse viewport + minimap. `relative` anchors the minimap's absolute
           position on mobile; `items-stretch` lets the desktop sidebar fill height.
           `overflow-hidden` clips minimap milestone labels/badges so they cannot
           cause a page-level scrollbar when the minimap is active. */}
-      <div
-        className="relative flex flex-1 min-h-0 gap-2 items-stretch overflow-hidden"
-      >
+      <div className="relative flex flex-1 min-h-0 gap-2 items-stretch overflow-hidden">
         {/* Fixed-height scrollable container — the document never scrolls */}
         <div
           ref={parentRef}
