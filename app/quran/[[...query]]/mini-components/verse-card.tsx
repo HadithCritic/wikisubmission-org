@@ -243,15 +243,15 @@ export const VerseCard = memo(
 
         {/* Verse key + play button */}
         <div className="flex items-center justify-between gap-2">
-          <div className="w-fit shrink-0 flex items-start space-x-0.5 border px-2 bg-muted/30 backdrop-blur-sm rounded-full">
+          <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full">
             <span className="w-full text-lg font-semibold">{chNum}</span>
             <span>:</span>
-            <span className="w-full text-lg font-semibold text-primary/80">{vNum}</span>
+            <span className="w-full text-lg font-semibold">{vNum}</span>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-full hover:bg-violet-600/10 hover:text-violet-600"
+            className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
             onClick={handlePlay}
           >
             {isCurrentAudio && isPlaying ? (

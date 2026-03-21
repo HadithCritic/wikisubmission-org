@@ -40,13 +40,7 @@ export default function PrayerTimesClient() {
   const t = useTranslations('prayertimes')
   return (
     <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
-      {/* Minimal Header */}
-      <div className="w-full max-w-5xl px-4 h-16 flex items-center justify-between z-10">
-        <PageSwitcher currentPage="prayertimes" />
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-2xl px-4 py-12 md:py-16 z-10">
+<div className="w-full max-w-2xl px-4 py-12 md:py-16 z-10">
         <div className="flex flex-col items-center mb-12">
           <Link href="/">
             <Image

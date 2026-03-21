@@ -233,7 +233,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                     <SidebarMenuItem key={chapter.chapter_number}>
                       <SidebarMenuButton
                         asChild
-                        className={`h-auto py-2 px-2.5 hover:bg-accent/50 ${currentChapter == `${chapter.chapter_number}` ? 'bg-secondary/50' : 'hover:bg-accent/50'}`}
+                        className={`h-auto py-2 px-2.5 ${currentChapter == `${chapter.chapter_number}` ? 'bg-primary/10 text-primary' : 'hover:bg-accent/50'}`}
                       >
                         <Link href={`/quran/${chapter.chapter_number}`} prefetch>
                           <div className="flex items-start gap-2.5 w-full min-w-0">

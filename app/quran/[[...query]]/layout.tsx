@@ -42,7 +42,7 @@ export default async function QuranLayout({
               per-page scroll so home/search pages still scroll normally. */}
           <SidebarInset className="h-svh overflow-hidden">
             {/* Header */}
-            <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b">
+            <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 glass-nav bg-background/80 border-b border-border/40">
               <SidebarTrigger className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden" />
               <PageSwitcher currentPage="quran" />
               <QuranSearchbar />

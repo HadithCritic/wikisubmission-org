@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { useMusic } from '@/lib/music-context'
 import { PageSwitcher } from '@/components/page-switcher'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
-import { FeaturedCard } from '@/app/music/components/featured-card'
-import { TrackRow } from '@/app/music/components/track-row'
-import { MusicPlayer } from '@/app/music/components/now-playing-bar'
+import { FeaturedCard } from '@/app/(site)/music/components/featured-card'
+import { TrackRow } from '@/app/(site)/music/components/track-row'
+import { MusicPlayer } from '@/app/(site)/music/components/now-playing-bar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Info,
@@ -21,7 +21,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useSearchParams } from 'next/navigation'
-import { AppPrompt } from '@/app/music/components/app-prompt'
+import { AppPrompt } from '@/app/(site)/music/components/app-prompt'
 import { useTranslations } from 'next-intl'
 
 export default function MusicClient() {
@@ -102,23 +102,7 @@ export default function MusicClient() {
 
   return (
     <main className="min-h-screen bg-background text-foreground flex flex-col items-center pb-32">
-      {/* Nav Header */}
-      <div className="w-full max-w-5xl px-4 h-16 flex items-center justify-between z-10 top-0 bg-background/50 backdrop-blur-md">
-        <PageSwitcher currentPage="music" />
-        <div className="flex items-center gap-2">
-          <Link
-            href={`mailto:contact@wikisubmission.org?subject=Music/Zikr Track Submission&body=Please provide track and artist information here.`}
-          >
-            <Button variant="outline" size="sm">
-              <PlusSquare />
-              {t('submitTrack')}
-            </Button>
-          </Link>
-          <ThemeToggle />
-        </div>
-      </div>
-
-      <AppPrompt trackId={currentTrack?.id || trackId || undefined} />
+<AppPrompt trackId={currentTrack?.id || trackId || undefined} />
 
       <Link href="/" className="mt-4">
         <Image

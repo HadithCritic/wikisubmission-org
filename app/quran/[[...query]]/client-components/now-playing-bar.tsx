@@ -109,7 +109,7 @@ export function QuranPlayer() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pointer-events-none mb-4">
       <div className="max-w-4xl mx-auto pointer-events-auto">
-        <div className="bg-background/80 backdrop-blur-xl border border-border shadow-2xl rounded-2xl overflow-hidden md:h-20">
+        <div className="bg-background/90 backdrop-blur-xl border border-border/30 shadow-2xl md:rounded-full rounded-2xl overflow-hidden md:h-14">
           {/* Progress Bar (Global for Mobile, inside Flex for Desktop) */}
           <div className="md:hidden w-full px-0 pt-0 bg-background/50">
             <Slider
@@ -160,7 +160,7 @@ export function QuranPlayer() {
                 <Button
                   variant="default"
                   size="icon"
-                  className="h-10 w-10 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20"
+                  className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/20"
                   onClick={togglePlayPause}
                 >
                   {isBuffering ? (
@@ -204,13 +204,13 @@ export function QuranPlayer() {
                           variant={reciter === r ? 'default' : 'outline'}
                           className={`justify-start h-12 px-4 rounded-xl text-sm transition-all ${
                             reciter === r
-                              ? 'bg-violet-600 hover:bg-violet-700 shadow-lg shadow-violet-500/20'
+                              ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20'
                               : ''
                           }`}
                           onClick={() => setReciter(r)}
                         >
                           <User
-                            className={`w-4 h-4 mr-3 ${reciter === r ? 'text-white' : 'text-violet-600'}`}
+                            className={`w-4 h-4 mr-3 ${reciter === r ? 'text-primary-foreground' : 'text-primary'}`}
                           />
                           {RECITER_NAMES[r]}
                         </Button>
@@ -275,7 +275,7 @@ export function QuranPlayer() {
                 <Button
                   variant="default"
                   size="icon"
-                  className="h-10 w-10 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20"
+                  className="h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/20"
                   onClick={togglePlayPause}
                 >
                   {isBuffering ? (
@@ -346,10 +346,10 @@ export function QuranPlayer() {
                     <DropdownMenuItem
                       key={r}
                       onClick={() => setReciter(r)}
-                      className={`rounded-lg mb-1 last:mb-0 cursor-pointer ${reciter === r ? 'bg-violet-600 text-white focus:bg-violet-700 focus:text-white' : 'focus:bg-violet-600/10'}`}
+                      className={`rounded-lg mb-1 last:mb-0 cursor-pointer ${reciter === r ? 'bg-primary text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground' : 'focus:bg-primary/10'}`}
                     >
                       <User
-                        className={`w-3.5 h-3.5 mr-2 ${reciter === r ? 'text-white' : 'text-violet-600'}`}
+                        className={`w-3.5 h-3.5 mr-2 ${reciter === r ? 'text-primary-foreground' : 'text-primary'}`}
                       />
                       {RECITER_NAMES[r]}
                     </DropdownMenuItem>

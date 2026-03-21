@@ -37,8 +37,7 @@ export default async function Downloads() {
   const t = await getTranslations('downloads')
   return (
     <main className="space-y-6 p-8 md:max-w-5xl mx-auto">
-      <PageSwitcher currentPage="downloads" />
-      <Link href="/">
+<Link href="/">
         <Image
           src="/brand-assets/logo-transparent.png"
           alt="WikiSubmission Logo"

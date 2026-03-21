@@ -28,7 +28,7 @@ export default async function RootLayout({
     <ClerkProvider signInUrl="/auth/sign-in" signUpUrl="/auth/sign-up">
       <html lang={locale} dir={dir} suppressHydrationWarning>
         <body
-          className={`${Fonts.sora.className} ${Fonts.amiri.variable} antialiased wrap-break-words`}
+          className={`${Fonts.sora.className} ${Fonts.amiri.variable} ${Fonts.jakartaSans.variable} antialiased wrap-break-words`}
           suppressHydrationWarning
         >
           <NextIntlClientProvider>

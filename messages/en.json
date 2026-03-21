@@ -178,6 +178,18 @@
     "appPromptOpen": "OPEN"
   },
   "home": {
+    "hero": {
+      "headline": "Wisdom for All",
+      "description": "A modern sanctuary for sacred texts and spiritual tools. Explore the Quran, prayer times, and more — free, open, and multilingual.",
+      "ctaPrimary": "Read the Final Testament",
+      "ctaSecondary": "Explore Tools"
+    },
+    "scripture": {
+      "title": "Scripture",
+      "subtitle": "Primary Texts",
+      "badge": "Most Read",
+      "readNow": "Read now"
+    },
     "services": {
       "finalTestament": "Final Testament",
       "finalTestamentDesc": "Read on the Web",

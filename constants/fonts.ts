@@ -1,4 +1,4 @@
-import { Sora, Geist_Mono, Amiri } from 'next/font/google'
+import { Sora, Geist_Mono, Amiri, Plus_Jakarta_Sans } from 'next/font/google'
 
 const sora = Sora({
   subsets: ['latin'],
@@ -16,8 +16,15 @@ const amiri = Amiri({
   variable: '--font-amiri',
 })
 
+const jakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-jakarta',
+})
+
 export const Fonts = {
   sora: sora,
   geistMono: geistMono,
   amiri: amiri,
+  jakartaSans: jakartaSans,
 }
