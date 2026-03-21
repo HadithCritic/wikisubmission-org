@@ -279,7 +279,7 @@ export function ChapterReader({
     t('sura', { number: chapterNumber })
 
   return (
-    <div className="space-y-2">
+    <div className="h-full flex flex-col">
       {/* Chapter title */}
       <div className="flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
         <div className="flex flex-col">
@@ -304,10 +304,7 @@ export function ChapterReader({
           position on mobile; `items-stretch` lets the desktop sidebar fill height.
           `overflow-hidden` clips minimap milestone labels/badges so they cannot
           cause a page-level scrollbar when the minimap is active. */}
-      <div
-        className="relative flex gap-2 items-stretch overflow-hidden"
-        style={{ height: VIEWPORT_HEIGHT }}
-      >
+      <div className="relative flex gap-2 items-stretch overflow-hidden h-full">
         {/* Fixed-height scrollable container — the document never scrolls */}
         <div
           ref={parentRef}
