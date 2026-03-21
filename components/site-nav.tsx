@@ -8,17 +8,20 @@ import { Menu, X, Search } from 'lucide-react'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 const NAV_LINKS = [
-  { label: 'Scripture', href: '/quran' },
-  { label: 'Tools', href: '/prayer-times' },
-  { label: 'Archive', href: '/search' },
-  { label: 'About', href: '/' },
+  { label: 'home', href: '/' },
+  { label: 'scripture', href: '/quran' },
+  { label: 'practices', href: '/prayer-times' },
+  { label: 'videos', href: '/search' },
+  { label: 'music', href: '/music' },
 ]
 
 export function SiteNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const t = useTranslations('navbar')
 
   return (
     <nav className="sticky top-0 z-50 w-full glass-nav bg-background/80 border-b border-border/40">
@@ -49,12 +52,13 @@ export function SiteNav() {
               href={link.href}
               className={cn(
                 'text-sm font-medium transition-colors hover:text-primary',
-                pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href))
+                pathname === link.href ||
+                  (link.href !== '/' && pathname?.startsWith(link.href))
                   ? 'text-primary font-semibold'
                   : 'text-muted-foreground'
               )}
             >
-              {link.label}
+              {t(link.label)}
             </Link>
           ))}
         </div>
@@ -100,7 +104,8 @@ export function SiteNav() {
               onClick={() => setMobileOpen(false)}
               className={cn(
                 'px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href))
+                pathname === link.href ||
+                  (link.href !== '/' && pathname?.startsWith(link.href))
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               )}

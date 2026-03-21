@@ -239,5 +239,13 @@
     "standard": "Standard",
     "revelation": "Revelation",
     "revOrder": "Rev. {number}"
+  },
+  "navbar": {
+    "scripture": "Scripture",
+    "practices": "Practices",
+    "search": "Search",
+    "videos": "Videos",
+    "music": "Music",
+    "home": "Home"
   }
 }
