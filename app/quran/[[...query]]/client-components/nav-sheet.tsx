@@ -298,7 +298,10 @@ export function QuranNavSheet({
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-[280px] sm:w-[300px] gap-0">
         <SheetHeader className="px-4 py-3 border-b border-border/40">
-          <SheetTitle className="text-sm font-semibold">Quran</SheetTitle>
+          <SheetTitle className="flex items-center gap-2 text-sm font-semibold">
+            <Book className="size-4 text-primary/70" />
+            Quran
+          </SheetTitle>
         </SheetHeader>
         <NavSheetContent chapters={chapters} appendices={appendices} />
       </SheetContent>

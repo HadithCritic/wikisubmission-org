@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, startTransition } from 'react'
 
 function useLocalStorage<T>(
   key: string,
@@ -14,7 +14,7 @@ function useLocalStorage<T>(
   useEffect(() => {
     try {
       const item = window.localStorage.getItem(key)
-      if (item !== null) setStoredValue(JSON.parse(item))
+      if (item !== null) startTransition(() => setStoredValue(JSON.parse(item)))
     } catch (error) {
       console.log(error)
     }

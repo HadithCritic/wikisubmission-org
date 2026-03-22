@@ -30,7 +30,9 @@ export function ZakatCalculator() {
           className="h-12 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           {['USD', 'EUR', 'GBP', 'SAR', 'AED', 'TRY'].map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c}>
+              {c}
+            </option>
           ))}
         </select>
         <input
@@ -90,8 +92,7 @@ export function ZakatCalculator() {
         <p>
           <span className="font-semibold text-foreground">How this works:</span>{' '}
           When you receive income, 2.5% belongs to those in need — give it
-          immediately or as soon as possible. There is no nisab (minimum
-          threshold) and no annual cycle in this understanding.
+          immediately or as soon as possible.
         </p>
       </div>
     </div>

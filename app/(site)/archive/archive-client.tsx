@@ -25,7 +25,6 @@ type MediaRow = Database['public']['Tables']['ws_media']['Row']
 type NewsletterRow = Database['public']['Tables']['ws_newsletters']['Row']
 
 export default function ArchiveClient() {
-  const t = useTranslations('search')
   return (
     <div className="min-h-screen">
       {/* Hero */}

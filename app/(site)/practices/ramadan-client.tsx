@@ -80,7 +80,7 @@ function RamadanContent() {
         setLoading(false)
       }
     },
-    []
+    [t]
   )
 
   useEffect(() => {

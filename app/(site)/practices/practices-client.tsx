@@ -1,10 +1,10 @@
-'use client'
-
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
 import PrayerTimesClient from './prayer-times-client'
 import RamadanClient from './ramadan-client'
 import { ZakatCalculator } from '@/components/zakat-calculator'
+import Link from 'next/link'
+import type { components } from '@/src/api/types.gen'
+
+type VerseData = components['schemas']['VerseData']
 
 // ── Astronomical Hijri calendar (Julian Day Number method) ──────────────────
 function gregorianToHijri(date: Date): { year: number; month: number; day: number } {
@@ -31,13 +31,10 @@ function gregorianToHijri(date: Date): { year: number; month: number; day: numbe
   return { year, month, day }
 }
 
-/** Days until the next Ramadan (month 9, day 1). Returns 0 if today is Ramadan. */
 function daysUntilNextRamadan(): number {
   const today = new Date()
   const hijri = gregorianToHijri(today)
-  // Already in Ramadan
   if (hijri.month === 9) return 0
-  // Walk forward day-by-day until Hijri month 9, day 1 (max ~354 iterations)
   const probe = new Date(today)
   for (let i = 1; i <= 355; i++) {
     probe.setDate(probe.getDate() + 1)
@@ -48,24 +45,7 @@ function daysUntilNextRamadan(): number {
 }
 
 const DAYS_UNTIL_RAMADAN = daysUntilNextRamadan()
-const SHOW_RAMADAN_TAB = DAYS_UNTIL_RAMADAN <= 15
-
-const ALL_TABS = [
-  { id: 'prayer' as const, label: 'Prayer Times', badge: null },
-  {
-    id: 'ramadan' as const,
-    label: 'Ramadan',
-    badge:
-      DAYS_UNTIL_RAMADAN > 0
-        ? `in ${DAYS_UNTIL_RAMADAN}d`
-        : null,
-  },
-  { id: 'zakat' as const, label: 'Zakat', badge: null },
-]
-
-const TABS = SHOW_RAMADAN_TAB ? ALL_TABS : ALL_TABS.filter((t) => t.id !== 'ramadan')
-
-type TabId = 'prayer' | 'ramadan' | 'zakat'
+const SHOW_RAMADAN_SECTION = DAYS_UNTIL_RAMADAN <= 15
 
 const PLACEHOLDER_CARDS = [
   {
@@ -90,10 +70,46 @@ const PLACEHOLDER_CARDS = [
   },
 ]
 
-export default function PracticesClient() {
-  const [activeTab, setActiveTab] = useState<TabId>(
-    TABS[0].id
+// ── Stylish verse quote card ─────────────────────────────────────────────────
+function VerseQuoteCard({
+  verseKey,
+  href,
+  text,
+}: {
+  verseKey: string
+  href: string
+  text: string
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-linear-to-br from-primary/5 to-transparent p-6 space-y-4">
+      {/* Decorative large quote mark */}
+      <span className="absolute top-1 right-4 text-8xl leading-none text-primary/8 font-serif select-none pointer-events-none">
+        &ldquo;
+      </span>
+      {/* Verse ref badge */}
+      <Link
+        href={href}
+        className="inline-flex items-center px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider hover:bg-primary/20 transition-colors"
+      >
+        {verseKey}
+      </Link>
+      {/* Text */}
+      <p className="text-sm leading-relaxed text-foreground/90 italic">
+        {text}
+      </p>
+    </div>
   )
+}
+
+export default function PracticesClient({
+  zakatVerse,
+  prayerVerse,
+}: {
+  zakatVerse: VerseData | null
+  prayerVerse: VerseData | null
+}) {
+  const zakatText = zakatVerse?.tr?.['en']?.tx
+  const prayerText = prayerVerse?.tr?.['en']?.tx
 
   return (
     <div className="min-h-screen">
@@ -113,39 +129,71 @@ export default function PracticesClient() {
         </div>
       </section>
 
-      {/* Tabs */}
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="flex gap-2 mb-8 border-b border-border/40 pb-4 overflow-x-auto no-scrollbar">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors',
-                activeTab === tab.id
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              )}
-            >
-              {tab.label}
-              {tab.badge && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary leading-none">
-                  {tab.badge}
+      {/* Prayer Times */}
+      <section className="max-w-5xl mx-auto px-6 py-10">
+        <div className="flex items-center gap-3 mb-6">
+          <h2 className="font-headline text-2xl font-bold">Prayer Times</h2>
+          <div className="h-px flex-1 bg-border/60" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
+          <div className="md:col-span-3">
+            <PrayerTimesClient />
+          </div>
+          {prayerText && (
+            <div className="md:col-span-2">
+              <VerseQuoteCard
+                verseKey="4:103"
+                href="/quran/4?verse=103"
+                text={prayerText}
+              />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Zakat */}
+      <section className="border-t border-border/40 bg-muted/20">
+        <div className="max-w-5xl mx-auto px-6 py-10">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="font-headline text-2xl font-bold">Zakat</h2>
+            <div className="h-px flex-1 bg-border/60" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
+            {/* Calculator */}
+            <div className="md:col-span-3">
+              <ZakatCalculator />
+            </div>
+            {/* Verse 9:60 */}
+            {zakatText && (
+              <div className="md:col-span-2">
+                <VerseQuoteCard
+                  verseKey="9:60"
+                  href="/quran/9?verse=60"
+                  text={zakatText}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Ramadan — only shown within 15 days of start or during */}
+      {SHOW_RAMADAN_SECTION && (
+        <section className="border-t border-border/40">
+          <div className="max-w-5xl mx-auto px-6 py-10">
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="font-headline text-2xl font-bold">Ramadan</h2>
+              {DAYS_UNTIL_RAMADAN > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary leading-none">
+                  in {DAYS_UNTIL_RAMADAN}d
                 </span>
               )}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab panels */}
-        {activeTab === 'prayer' && <PrayerTimesClient />}
-        {activeTab === 'ramadan' && <RamadanClient />}
-        {activeTab === 'zakat' && (
-          <div className="py-8">
-            <ZakatCalculator />
+              <div className="h-px flex-1 bg-border/60" />
+            </div>
+            <RamadanClient />
           </div>
-        )}
-      </div>
+        </section>
+      )}
 
       {/* Placeholder educational cards */}
       <section className="border-t border-border/40 bg-muted/30 py-16">

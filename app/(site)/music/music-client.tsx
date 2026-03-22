@@ -13,7 +13,6 @@ import {
   Clock,
   Repeat,
 } from 'lucide-react'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { AppPrompt } from '@/app/(site)/music/components/app-prompt'
 import { useTranslations } from 'next-intl'

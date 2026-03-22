@@ -328,12 +328,18 @@ export const VerseCard = memo(
       </div>
 
       {!isLast && (
-        <div className="flex justify-center items-center py-2">
-          <div className="flex items-center gap-2">
-            <span className="size-1 rounded-full bg-border/60 block" />
-            <span className="size-1.5 rounded-full bg-border/80 block" />
-            <span className="size-1 rounded-full bg-border/60 block" />
-          </div>
+        <div className="flex justify-center items-center py-3">
+          <svg
+            width="80" height="20" viewBox="0 0 80 20" fill="none"
+            className="text-border/70"
+            aria-hidden="true"
+          >
+            <line x1="0" y1="10" x2="28" y2="10" stroke="currentColor" strokeWidth="0.75" />
+            <circle cx="40" cy="10" r="7" stroke="currentColor" strokeWidth="0.75" />
+            <path d="M40 5 L44.3 10 L40 15 L35.7 10 Z" fill="currentColor" opacity="0.35" />
+            <circle cx="40" cy="10" r="1.8" fill="currentColor" opacity="0.55" />
+            <line x1="52" y1="10" x2="80" y2="10" stroke="currentColor" strokeWidth="0.75" />
+          </svg>
         </div>
       )}
     </div>

@@ -60,7 +60,7 @@ export default async function QuranPage({
   if (!queryText) {
     return (
       <main className="whitespace-pre-line h-full">
-        <section>
+        <section className="max-w-4xl mx-auto w-full">
           <div className="space-y-2">
             <QuranUtilitiesRow />
             <HomeScreenMetrics />

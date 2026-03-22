@@ -13,12 +13,10 @@ type VerseData = components['schemas']['VerseData']
 export default function HomeScreenRandomVerse() {
   const t = useTranslations('common')
   const [verse, setVerse] = useState<VerseData | null>(null)
-  const [ref, setRef] = useState<{ chapter: number; verse: number } | null>(null)
+  const [ref] = useState<{ chapter: number; verse: number }>(() => randomQuranRef())
 
   useEffect(() => {
-    const r = randomQuranRef()
-    setRef(r)
-
+    const r = ref
     wsApi
       .GET('/quran', {
         params: {
@@ -36,7 +34,7 @@ export default function HomeScreenRandomVerse() {
       })
   }, [])
 
-  if (!verse || !ref) {
+  if (!verse) {
     return (
       <main className="max-w-lg mx-auto">
         <div className="bg-muted/50 p-4 rounded-2xl flex justify-center py-8">

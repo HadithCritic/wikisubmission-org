@@ -1,18 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, ArrowLeft } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useVerseFetch, parseQuranRef } from '@/hooks/use-verse-fetch'
+import { QuranRefText } from './quran-ref-text'
 import type { components } from '@/src/api/types.gen'
+import type { LangCode } from '@/hooks/use-quran-preferences'
 
 type VerseData = components['schemas']['VerseData']
 
@@ -20,10 +23,12 @@ function VersePreview({
   verse,
   primaryCode,
   showArabic,
+  onNavigateRef,
 }: {
   verse: VerseData
   primaryCode: string
   showArabic: boolean
+  onNavigateRef: (ref: string) => void
 }) {
   const tr = verse.tr?.[primaryCode]
   const arTr = verse.tr?.['ar']
@@ -47,13 +52,12 @@ function VersePreview({
         </p>
       )}
       {tr?.f && (
-        <p className="text-sm text-muted-foreground italic">{tr.f}</p>
+        <p className="text-sm text-muted-foreground italic">
+          <QuranRefText text={tr.f} from={`footnote of ${verse.vk}`} onNavigateRef={onNavigateRef} />
+        </p>
       )}
       {showArabic && arTr?.tx && (
-        <p
-          dir="rtl"
-          className="font-arabic text-xl leading-relaxed text-right pt-1"
-        >
+        <p dir="rtl" className="font-arabic text-xl leading-relaxed text-right pt-1">
           {arTr.tx}
         </p>
       )}
@@ -77,6 +81,8 @@ export function QuranRef({
   const prefs = useQuranPreferences()
   const { verses, loading, error, fetch } = useVerseFetch()
   const [open, setOpen] = useState(false)
+  // History stack — each entry is a reference string. The current view is the last item.
+  const [history, setHistory] = useState<string[]>([])
 
   const parsed = parseQuranRef(reference)
 
@@ -85,20 +91,52 @@ export function QuranRef({
     return <span className="font-mono text-xs">{reference}</span>
   }
 
-  const primaryCode =
+  const primaryCode: LangCode =
     prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+
+  const currentRef = history[history.length - 1] ?? reference
+  const currentParsed = parseQuranRef(currentRef) ?? parsed
 
   const label =
     parsed.vs === parsed.ve
       ? `${parsed.cn}:${parsed.vs}`
       : `${parsed.cn}:${parsed.vs}–${parsed.ve}`
 
+  const currentLabel =
+    currentParsed.vs === currentParsed.ve
+      ? `${currentParsed.cn}:${currentParsed.vs}`
+      : `${currentParsed.cn}:${currentParsed.vs}–${currentParsed.ve}`
+
+  const doFetch = useCallback(
+    (ref: string) => fetch(ref, primaryCode),
+    [fetch, primaryCode]
+  )
+
   function handleOpenChange(val: boolean) {
     setOpen(val)
-    if (val && verses.length === 0 && !loading) {
-      fetch(reference, prefs.primaryLanguage)
+    if (val) {
+      setHistory([reference])
+      doFetch(reference)
+    } else {
+      setHistory([])
     }
   }
+
+  const handleNavigate = useCallback(
+    (newRef: string) => {
+      setHistory((prev) => [...prev, newRef])
+      doFetch(newRef)
+    },
+    [doFetch]
+  )
+
+  const handleBack = useCallback(() => {
+    setHistory((prev) => {
+      const next = prev.slice(0, -1)
+      doFetch(next[next.length - 1] ?? reference)
+      return next
+    })
+  }, [doFetch, reference])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -112,14 +150,26 @@ export function QuranRef({
 
       <DialogContent className="max-w-lg rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 flex-wrap">
-            <span className="font-mono text-violet-600">{label}</span>
-            {from && (
-              <span className="text-xs text-muted-foreground font-normal">
-                — from {from}
-              </span>
+          <div className="flex items-center gap-2">
+            {history.length > 1 && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleBack}
+                aria-label="Go back"
+              >
+                <ArrowLeft className="size-4" />
+              </Button>
             )}
-          </DialogTitle>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-violet-600">{currentLabel}</span>
+              {from && history.length === 1 && (
+                <span className="text-xs text-muted-foreground font-normal">
+                  — from {from}
+                </span>
+              )}
+            </DialogTitle>
+          </div>
         </DialogHeader>
 
         <div className="max-h-[60vh] overflow-y-auto pr-1 -mr-1">
@@ -137,6 +187,7 @@ export function QuranRef({
               verse={verse}
               primaryCode={primaryCode}
               showArabic={prefs.arabic}
+              onNavigateRef={handleNavigate}
             />
           ))}
         </div>
@@ -144,7 +195,7 @@ export function QuranRef({
         {verses.length > 0 && (
           <div className="pt-3 border-t">
             <Link
-              href={`/quran/${parsed.cn}?verse=${parsed.vs}`}
+              href={`/quran/${currentParsed.cn}?verse=${currentParsed.vs}`}
               onClick={() => setOpen(false)}
               className="text-xs text-violet-500 hover:text-violet-600 flex items-center gap-1 w-fit transition-colors"
             >

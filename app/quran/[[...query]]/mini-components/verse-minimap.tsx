@@ -135,13 +135,13 @@ export function VerseMinimap({
           {/* Progress fill tube */}
           <div
             className="absolute left-1/2 -translate-x-1/2 top-0 w-3 rounded-full bg-violet-500/60 pointer-events-none"
-            style={{ height: `${progressPct}%` }}
+            style={{ height: `${progressPct}%`, transition: 'height 0.35s cubic-bezier(0.4,0,0.2,1)' }}
           />
 
           {/* Current verse thumb — 14px dot */}
           <div
             className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-violet-500 ring-2 ring-background/80 z-10 pointer-events-none"
-            style={{ top: `${progressPct}%` }}
+            style={{ top: `${progressPct}%`, transition: 'top 0.35s cubic-bezier(0.4,0,0.2,1)' }}
           />
 
           {/* Preview indicator while dragging */}

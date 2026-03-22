@@ -87,6 +87,7 @@ export function useChapterReader(
   // would need `state` in its dep array, causing a new function reference on
   // every state update and making downstream useEffects re-fire constantly.
   const stateRef = useRef(state)
+  // eslint-disable-next-line react-hooks/refs
   stateRef.current = state
 
   // Cache for in-flight prefetch promises: cacheKey → Promise<FetchResult>

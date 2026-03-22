@@ -1,15 +1,198 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import type { VerseData } from '@/hooks/use-chapter-reader'
 import type { ChapterReaderOptions } from '@/hooks/use-chapter-reader'
 import { QuranRefText } from '@/components/quran-ref-text'
 import { Spinner } from '@/components/ui/spinner'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, ArrowUpRight } from 'lucide-react'
+import Link from 'next/link'
+import { useVerseFetch, parseQuranRef } from '@/hooks/use-verse-fetch'
+import type { components } from '@/src/api/types.gen'
+
+type ApiVerseData = components['schemas']['VerseData']
 
 function isRtl(lang: string) {
   return ['ar', 'fa', 'ur'].includes(lang)
 }
+
+// ─── Footnote dialog with history ─────────────────────────────────────────────
+
+type HistoryEntry =
+  | { type: 'footnote'; verseKey: string; text: string }
+  | { type: 'verse'; ref: string }
+
+function FootnoteDialogContent({
+  initialEntry,
+  onClose,
+}: {
+  initialEntry: HistoryEntry
+  onClose: () => void
+}) {
+  const prefs = useQuranPreferences()
+  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const { verses, loading, error, fetch } = useVerseFetch()
+  const [history, setHistory] = useState<HistoryEntry[]>([initialEntry])
+  const current = history[history.length - 1]
+
+  const doFetch = useCallback(
+    (ref: string) => fetch(ref, primaryCode),
+    [fetch, primaryCode]
+  )
+
+  const handleNavigate = useCallback(
+    (ref: string) => {
+      setHistory((prev) => [...prev, { type: 'verse', ref }])
+      doFetch(ref)
+    },
+    [doFetch]
+  )
+
+  const handleBack = useCallback(() => {
+    setHistory((prev) => {
+      const next = prev.slice(0, -1)
+      const prev_ = next[next.length - 1]
+      if (prev_?.type === 'verse') doFetch(prev_.ref)
+      return next
+    })
+  }, [doFetch])
+
+  // Fetch verse when navigating to a verse entry
+  useEffect(() => {
+    if (current.type === 'verse') {
+      doFetch(current.ref)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current])
+
+  const showBack = history.length > 1
+
+  let headerLabel = ''
+  if (current.type === 'footnote') {
+    headerLabel = `v.${current.verseKey}`
+  } else {
+    const p = parseQuranRef(current.ref)
+    if (p) headerLabel = p.vs === p.ve ? `${p.cn}:${p.vs}` : `${p.cn}:${p.vs}–${p.ve}`
+  }
+
+  return (
+    <>
+      <DialogHeader>
+        <div className="flex items-center gap-2">
+          {showBack && (
+            <Button variant="ghost" size="icon-sm" onClick={handleBack} aria-label="Go back">
+              <ArrowLeft className="size-4" />
+            </Button>
+          )}
+          <DialogTitle className="font-mono text-violet-600 text-sm">{headerLabel}</DialogTitle>
+        </div>
+      </DialogHeader>
+
+      <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1 -mr-1">
+        {current.type === 'footnote' && (
+          <p className="text-sm leading-relaxed text-foreground">
+            <QuranRefText
+              text={current.text}
+              from={`footnote of ${current.verseKey}`}
+              onNavigateRef={handleNavigate}
+            />
+          </p>
+        )}
+
+        {current.type === 'verse' && (
+          <>
+            {loading && (
+              <div className="flex justify-center py-10"><Spinner /></div>
+            )}
+            {error && (
+              <p className="text-sm text-destructive text-center py-6">{error}</p>
+            )}
+            {verses.map((v, i) => {
+              const vd = v as ApiVerseData
+              const tr = vd.tr?.[primaryCode]
+              const arTr = vd.tr?.['ar']
+              const [chNum, vNum] = (v.vk ?? '').split(':').map(Number)
+              return (
+                <div key={v.vk ?? i} className="space-y-2 py-2 border-b last:border-0">
+                  <Link
+                    href={`/quran/${chNum}?verse=${vNum}`}
+                    onClick={onClose}
+                    className="text-xs text-violet-500 hover:text-violet-600 flex items-center gap-1 w-fit"
+                  >
+                    {v.vk} <ArrowUpRight className="size-3" />
+                  </Link>
+                  {tr?.tx && (
+                    <p className="text-base leading-relaxed">
+                      <strong>[{v.vk}]</strong> {tr.tx}
+                    </p>
+                  )}
+                  {tr?.f && (
+                    <p className="text-sm text-muted-foreground italic">
+                      <QuranRefText
+                        text={tr.f}
+                        from={`footnote of ${v.vk}`}
+                        onNavigateRef={handleNavigate}
+                      />
+                    </p>
+                  )}
+                  {prefs.arabic && arTr?.tx && (
+                    <p dir="rtl" className="font-arabic text-xl leading-relaxed text-right pt-1">
+                      {arTr.tx}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </>
+        )}
+      </div>
+    </>
+  )
+}
+
+function FootnoteButton({
+  index,
+  verseKey,
+  text,
+}: {
+  index: number
+  verseKey: string
+  text: string
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center font-mono text-[10px] text-muted-foreground/60 hover:text-primary/70 align-super mx-0.5 cursor-pointer transition-colors"
+        aria-label={`Footnote ${index + 1}`}
+      >
+        [{index + 1}]
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg rounded-3xl">
+          {open && (
+            <FootnoteDialogContent
+              initialEntry={{ type: 'footnote', verseKey, text }}
+              onClose={() => setOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
+// ─── Main ReadingView ──────────────────────────────────────────────────────────
 
 type Props = {
   verses: VerseData[]
@@ -30,14 +213,14 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
     }
   }, [hasMore, loading, verses.length, loadMore, opts])
 
-  // Collect footnotes for bottom reference section
-  const footnotes: { verseKey: string; text: string }[] = []
+  // Build footnote index for clickable refs in the translation block
+  const footnoteIndex: { verseKey: string; text: string }[] = []
   if (prefs.footnotes) {
     verses.forEach((v) => {
       const tr = v.tr?.[primaryCode]
       if (tr?.f) {
         const [, vNum] = (v.vk ?? '').split(':')
-        footnotes.push({ verseKey: vNum, text: tr.f })
+        footnoteIndex.push({ verseKey: vNum, text: tr.f })
       }
     })
   }
@@ -62,7 +245,6 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
               const primaryTr = v.tr?.[primaryCode]
               return (
                 <span key={v.vk}>
-                  {/* Subtitle as section break in Arabic */}
                   {prefs.subtitles && primaryTr?.s && (
                     <span className="block text-center text-base font-sans text-primary font-semibold my-4 not-italic">
                       {primaryTr.s}
@@ -82,17 +264,16 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
         </div>
       )}
 
-      {/* Translation prose block */}
+      {/* Translation prose block — single language only in reading mode */}
       {prefs.text && (
         <div className={isRtl(primaryCode) ? 'text-right' : ''}>
           <p className="text-base leading-[2] text-foreground">
             {verses.map((v) => {
               const tr = v.tr?.[primaryCode]
               const [, vNum] = (v.vk ?? '').split(':')
-              const fnIndex = footnotes.findIndex((f) => f.verseKey === vNum)
+              const fnIdx = footnoteIndex.findIndex((f) => f.verseKey === vNum)
               return (
                 <span key={v.vk}>
-                  {/* Subtitle as a natural section break in translation */}
                   {prefs.subtitles && tr?.s && (
                     <span className="block text-center text-sm font-semibold text-primary my-4">
                       <QuranRefText text={tr.s} from={`subtitle of ${v.vk}`} />
@@ -104,34 +285,12 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
                       {vNum}
                     </sup>
                   )}
-                  {/* Footnote reference number */}
-                  {prefs.footnotes && fnIndex >= 0 && (
-                    <sup className="text-[10px] font-mono text-muted-foreground/60 mx-0.5 align-super">
-                      [{fnIndex + 1}]
-                    </sup>
-                  )}
-                  {' '}
-                </span>
-              )
-            })}
-          </p>
-        </div>
-      )}
-
-      {/* Secondary translation prose block */}
-      {prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl' && (
-        <div className={isRtl(prefs.secondaryLanguage) ? 'text-right' : ''}>
-          <p className="text-base leading-[2] text-muted-foreground italic">
-            {verses.map((v) => {
-              const tr = v.tr?.[prefs.secondaryLanguage!]
-              const [, vNum] = (v.vk ?? '').split(':')
-              return (
-                <span key={v.vk}>
-                  {tr?.tx ?? ''}
-                  {prefs.showVerseNumbers && (
-                    <sup className="text-[10px] font-mono text-primary/60 mx-0.5 align-super not-italic">
-                      {vNum}
-                    </sup>
+                  {prefs.footnotes && fnIdx >= 0 && (
+                    <FootnoteButton
+                      index={fnIdx}
+                      verseKey={footnoteIndex[fnIdx].verseKey}
+                      text={footnoteIndex[fnIdx].text}
+                    />
                   )}
                   {' '}
                 </span>
@@ -145,26 +304,6 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
       {loading && (
         <div className="flex justify-center py-4">
           <Spinner className="size-4" />
-        </div>
-      )}
-
-      {/* Footnote references */}
-      {!hasMore && footnotes.length > 0 && (
-        <div className="border-t border-border/40 pt-8 space-y-2">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-4">
-            Notes
-          </p>
-          {footnotes.map((fn, i) => (
-            <div key={fn.verseKey} className="flex gap-3 text-sm text-muted-foreground">
-              <span className="font-mono text-xs text-primary/60 shrink-0 mt-0.5">
-                [{i + 1}]
-              </span>
-              <span className="leading-relaxed">
-                <span className="font-medium text-foreground/60 mr-1">v.{fn.verseKey}</span>
-                <QuranRefText text={fn.text} from={`footnote of verse ${fn.verseKey}`} />
-              </span>
-            </div>
-          ))}
         </div>
       )}
     </div>
