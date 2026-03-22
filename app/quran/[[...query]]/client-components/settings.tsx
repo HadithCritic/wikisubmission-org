@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import type { LangCode } from '@/hooks/use-quran-preferences'
-import { useLanguagesStore } from '@/hooks/use-languages-store'
+import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
@@ -46,7 +46,9 @@ function SettingTile({
         <span className="text-muted-foreground mt-0.5 shrink-0">{icon}</span>
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-sm font-medium leading-none">{label}</span>
-          <span className="text-xs text-muted-foreground leading-snug">{description}</span>
+          <span className="text-xs text-muted-foreground leading-snug">
+            {description}
+          </span>
         </div>
       </div>
       <Switch
@@ -69,12 +71,14 @@ function LangPicker({
   label: string
   value: string | undefined
   nullable?: boolean
-  languages: { code: string; name: string }[]
+  languages: LanguageEntry[]
   onChange: (code: string | undefined) => void
 }) {
   return (
     <div className="px-3 py-2 space-y-2">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        {label}
+      </p>
       <div className="flex flex-wrap gap-1.5">
         {nullable && (
           <button
@@ -168,10 +172,15 @@ export default function QuranSettings() {
             icon={<TypeIcon className="size-3.5" />}
             label={t('arabic')}
             description="Original Arabic text"
-            checked={quranPreferences.arabic || quranPreferences.displayMode === 'word'}
+            checked={
+              quranPreferences.arabic || quranPreferences.displayMode === 'word'
+            }
             disabled={quranPreferences.displayMode === 'word'}
             onCheckedChange={(checked) =>
-              quranPreferences.setPreferences({ ...quranPreferences, arabic: checked })
+              quranPreferences.setPreferences({
+                ...quranPreferences,
+                arabic: checked,
+              })
             }
           />
 
@@ -182,7 +191,10 @@ export default function QuranSettings() {
             description="Verse translation text"
             checked={quranPreferences.text}
             onCheckedChange={(checked) =>
-              quranPreferences.setPreferences({ ...quranPreferences, text: checked })
+              quranPreferences.setPreferences({
+                ...quranPreferences,
+                text: checked,
+              })
             }
           />
 
@@ -194,7 +206,10 @@ export default function QuranSettings() {
               description="Section titles above verses"
               checked={quranPreferences.subtitles}
               onCheckedChange={(checked) =>
-                quranPreferences.setPreferences({ ...quranPreferences, subtitles: checked })
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  subtitles: checked,
+                })
               }
             />
           )}
@@ -207,7 +222,10 @@ export default function QuranSettings() {
               description="Translator notes at the bottom"
               checked={quranPreferences.footnotes}
               onCheckedChange={(checked) =>
-                quranPreferences.setPreferences({ ...quranPreferences, footnotes: checked })
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  footnotes: checked,
+                })
               }
             />
           )}
@@ -220,7 +238,10 @@ export default function QuranSettings() {
               description="Romanized pronunciation"
               checked={quranPreferences.transliteration}
               onCheckedChange={(checked) =>
-                quranPreferences.setPreferences({ ...quranPreferences, transliteration: checked })
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  transliteration: checked,
+                })
               }
             />
           )}
@@ -233,7 +254,10 @@ export default function QuranSettings() {
               description="Inline superscript verse numbers"
               checked={quranPreferences.showVerseNumbers}
               onCheckedChange={(checked) =>
-                quranPreferences.setPreferences({ ...quranPreferences, showVerseNumbers: checked })
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  showVerseNumbers: checked,
+                })
               }
             />
           )}

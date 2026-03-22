@@ -16,7 +16,6 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ExternalLink, ChevronRight } from 'lucide-react'
-import { PageSwitcher } from '@/components/page-switcher'
 import { FaAndroid, FaApple } from 'react-icons/fa'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -37,7 +36,7 @@ export default async function Downloads() {
   const t = await getTranslations('downloads')
   return (
     <main className="space-y-6 p-8 md:max-w-5xl mx-auto">
-<Link href="/">
+      <Link href="/">
         <Image
           src="/brand-assets/logo-transparent.png"
           alt="WikiSubmission Logo"
@@ -222,7 +221,9 @@ export default async function Downloads() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="full-pdf">{t('tabFullPdf')}</TabsTrigger>
             <TabsTrigger value="appendices">{t('tabAppendices')}</TabsTrigger>
-            <TabsTrigger value="physical-copies">{t('tabPhysicalCopies')}</TabsTrigger>
+            <TabsTrigger value="physical-copies">
+              {t('tabPhysicalCopies')}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="full-pdf">
