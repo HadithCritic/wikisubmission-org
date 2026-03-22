@@ -1,7 +1,9 @@
-import { sanityClient } from '@/lib/sanity'
+import { sanityServer } from '@/lib/sanity'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Metadata } from 'next'
+import { BlogBrowser } from './blog-browser'
+import type { Post, Category } from './blog-browser'
 
 export const metadata: Metadata = {
   title: 'Blog | WikiSubmission',
@@ -12,42 +14,30 @@ export const metadata: Metadata = {
   },
 }
 
-// Adjust these field names to match your Sanity schema
-const LATEST_QUERY = `*[_type == "post"] | order(publishedAt desc) [0...12] {
-  _id,
-  title,
-  slug,
-  excerpt,
-  publishedAt,
-  category,
-  "mainImageUrl": mainImage.asset->url,
-  "authorName": author->name,
-  viewCount
+// Top 3 newest for the Featured strip
+const FEATURED_QUERY = `*[_type == "article"] | order(publishedAt desc) [0...3] {
+  _id, title, slug, excerpt, publishedAt,
+  "category": categories[0]->name,
+  "categorySlug": categories[0]->slug.current,
+  "thumbnailUrl": thumbnail.asset->url,
+  "authorName": author->name
 }`
 
-const FEATURED_QUERY = `*[_type == "post"] | order(viewCount desc) [0...3] {
-  _id,
-  title,
-  slug,
-  excerpt,
-  publishedAt,
-  category,
-  "mainImageUrl": mainImage.asset->url,
-  "authorName": author->name,
-  viewCount
+// All articles passed to the client browser for search / filtering
+const ALL_ARTICLES_QUERY = `*[_type == "article"] | order(publishedAt desc) {
+  _id, title, slug, excerpt, publishedAt,
+  "category": categories[0]->name,
+  "categorySlug": categories[0]->slug.current,
+  "thumbnailUrl": thumbnail.asset->url,
+  "authorName": author->name
 }`
 
-type Post = {
-  _id: string
-  title: string
-  slug: { current: string }
-  excerpt?: string
-  publishedAt?: string
-  category?: string
-  mainImageUrl?: string
-  authorName?: string
-  viewCount?: number
-}
+// Categories with counts for filter pills
+const CATEGORIES_QUERY = `*[_type == "category"] | order(name asc) {
+  name,
+  "slug": slug.current,
+  "count": count(*[_type == "article" && references(^._id)])
+}`
 
 function formatDate(dateString?: string) {
   if (!dateString) return ''
@@ -59,73 +49,46 @@ function formatDate(dateString?: string) {
 }
 
 export default async function BlogPage() {
-  const [latest, featured] = await Promise.all([
-    sanityClient.fetch<Post[]>(LATEST_QUERY),
-    sanityClient.fetch<Post[]>(FEATURED_QUERY),
-  ])
+  let featured: Post[] = []
+  let allArticles: Post[] = []
+  let categories: Category[] = []
 
-  // Exclude featured posts from the grid to avoid duplicates
-  const featuredIds = new Set(featured.map((p) => p._id))
-  const grid = latest.filter((p) => !featuredIds.has(p._id))
+  try {
+    ;[featured, allArticles, categories] = await Promise.all([
+      sanityServer.fetch<Post[]>(FEATURED_QUERY),
+      sanityServer.fetch<Post[]>(ALL_ARTICLES_QUERY),
+      sanityServer.fetch<Category[]>(CATEGORIES_QUERY),
+    ])
+  } catch (err) {
+    console.error('[blog] Sanity fetch failed:', err)
+    return (
+      <div className="min-h-screen max-w-7xl mx-auto px-6 py-16 text-center">
+        <p className="text-muted-foreground">
+          Blog posts are temporarily unavailable. Please try again later.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="border-b border-border/40 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
-            Blog
-          </span>
-          <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
-            Latest Articles
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-xl">
-            Research, reflections, and community writings on the Quran and Submission.
-          </p>
-        </div>
-      </section>
-
-      <div className="max-w-7xl mx-auto px-6 py-12 space-y-16">
-        {/* Featured / most-read */}
-        {featured.length > 0 && (
-          <section>
-            <div className="flex items-baseline gap-6 mb-8">
-              <h2 className="font-headline text-2xl font-bold shrink-0">Most Read</h2>
-              <div className="h-px grow bg-border/60" />
-              <span className="text-xs uppercase tracking-wider text-muted-foreground shrink-0">
-                Featured
-              </span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {featured.map((post, i) => (
-                <FeaturedCard key={post._id} post={post} large={i === 0} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Latest grid */}
-        {grid.length > 0 && (
-          <section>
-            <div className="flex items-baseline gap-6 mb-8">
-              <h2 className="font-headline text-2xl font-bold shrink-0">Recent</h2>
-              <div className="h-px grow bg-border/60" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {grid.map((post) => (
-                <PostCard key={post._id} post={post} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {latest.length === 0 && (
-          <div className="text-center py-24 text-muted-foreground">
-            <p className="text-lg font-headline font-bold">No posts yet</p>
-            <p className="text-sm mt-2">Check back soon.</p>
+      {/* ── Featured ──────────────────────────────────────────────────────── */}
+      {featured.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 pt-10 pb-2">
+          <div className="flex items-baseline gap-6 mb-8">
+            <h2 className="font-headline text-2xl font-bold shrink-0">Featured</h2>
+            <div className="h-px grow bg-border/60" />
           </div>
-        )}
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featured.map((post, i) => (
+              <FeaturedCard key={post._id} post={post} large={i === 0} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Browse — search + category groups ────────────────────────────── */}
+      <BlogBrowser articles={allArticles} categories={categories} />
     </div>
   )
 }
@@ -134,14 +97,15 @@ function FeaturedCard({ post, large }: { post: Post; large?: boolean }) {
   return (
     <Link
       href={`/blog/${post.slug?.current}`}
-      className={`group relative bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all hover:-translate-y-1 ${large ? 'md:col-span-2 md:row-span-2' : ''}`}
+      className={`group relative bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all hover:-translate-y-1 ${large ? 'md:col-span-2' : ''}`}
     >
-      {post.mainImageUrl && (
+      {post.thumbnailUrl && (
         <div className={`relative w-full overflow-hidden bg-muted ${large ? 'aspect-[16/9]' : 'aspect-video'}`}>
           <Image
-            src={post.mainImageUrl}
+            src={post.thumbnailUrl}
             alt={post.title}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </div>
@@ -165,40 +129,6 @@ function FeaturedCard({ post, large }: { post: Post; large?: boolean }) {
           {post.authorName && post.publishedAt && <span>·</span>}
           {post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
         </div>
-      </div>
-    </Link>
-  )
-}
-
-function PostCard({ post }: { post: Post }) {
-  return (
-    <Link
-      href={`/blog/${post.slug?.current}`}
-      className="group bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all hover:-translate-y-0.5"
-    >
-      {post.mainImageUrl && (
-        <div className="relative w-full aspect-video overflow-hidden bg-muted">
-          <Image
-            src={post.mainImageUrl}
-            alt={post.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        </div>
-      )}
-      <div className="p-5 space-y-2">
-        {post.category && (
-          <span className="inline-block px-2.5 py-0.5 bg-muted text-muted-foreground rounded-full text-xs font-medium">
-            {post.category}
-          </span>
-        )}
-        <h3 className="font-headline font-bold text-base leading-snug group-hover:text-primary transition-colors">
-          {post.title}
-        </h3>
-        {post.excerpt && (
-          <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
-        )}
-        <p className="text-xs text-muted-foreground pt-1">{formatDate(post.publishedAt)}</p>
       </div>
     </Link>
   )

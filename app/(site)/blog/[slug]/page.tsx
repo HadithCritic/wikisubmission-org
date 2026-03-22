@@ -1,4 +1,4 @@
-import { sanityClient } from '@/lib/sanity'
+import { sanityServer } from '@/lib/sanity'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextBlock } from '@portabletext/types'
 import Link from 'next/link'
@@ -7,26 +7,31 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { ArrowLeftIcon } from 'lucide-react'
 
-const POST_QUERY = `*[_type == "post" && slug.current == $slug][0] {
+const POST_QUERY = `*[_type == "article" && slug.current == $slug][0] {
   _id,
   title,
   slug,
   excerpt,
   publishedAt,
-  category,
+  "category": categories[0]->name,
+  "categoryRef": categories[0]._ref,
   body,
-  "mainImageUrl": mainImage.asset->url,
+  "thumbnailUrl": thumbnail.asset->url,
   "authorName": author->name,
-  "authorImageUrl": author->image.asset->url,
+  "authorPhotoUrl": author->photo.asset->url
 }`
 
-const RELATED_QUERY = `*[_type == "post" && slug.current != $slug && category == $category] | order(publishedAt desc) [0...3] {
+const RELATED_QUERY = `*[
+  _type == "article" &&
+  $categoryRef in categories[]._ref &&
+  slug.current != $slug
+] | order(publishedAt desc) [0...3] {
   _id,
   title,
   slug,
   publishedAt,
-  category,
-  "mainImageUrl": mainImage.asset->url,
+  "category": categories[0]->name,
+  "thumbnailUrl": thumbnail.asset->url
 }`
 
 type Post = {
@@ -36,10 +41,11 @@ type Post = {
   excerpt?: string
   publishedAt?: string
   category?: string
+  categoryRef?: string
   body?: PortableTextBlock[]
-  mainImageUrl?: string
+  thumbnailUrl?: string
   authorName?: string
-  authorImageUrl?: string
+  authorPhotoUrl?: string
 }
 
 type RelatedPost = {
@@ -48,7 +54,7 @@ type RelatedPost = {
   slug: { current: string }
   publishedAt?: string
   category?: string
-  mainImageUrl?: string
+  thumbnailUrl?: string
 }
 
 function formatDate(dateString?: string) {
@@ -66,16 +72,20 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const post = await sanityClient.fetch<Post | null>(POST_QUERY, { slug })
-  if (!post) return {}
-  return {
-    title: `${post.title} | WikiSubmission`,
-    description: post.excerpt,
-    openGraph: {
-      title: post.title,
+  try {
+    const post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug })
+    if (!post) return {}
+    return {
+      title: `${post.title} | WikiSubmission`,
       description: post.excerpt,
-      images: post.mainImageUrl ? [post.mainImageUrl] : [],
-    },
+      openGraph: {
+        title: post.title,
+        description: post.excerpt,
+        images: post.thumbnailUrl ? [post.thumbnailUrl] : [],
+      },
+    }
+  } catch {
+    return {}
   }
 }
 
@@ -85,29 +95,43 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const post = await sanityClient.fetch<Post | null>(POST_QUERY, { slug })
+
+  let post: Post | null = null
+  try {
+    post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug })
+  } catch (err) {
+    console.error('[blog/slug] Sanity fetch failed:', err)
+    notFound()
+  }
+
   if (!post) notFound()
 
-  const related = post.category
-    ? await sanityClient.fetch<RelatedPost[]>(RELATED_QUERY, {
+  let related: RelatedPost[] = []
+  if (post.categoryRef) {
+    try {
+      related = await sanityServer.fetch<RelatedPost[]>(RELATED_QUERY, {
         slug,
-        category: post.category,
+        categoryRef: post.categoryRef,
       })
-    : []
+    } catch {
+      // non-critical — page still renders without related posts
+    }
+  }
 
   return (
     <div className="min-h-screen">
       {/* Hero image */}
-      {post.mainImageUrl && (
+      {post.thumbnailUrl && (
         <div className="relative w-full h-64 md:h-96 bg-muted overflow-hidden">
           <Image
-            src={post.mainImageUrl}
+            src={post.thumbnailUrl}
             alt={post.title}
             fill
+            sizes="100vw"
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-background/60 to-transparent" />
         </div>
       )}
 
@@ -137,9 +161,9 @@ export default async function BlogPostPage({
             </p>
           )}
           <div className="flex items-center gap-3 pt-2">
-            {post.authorImageUrl && (
+            {post.authorPhotoUrl && (
               <Image
-                src={post.authorImageUrl}
+                src={post.authorPhotoUrl}
                 alt={post.authorName ?? ''}
                 width={36}
                 height={36}
@@ -162,7 +186,10 @@ export default async function BlogPostPage({
         {/* Body */}
         {post.body && (
           <article className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-primary">
-            <PortableText value={post.body} components={portableTextComponents} />
+            <PortableText
+              value={post.body}
+              components={portableTextComponents}
+            />
           </article>
         )}
       </div>
@@ -172,7 +199,9 @@ export default async function BlogPostPage({
         <section className="border-t border-border/40 bg-muted/30 py-16">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-baseline gap-6 mb-8">
-              <h2 className="font-headline text-2xl font-bold shrink-0">Related</h2>
+              <h2 className="font-headline text-2xl font-bold shrink-0">
+                Related
+              </h2>
               <div className="h-px grow bg-border/60" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -182,12 +211,13 @@ export default async function BlogPostPage({
                   href={`/blog/${p.slug?.current}`}
                   className="group bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all hover:-translate-y-0.5"
                 >
-                  {p.mainImageUrl && (
+                  {p.thumbnailUrl && (
                     <div className="relative w-full aspect-video overflow-hidden bg-muted">
                       <Image
-                        src={p.mainImageUrl}
+                        src={p.thumbnailUrl}
                         alt={p.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
@@ -228,7 +258,11 @@ const portableTextComponents = {
     ),
   },
   types: {
-    image: ({ value }: { value: { asset?: { url?: string }; alt?: string } }) => {
+    image: ({
+      value,
+    }: {
+      value: { asset?: { url?: string }; alt?: string }
+    }) => {
       const url = value?.asset?.url
       if (!url) return null
       return (
