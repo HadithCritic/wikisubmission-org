@@ -108,6 +108,7 @@ export default async function QuranPage({
       <main className="flex-1 min-h-0 flex flex-col">
         <Suspense fallback={<Spinner />}>
           <ChapterReader
+            key={parsed.chapterNumber}
             chapterNumber={parsed.chapterNumber}
             initialData={data ?? null}
             initialVerse={verse}
