@@ -1,11 +1,19 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import { Sun, Moon } from 'lucide-react'
 
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  if (!mounted) {
+    return <div className="h-9 w-9 flex items-center justify-center border rounded-md" />
+  }
 
   return (
     <button

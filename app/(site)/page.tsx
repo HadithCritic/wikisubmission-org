@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { HeroCardDeck } from '@/components/hero-card-deck'
 import {
   FaApple,
   FaDiscord,
@@ -74,19 +75,8 @@ export default async function Home() {
           </div>
 
           {/* Image column */}
-          <div className="md:col-span-5 relative flex justify-center md:justify-end">
-            <div className="relative w-72 h-72 md:w-full md:aspect-square md:max-w-sm">
-              <div className="w-full h-full bg-surface-container rounded-2xl editorial-shadow rotate-3 hover:rotate-0 transition-transform duration-500 overflow-hidden group">
-                <Image
-                  src="/brand-assets/logo-transparent.png"
-                  alt="WikiSubmission"
-                  fill
-                  className="object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 scale-75"
-                />
-              </div>
-              {/* Blur decoration */}
-              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-            </div>
+          <div className="md:col-span-5 relative flex justify-center md:justify-end pb-6">
+            <HeroCardDeck />
           </div>
         </div>
       </section>
