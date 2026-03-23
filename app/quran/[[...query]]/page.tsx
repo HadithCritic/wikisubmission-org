@@ -4,13 +4,12 @@ import { Suspense } from 'react'
 import { Spinner } from '@/components/ui/spinner'
 import SearchResult from './client-components/result-search'
 import { ChapterReader } from './client-components/chapter-reader'
-import HomeScreenRandomVerse from './mini-components/home-random-verse'
-import HomeScreenMetrics from './mini-components/home-metrics'
-import QuranUtilitiesRow from './mini-components/home-utilities'
-import HomeScreenSuggestions from './mini-components/home-suggestions'
 import QuranSearchBar from './client-components/search-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowRight, BookOpen, ChevronDown, ExternalLink } from 'lucide-react'
+import { RandomVerseTile } from './mini-components/random-verse-tile'
 
 // Detect if a query string is a chapter number (1–114)
 function parseQueryType(q: string): {
@@ -58,23 +57,130 @@ export default async function QuranPage({
   const queryText = q || query?.join(' ')
 
   if (!queryText) {
+    const [chaptersRes, appendicesRes] = await Promise.all([
+      wsApiServer.GET('/chapters', {
+        params: { query: { lang: 'en' } },
+        next: { revalidate: 86400 },
+      }),
+      wsApiServer.GET('/appendices', {
+        params: { query: { lang: 'en' } },
+        next: { revalidate: 86400 },
+      }),
+    ])
+    const chapters = (chaptersRes.data ?? []).filter(Boolean).sort(
+      (a, b) => (a.chapter_number ?? 0) - (b.chapter_number ?? 0)
+    )
+    const appendices = (appendicesRes.data ?? []).filter(Boolean).sort(
+      (a, b) => (a.code ?? 0) - (b.code ?? 0)
+    )
+
     return (
-      <main className="whitespace-pre-line h-full">
-        <section className="max-w-4xl mx-auto w-full">
-          <div className="space-y-2">
-            <QuranUtilitiesRow />
-            <hr className="my-6 w-xs mx-auto" />
-            <div className="max-w-md mx-auto w-full px-2 gap-4 flex flex-col">
-              <QuranSearchBar />
-              <HomeScreenMetrics />
+      <main className="py-12 px-4">
+        <div className="max-w-4xl mx-auto space-y-12">
+
+          {/* ── Hero ──────────────────────────────────────────────────── */}
+          <section className="space-y-6 text-center max-w-xl mx-auto">
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-widest text-primary/70">Quran</p>
+              <h1 className="text-4xl font-bold tracking-tight">The Final Testament</h1>
             </div>
-            <hr className="my-6 w-xs mx-auto" />
-            <HomeScreenSuggestions />
-            <hr className="my-6 w-xs mx-auto" />
-            <HomeScreenRandomVerse />
-            <hr className="my-6 w-xs mx-auto" />
-          </div>
-        </section>
+            <QuranSearchBar large />
+          </section>
+
+          {/* ── Preview cards ─────────────────────────────────────────── */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/proclamation"
+              className="group flex flex-col gap-2 p-5 rounded-2xl border border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <BookOpen className="size-4 text-primary/70" />
+                  Proclamation
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Proclaiming One Unified Religion for All the People — Rashad Khalifa, 1989
+              </p>
+            </Link>
+
+            <a
+              href="/introduction"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col gap-2 p-5 rounded-2xl border border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <BookOpen className="size-4 text-primary/70" />
+                  Introduction
+                </div>
+                <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-all" />
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                An introduction to the Final Testament and its mathematical miracle
+              </p>
+            </a>
+          </section>
+
+          {/* ── Chapters accordion ────────────────────────────────────── */}
+          <details open className="group/ch">
+            <summary className="flex items-center justify-between cursor-pointer list-none py-2 border-b border-border/40">
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                Chapters
+              </h2>
+              <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/ch:rotate-180" />
+            </summary>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+              <RandomVerseTile />
+              {chapters.map((ch) => (
+                <Link
+                  key={ch.chapter_number}
+                  href={`/quran/${ch.chapter_number}`}
+                  className="flex flex-col gap-1 p-3 rounded-xl border border-border/40 bg-muted/20 hover:bg-muted/50 hover:border-border transition-all group"
+                >
+                  <span className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                    {ch.chapter_number}
+                  </span>
+                  <span className="text-sm font-medium leading-snug line-clamp-2">
+                    {ch.title}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </details>
+
+          {/* ── Appendices accordion ──────────────────────────────────── */}
+          <details open className="group/ap">
+            <summary className="flex items-center justify-between cursor-pointer list-none py-2 border-b border-border/40">
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                Appendices
+              </h2>
+              <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/ap:rotate-180" />
+            </summary>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {appendices.map((app) => (
+                <a
+                  key={app.code}
+                  href={`https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${app.code}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-muted/20 hover:bg-muted/50 hover:border-border transition-all group"
+                >
+                  <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
+                    {app.code}
+                  </span>
+                  <span className="text-sm flex-1 min-w-0 truncate group-hover:text-foreground transition-colors">
+                    {app.title}
+                  </span>
+                  <ExternalLink className="size-3.5 text-muted-foreground/50 shrink-0" />
+                </a>
+              ))}
+            </div>
+          </details>
+
+        </div>
       </main>
     )
   }

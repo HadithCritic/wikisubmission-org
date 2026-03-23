@@ -5,8 +5,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
 
-export default function QuranSearchBar() {
+export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -37,13 +38,13 @@ export default function QuranSearchBar() {
         e.preventDefault()
         performSearch(query)
       }}
-      className="relative flex-1 max-w-sm min-w-0"
+      className={cn('relative min-w-0', large ? 'w-full' : 'flex-1 max-w-sm')}
     >
-      <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60 pointer-events-none" />
+      <SearchIcon className={cn('absolute top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none', large ? 'left-3.5 size-4' : 'left-2.5 size-3.5')} />
       <Input
         type="search"
         placeholder={t('placeholder')}
-        className="pl-8 h-8 bg-muted/50 border-border/40 text-sm"
+        className={cn('bg-muted/50 border-border/40', large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm')}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
