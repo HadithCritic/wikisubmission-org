@@ -45,14 +45,11 @@ export default function PrayerTimesClient() {
   return (
     <Suspense
       fallback={
-        <div className="space-y-4 pt-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <div className="space-y-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-2/5" />
+          <Skeleton className="h-24 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-4 w-28" />
         </div>
       }
     >
@@ -208,15 +205,20 @@ function PrayerTimesContent() {
 
       {/* ── Loading skeleton ──────────────────────────────────────────────── */}
       {loading && (
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-1/3" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-10 w-full" />
+        <div className="space-y-6">
+          {/* location row */}
+          <Skeleton className="h-8 w-2/5" />
+          {/* now / next card */}
+          <Skeleton className="h-20 w-full rounded-2xl" />
+          {/* day timeline */}
+          <Skeleton className="h-16 w-full" />
+          {/* schedule button */}
+          <Skeleton className="h-4 w-28" />
         </div>
       )}
 
       {/* ── Data loaded ───────────────────────────────────────────────────── */}
-      {data && (
+      {data && !loading && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
           {/* Location header + Asr toggle + Change */}
