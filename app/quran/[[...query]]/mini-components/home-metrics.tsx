@@ -17,7 +17,7 @@ export default function HomeScreenMetrics() {
   }
 
   return (
-    <main className="flex justify-between items-start">
+    <main className="flex justify-start items-start">
       <div className="flex flex-wrap gap-1">
         {recentNavigation.map((entry, index) => {
           // Build the URL and display text based on entry type

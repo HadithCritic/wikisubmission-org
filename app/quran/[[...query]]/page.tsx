@@ -8,7 +8,7 @@ import HomeScreenRandomVerse from './mini-components/home-random-verse'
 import HomeScreenMetrics from './mini-components/home-metrics'
 import QuranUtilitiesRow from './mini-components/home-utilities'
 import HomeScreenSuggestions from './mini-components/home-suggestions'
-import Image from 'next/image'
+import QuranSearchBar from './client-components/search-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
 
@@ -63,14 +63,11 @@ export default async function QuranPage({
         <section className="max-w-4xl mx-auto w-full">
           <div className="space-y-2">
             <QuranUtilitiesRow />
-            <HomeScreenMetrics />
-            <Image
-              src="/brand-assets/logo-transparent.png"
-              alt="WikiSubmission Logo"
-              width={64}
-              height={64}
-              className="mx-auto"
-            />
+            <hr className="my-6 w-xs mx-auto" />
+            <div className="max-w-md mx-auto w-full px-2 gap-4 flex flex-col">
+              <QuranSearchBar />
+              <HomeScreenMetrics />
+            </div>
             <hr className="my-6 w-xs mx-auto" />
             <HomeScreenSuggestions />
             <hr className="my-6 w-xs mx-auto" />
