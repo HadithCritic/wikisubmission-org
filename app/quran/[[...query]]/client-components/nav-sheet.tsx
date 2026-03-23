@@ -97,19 +97,6 @@ function NavSheetContent({
     <div className="flex flex-col h-full overflow-hidden">
       {/* Context links */}
       <div className="px-3 py-2 space-y-0.5 border-b border-border/40">
-        {currentChapter && (
-          <SheetClose asChild>
-            <Link
-              href="/quran"
-              className="flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
-            >
-              {tNav('quran')}
-            </Link>
-          </SheetClose>
-        )}
-        <Suspense>
-          <BackToQuranLink alreadyShown={!!currentChapter} />
-        </Suspense>
         <SheetClose asChild>
           <Link
             href="/proclamation"
@@ -301,7 +288,6 @@ function NavSheetContent({
     </div>
   )
 }
-
 export function QuranNavSheet({
   chapters,
   appendices,
@@ -314,11 +300,12 @@ export function QuranNavSheet({
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          size="icon-sm"
+          size="sm"
           aria-label="Open navigation"
-          className="shrink-0"
+          className="shrink-0 h-8 px-2 gap-1.5"
         >
-          <MenuIcon className="size-4" />
+          <MenuIcon className="size-4 shrink-0" />
+          <span className="hidden sm:inline text-xs font-medium">Table of content</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-[280px] sm:w-[300px] gap-0">

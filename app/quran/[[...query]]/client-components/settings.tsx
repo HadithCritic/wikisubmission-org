@@ -19,7 +19,7 @@ import {
   TypeIcon,
 } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import type { LangCode } from '@/hooks/use-quran-preferences'
+import type { LangCode, ReadingModeLang } from '@/hooks/use-quran-preferences'
 import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
@@ -167,36 +167,70 @@ export default function QuranSettings() {
         </DropdownMenuLabel>
 
         <div className="space-y-0.5 pb-1">
-          {/* Arabic */}
-          <SettingTile
-            icon={<TypeIcon className="size-3.5" />}
-            label={t('arabic')}
-            description="Original Arabic text"
-            checked={
-              quranPreferences.arabic || quranPreferences.displayMode === 'word'
-            }
-            disabled={quranPreferences.displayMode === 'word'}
-            onCheckedChange={(checked) =>
-              quranPreferences.setPreferences({
-                ...quranPreferences,
-                arabic: checked,
-              })
-            }
-          />
+          {/* Reading mode: language selector (replaces arabic + translation toggles) */}
+          {quranPreferences.displayMode === 'reading' && (
+            <div className="px-3 py-2 space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Language
+              </p>
+              <div className="flex gap-1.5">
+                {(['translation', 'arabic'] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() =>
+                      quranPreferences.setPreferences({
+                        ...quranPreferences,
+                        readingModeLang: lang as ReadingModeLang,
+                      })
+                    }
+                    className={cn(
+                      'px-2.5 py-1 rounded-lg text-xs font-medium transition-all border',
+                      quranPreferences.readingModeLang === lang
+                        ? 'bg-primary/10 text-primary border-primary/20'
+                        : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
+                    )}
+                  >
+                    {lang === 'translation' ? 'Translation' : 'Arabic'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-          {/* Translation */}
-          <SettingTile
-            icon={<TextIcon className="size-3.5" />}
-            label="Translation"
-            description="Verse translation text"
-            checked={quranPreferences.text}
-            onCheckedChange={(checked) =>
-              quranPreferences.setPreferences({
-                ...quranPreferences,
-                text: checked,
-              })
-            }
-          />
+          {/* Arabic — hidden in reading mode (handled by reading language selector) */}
+          {quranPreferences.displayMode !== 'reading' && (
+            <SettingTile
+              icon={<TypeIcon className="size-3.5" />}
+              label={t('arabic')}
+              description="Original Arabic text"
+              checked={
+                quranPreferences.arabic || quranPreferences.displayMode === 'word'
+              }
+              disabled={quranPreferences.displayMode === 'word'}
+              onCheckedChange={(checked) =>
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  arabic: checked,
+                })
+              }
+            />
+          )}
+
+          {/* Translation — hidden in reading mode (handled by reading language selector) */}
+          {quranPreferences.displayMode !== 'reading' && (
+            <SettingTile
+              icon={<TextIcon className="size-3.5" />}
+              label="Translation"
+              description="Verse translation text"
+              checked={quranPreferences.text}
+              onCheckedChange={(checked) =>
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  text: checked,
+                })
+              }
+            />
+          )}
 
           {/* Subtitles — verse + word modes */}
           {quranPreferences.displayMode !== 'reading' && (

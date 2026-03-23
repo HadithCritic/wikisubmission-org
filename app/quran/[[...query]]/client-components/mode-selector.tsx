@@ -29,7 +29,7 @@ export function QuranModeSelector() {
   }
 
   return (
-    <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-muted/50 border border-border/40 ml-auto">
+    <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-muted/50 border border-border/40">
       {MODES.map((mode) => {
         const isActive = prefs.displayMode === mode.id
         return (
@@ -39,16 +39,17 @@ export function QuranModeSelector() {
                 onClick={() => handleModeChange(mode.id)}
                 aria-label={mode.label}
                 className={cn(
-                  'flex items-center justify-center size-7 rounded-md transition-colors',
+                  'flex items-center gap-1.5 h-7 px-2 rounded-md transition-colors',
                   isActive
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                 )}
               >
                 {mode.icon}
+                <span className="hidden md:inline text-xs font-medium">{mode.label}</span>
               </button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">
+            <TooltipContent side="bottom" className="md:hidden">
               <p>{mode.label}</p>
             </TooltipContent>
           </Tooltip>

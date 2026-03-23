@@ -205,6 +205,8 @@ type Props = {
 export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props) {
   const prefs = useQuranPreferences()
   const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const showArabic = prefs.readingModeLang === 'arabic'
+  const showTranslation = prefs.readingModeLang === 'translation'
 
   // Auto-load all verses when reading mode is active
   useEffect(() => {
@@ -236,7 +238,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-10">
       {/* Arabic prose block */}
-      {prefs.arabic && (
+      {showArabic && (
         <div>
           <p dir="rtl" className="font-arabic text-2xl leading-[2.2] text-right text-foreground/90">
             {verses.map((v) => {
@@ -252,9 +254,9 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
                   )}
                   {arTr?.tx ?? ''}
                   {prefs.showVerseNumbers && (
-                    <sup className="font-sans text-[10px] text-primary/60 mx-1 align-super">
+                    <span className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary text-[9px] font-mono mx-1 align-middle">
                       {vNum}
-                    </sup>
+                    </span>
                   )}
                   {' '}
                 </span>
@@ -264,8 +266,8 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
         </div>
       )}
 
-      {/* Translation prose block — single language only in reading mode */}
-      {prefs.text && (
+      {/* Translation prose block */}
+      {showTranslation && (
         <div className={isRtl(primaryCode) ? 'text-right' : ''}>
           <p className="text-base leading-[2] text-foreground">
             {verses.map((v) => {
@@ -281,9 +283,9 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
                   )}
                   {tr?.tx ?? ''}
                   {prefs.showVerseNumbers && (
-                    <sup className="text-[10px] font-mono text-primary/60 mx-0.5 align-super">
+                    <span className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary text-[9px] font-mono mx-1 align-middle">
                       {vNum}
-                    </sup>
+                    </span>
                   )}
                   {prefs.footnotes && fnIdx >= 0 && (
                     <FootnoteButton

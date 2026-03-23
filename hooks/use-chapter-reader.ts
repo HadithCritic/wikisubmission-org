@@ -93,6 +93,14 @@ export function useChapterReader(
   // Cache for in-flight prefetch promises: cacheKey → Promise<FetchResult>
   const prefetchCacheRef = useRef(new Map<string, Promise<FetchResult>>())
 
+  // Prevents two concurrent loadMore calls from both applying their results.
+  // Set synchronously before the fetch so even same-tick calls see it.
+  const loadMoreInFlightRef = useRef(false)
+
+  // Incremented by reload/seekToVerse to cancel any in-flight loadMore.
+  // loadMore checks this after its await — if the number changed, the result is stale.
+  const fetchGenerationRef = useRef(0)
+
   const fetchVerses = useCallback(
     async (verseStart: number, opts: ChapterReaderOptions): Promise<FetchResult> => {
       const langs = buildLangs(opts)
@@ -129,9 +137,13 @@ export function useChapterReader(
 
   const reload = useCallback(
     async (opts: ChapterReaderOptions) => {
+      const generation = ++fetchGenerationRef.current
+      loadMoreInFlightRef.current = false
       setState((prev) => ({ ...prev, loading: true, error: null }))
 
       const result = await fetchVerses(0, opts)
+
+      if (fetchGenerationRef.current !== generation) return
 
       if (result.error || !result.verses) {
         setState((prev) => ({
@@ -148,7 +160,7 @@ export function useChapterReader(
         verseCount: result.verses.length,
         loading: false,
         error: null,
-        lastVerseEnd: PAGE_SIZE - 1,
+        lastVerseEnd: PAGE_SIZE,
         reachedEnd: result.reachedEnd ?? false,
         lastOpts: opts,
       })
@@ -157,14 +169,22 @@ export function useChapterReader(
   )
 
   const loadMore = useCallback(async (fallbackOpts?: ChapterReaderOptions) => {
+    if (loadMoreInFlightRef.current) return // prevent concurrent calls
     const { lastVerseEnd, lastOpts: storedOpts } = stateRef.current
     const lastOpts = storedOpts ?? fallbackOpts
     if (!lastOpts) return
 
+    const generation = fetchGenerationRef.current
     const nextStart = lastVerseEnd + 1
+
+    loadMoreInFlightRef.current = true
     setState((prev) => ({ ...prev, loading: true, error: null }))
 
     const result = await fetchVerses(nextStart, lastOpts)
+
+    loadMoreInFlightRef.current = false
+
+    if (fetchGenerationRef.current !== generation) return // reload/seek superseded this
 
     if (result.error || !result.verses) {
       setState((prev) => ({
@@ -222,6 +242,8 @@ export function useChapterReader(
       const opts = stateRef.current.lastOpts ?? fallbackOpts
       if (!opts) return
 
+      const generation = ++fetchGenerationRef.current
+      loadMoreInFlightRef.current = false
       const windowStart = Math.max(0, targetVerse - 5)
       const cacheKey = `${chapterNumber}:${windowStart}`
 
@@ -232,6 +254,8 @@ export function useChapterReader(
 
       // Clean up the consumed cache entry
       prefetchCacheRef.current.delete(cacheKey)
+
+      if (fetchGenerationRef.current !== generation) return // superseded by newer seek/reload
 
       if (result.error || !result.verses) {
         setState((prev) => ({

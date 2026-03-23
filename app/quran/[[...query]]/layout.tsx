@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import QuranSearchDialog from './client-components/search-dialog'
+import QuranSearchBar from './client-components/search-bar'
 import QuranSettings from './client-components/settings'
 import MetricsCollector from './mini-components/metrics-collector'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
@@ -44,15 +44,20 @@ export default async function QuranLayout({
               {/* Sub-header: nav trigger + mode selector + search + settings */}
               {query && (
                 <header className="sticky top-0 z-40 h-16 shrink-0 glass-nav bg-background/80 border-b border-border/40">
-                  <div className="max-w-7xl mx-auto px-4 h-full flex items-center gap-2">
-                    <QuranNavSheet
-                      chapters={chaptersRes.data}
-                      appendices={appendicesRes.data}
-                    />
-                    <QuranModeSelector />
-                    <div className="flex-1" />
-                    <QuranSearchDialog />
-                    <QuranSettings />
+                  <div className="max-w-7xl mx-auto px-4 h-full flex flex-row items-center">
+                    <div className="flex justify-start w-4/12">
+                      <QuranNavSheet
+                        chapters={chaptersRes.data}
+                        appendices={appendicesRes.data}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 w-4/12">
+                      <QuranSearchBar />
+                    </div>
+                    <div className="flex justify-end gap-2 w-4/12">
+                      <QuranModeSelector />
+                      <QuranSettings />
+                    </div>
                   </div>
                 </header>
               )}
