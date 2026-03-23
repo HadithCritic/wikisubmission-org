@@ -57,9 +57,18 @@ function NavSheetContent({
   const tNav = useTranslations('nav')
   const [chapterSearchQuery, setChapterSearchQuery] = useState('')
   const [appendixSearchQuery, setAppendixSearchQuery] = useState('')
-  const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>('chaptersOpen', true)
-  const [appendicesOpen, setAppendicesOpen] = useLocalStorage<boolean>('appendicesOpen', true)
-  const [orderType, setOrderType] = useLocalStorage<'standard' | 'revelation'>('orderType', 'standard')
+  const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>(
+    'chaptersOpen',
+    true
+  )
+  const [appendicesOpen, setAppendicesOpen] = useLocalStorage<boolean>(
+    'appendicesOpen',
+    true
+  )
+  const [orderType, setOrderType] = useLocalStorage<'standard' | 'revelation'>(
+    'orderType',
+    'standard'
+  )
   const { query: currentChapter } = useParams()
 
   const filteredChapters = chapters
@@ -140,7 +149,10 @@ function NavSheetContent({
                 {filteredChapters.length === 1 ? t('chapter') : t('chapters')}
               </div>
               <ChevronRight
-                className={cn('size-3 transition-transform', chaptersOpen && 'rotate-90')}
+                className={cn(
+                  'size-3 transition-transform',
+                  chaptersOpen && 'rotate-90'
+                )}
               />
             </CollapsibleTrigger>
 
@@ -161,14 +173,18 @@ function NavSheetContent({
               {chaptersOpen && (
                 <Button
                   onClick={() =>
-                    setOrderType(orderType === 'standard' ? 'revelation' : 'standard')
+                    setOrderType(
+                      orderType === 'standard' ? 'revelation' : 'standard'
+                    )
                   }
                   className="w-fit px-2 py-1 text-xs rounded-md bg-secondary/50 hover:bg-secondary border border-border/40 transition-colors text-muted-foreground hover:text-foreground"
                   size="sm"
                   variant="ghost"
                 >
                   {t('order', {
-                    type: t(orderType === 'standard' ? 'standard' : 'revelation'),
+                    type: t(
+                      orderType === 'standard' ? 'standard' : 'revelation'
+                    ),
                   })}
                 </Button>
               )}
@@ -201,11 +217,15 @@ function NavSheetContent({
                           {chapter.chapter_number}
                         </span>
                         <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-                          <span className="text-sm font-medium truncate">{chapter.title}</span>
+                          <span className="text-sm font-medium truncate">
+                            {chapter.title}
+                          </span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             {orderType === 'revelation' && (
                               <span className="text-[10px] font-bold text-muted-foreground">
-                                {t('revOrder', { number: chapter.revelation_order ?? '' })}
+                                {t('revOrder', {
+                                  number: chapter.revelation_order ?? '',
+                                })}
                               </span>
                             )}
                             <span className="text-[10px] text-muted-foreground/60 font-mono">
@@ -229,10 +249,15 @@ function NavSheetContent({
               <div className="flex items-center gap-1.5">
                 <ScrollText className="size-3" />
                 {filteredAppendices.length}{' '}
-                {filteredAppendices.length === 1 ? t('appendix') : t('appendices')}
+                {filteredAppendices.length === 1
+                  ? t('appendix')
+                  : t('appendices')}
               </div>
               <ChevronRight
-                className={cn('size-3 transition-transform', appendicesOpen && 'rotate-90')}
+                className={cn(
+                  'size-3 transition-transform',
+                  appendicesOpen && 'rotate-90'
+                )}
               />
             </CollapsibleTrigger>
 
@@ -300,7 +325,7 @@ export function QuranNavSheet({
         <SheetHeader className="px-4 py-3 border-b border-border/40">
           <SheetTitle className="flex items-center gap-2 text-sm font-semibold">
             <Book className="size-4 text-primary/70" />
-            Quran
+            The Final Testament
           </SheetTitle>
         </SheetHeader>
         <NavSheetContent chapters={chapters} appendices={appendices} />
