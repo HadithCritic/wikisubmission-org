@@ -144,6 +144,62 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── Miracle ──────────────────────────────────────────────────────── */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader title="Miracle" subtitle="Code 19" />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Main description card (2 cols) */}
+            <div className="md:col-span-2 bg-surface-container-low p-8 rounded-2xl editorial-shadow space-y-4">
+              <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">
+                Mathematical Miracle
+              </span>
+              <h3 className="font-headline text-2xl font-extrabold">
+                The Quran&apos;s Mathematical Structure
+              </h3>
+              <p className="text-on-surface-variant leading-relaxed">
+                The Quran is mathematically composed around the prime number 19. The opening
+                statement — <em>Bismillah Al-Rahman Al-Raheem</em> — consists of exactly 19
+                Arabic letters. The Quran contains 114 chapters (19&nbsp;×&nbsp;6). The first
+                revelation (96:1&ndash;5) has 19 words. The word &ldquo;God&rdquo; appears 2,698 times
+                (19&nbsp;×&nbsp;142). This interlocking numerical code, discovered by Dr.&nbsp;Rashad
+                Khalifa in 1974, provides a built-in authentication that no human could have
+                designed 14 centuries ago &mdash; a divine signature confirming the Quran&apos;s
+                authorship and protecting it from tampering.
+              </p>
+              <Link
+                href="/miracle"
+                className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all"
+              >
+                Read more <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            {/* YouTube card (1 col) */}
+            <a
+              href="https://youtu.be/4TUYIuxkAmQ?si=KqAL8Ra2c_Y4C2xf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group bg-surface-container-low p-8 rounded-2xl editorial-shadow border border-transparent hover:border-border/40 transition-all hover:-translate-y-1 flex flex-col gap-4"
+            >
+              <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500 group-hover:bg-red-500/20 transition-colors">
+                <FaYoutube size={24} />
+              </div>
+              <div>
+                <h3 className="font-headline font-bold text-lg mb-1">Watch: Code 19</h3>
+                <p className="text-on-surface-variant text-sm leading-relaxed">
+                  A visual introduction to the mathematical miracle of the Quran.
+                </p>
+              </div>
+              <span className="mt-auto text-xs font-mono text-muted-foreground uppercase tracking-widest">
+                YouTube ↗
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── Platforms & Tools ────────────────────────────────────────────── */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
