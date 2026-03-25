@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Book, ChevronRight, MenuIcon, ScrollText, Search } from 'lucide-react'
 import Link from 'next/link'
-import { useState, Suspense } from 'react'
+import { useState } from 'react'
 import type { components } from '@/src/api/types.gen'
 import useLocalStorage from '@/hooks/use-local-storage'
 import { useParams, useSearchParams } from 'next/navigation'
@@ -303,7 +303,9 @@ export function QuranNavSheet({
           className="shrink-0 h-8 px-2 gap-1.5"
         >
           <MenuIcon className="size-4 shrink-0" />
-          <span className="hidden sm:inline text-xs font-medium">Table of content</span>
+          <span className="hidden sm:inline text-xs font-medium">
+            Table of content
+          </span>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-[280px] sm:w-[300px] gap-0">

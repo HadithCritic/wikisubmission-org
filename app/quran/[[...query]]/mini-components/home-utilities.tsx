@@ -1,22 +1,10 @@
 'use client'
 
-import { ThemeToggle } from '@/components/toggles/theme-toggle'
-import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { DownloadIcon, SparkleIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Fonts } from '@/constants/fonts'
-import Image from 'next/image'
-import { randomQuranRef } from '@/constants/quran-chapters'
-import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 export default function QuranUtilitiesRow() {
-  const router = useRouter()
   const t = useTranslations('common')
 
   return (

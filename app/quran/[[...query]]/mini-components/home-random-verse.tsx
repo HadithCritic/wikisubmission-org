@@ -13,7 +13,9 @@ type VerseData = components['schemas']['VerseData']
 export default function HomeScreenRandomVerse() {
   const t = useTranslations('common')
   const [verse, setVerse] = useState<VerseData | null>(null)
-  const [ref] = useState<{ chapter: number; verse: number }>(() => randomQuranRef())
+  const [ref] = useState<{ chapter: number; verse: number }>(() =>
+    randomQuranRef()
+  )
 
   useEffect(() => {
     const r = ref
@@ -32,7 +34,7 @@ export default function HomeScreenRandomVerse() {
         const v = data?.chapters?.[0]?.verses?.[0]
         if (v) setVerse(v)
       })
-  }, [])
+  }, [ref])
 
   if (!verse) {
     return (

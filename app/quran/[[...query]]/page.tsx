@@ -211,13 +211,15 @@ export default async function QuranPage({
   }
 
   const parsed = parseQueryType(queryText)
-  console.log(`Parsed Query: ${parsed.type}, query text: ${queryText}`)
 
   // ── Chapter view: SSR first N verses via internal Railway network ───────────
-  // If ?verse=N is set, SSR up to that verse so it's immediately in the DOM.
+  // If ?verse=N is set, start the SSR window 5 verses before the target so
+  // scrollToIndex only needs to jump ~5 measured items — avoiding the
+  // estimation error that occurs when scrolling past dozens of unmeasured items.
   if (parsed.type === 'chapter' && parsed.chapterNumber) {
     const targetVerse = verse ? parseInt(verse) : undefined
-    const ssrVerseEnd = targetVerse ? Math.max(50, targetVerse + 5) : 50
+    const ssrVerseStart = targetVerse ? Math.max(1, targetVerse - 5) : 1
+    const ssrVerseEnd = ssrVerseStart + 49 // always fetch a 50-verse window
 
     let data = null
     try {
@@ -226,7 +228,7 @@ export default async function QuranPage({
           query: {
             chapter_number_start: parsed.chapterNumber,
             langs: ['en', 'ar'],
-            verse_start: 0,
+            verse_start: ssrVerseStart,
             verse_end: ssrVerseEnd,
             include_words: true,
             include_root: true,

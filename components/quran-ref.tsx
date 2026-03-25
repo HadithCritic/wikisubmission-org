@@ -43,9 +43,7 @@ function VersePreview({
         {verse.vk}
         <ArrowUpRight className="size-3" />
       </Link>
-      {tr?.s && (
-        <p className="text-xs text-violet-500 italic">{tr.s}</p>
-      )}
+      {tr?.s && <p className="text-xs text-violet-500 italic">{tr.s}</p>}
       {tr?.tx && (
         <p className="text-base leading-relaxed">
           <strong>[{verse.vk}]</strong> {tr.tx}
@@ -53,11 +51,18 @@ function VersePreview({
       )}
       {tr?.f && (
         <p className="text-sm text-muted-foreground italic">
-          <QuranRefText text={tr.f} from={`footnote of ${verse.vk}`} onNavigateRef={onNavigateRef} />
+          <QuranRefText
+            text={tr.f}
+            from={`footnote of ${verse.vk}`}
+            onNavigateRef={onNavigateRef}
+          />
         </p>
       )}
       {showArabic && arTr?.tx && (
-        <p dir="rtl" className="font-arabic text-xl leading-relaxed text-right pt-1">
+        <p
+          dir="rtl"
+          className="font-arabic text-xl leading-relaxed text-right pt-1"
+        >
           {arTr.tx}
         </p>
       )}
@@ -86,41 +91,14 @@ export function QuranRef({
 
   const parsed = parseQuranRef(reference)
 
-  // If unparseable, render plain text so we don't swallow content
-  if (!parsed) {
-    return <span className="font-mono text-xs">{reference}</span>
-  }
-
   const primaryCode: LangCode =
     prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
 
-  const currentRef = history[history.length - 1] ?? reference
-  const currentParsed = parseQuranRef(currentRef) ?? parsed
-
-  const label =
-    parsed.vs === parsed.ve
-      ? `${parsed.cn}:${parsed.vs}`
-      : `${parsed.cn}:${parsed.vs}–${parsed.ve}`
-
-  const currentLabel =
-    currentParsed.vs === currentParsed.ve
-      ? `${currentParsed.cn}:${currentParsed.vs}`
-      : `${currentParsed.cn}:${currentParsed.vs}–${currentParsed.ve}`
-
+  // Define all hooks unconditionally before any early returns
   const doFetch = useCallback(
     (ref: string) => fetch(ref, primaryCode),
     [fetch, primaryCode]
   )
-
-  function handleOpenChange(val: boolean) {
-    setOpen(val)
-    if (val) {
-      setHistory([reference])
-      doFetch(reference)
-    } else {
-      setHistory([])
-    }
-  }
 
   const handleNavigate = useCallback(
     (newRef: string) => {
@@ -137,6 +115,34 @@ export function QuranRef({
       return next
     })
   }, [doFetch, reference])
+
+  // If unparseable, render plain text so we don't swallow content
+  if (!parsed) {
+    return <span className="font-mono text-xs">{reference}</span>
+  }
+
+  const currentRef = history[history.length - 1] ?? reference
+  const currentParsed = parseQuranRef(currentRef) ?? parsed
+
+  const label =
+    parsed.vs === parsed.ve
+      ? `${parsed.cn}:${parsed.vs}`
+      : `${parsed.cn}:${parsed.vs}–${parsed.ve}`
+
+  const currentLabel =
+    currentParsed.vs === currentParsed.ve
+      ? `${currentParsed.cn}:${currentParsed.vs}`
+      : `${currentParsed.cn}:${currentParsed.vs}–${currentParsed.ve}`
+
+  function handleOpenChange(val: boolean) {
+    setOpen(val)
+    if (val) {
+      setHistory([reference])
+      doFetch(reference)
+    } else {
+      setHistory([])
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
