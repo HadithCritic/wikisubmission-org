@@ -262,8 +262,8 @@ export function ChapterReader({
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}`
 
   // Current verse number for minimap highlight.
-  // Reads window.scrollY — reliable since useWindowVirtualizer re-renders on scroll.
-  const centerY = window.scrollY + window.innerHeight / 2
+  // Guard against SSR: window is undefined on the server even in 'use client' components.
+  const centerY = typeof window !== 'undefined' ? window.scrollY + window.innerHeight / 2 : 0
   const centerVirtualItem =
     virtualItems.find(
       (v) => v.start <= centerY && v.start + v.size > centerY
