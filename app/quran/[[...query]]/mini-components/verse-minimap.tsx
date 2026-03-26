@@ -112,13 +112,13 @@ export function VerseMinimap({
 
   return (
     /**
-     * Mobile  (< sm): low opacity overlay anchored to right edge.
-     *   Press-to-reveal: opacity jumps to 100% on pointerDown.
-     * Desktop (≥ sm): always fully visible sidebar column.
+     * Fixed overlay anchored to the right edge of the viewport.
+     * top-30 (120px) = SiteNav (64) + sub-header (56), matching the fixed header stack.
+     * Mobile: low opacity until press. Desktop (≥ sm): always fully visible.
      */
     <div
-      className={`absolute inset-y-0 right-0 w-9 z-10 transition-opacity duration-200
-        sm:relative sm:inset-auto sm:h-full sm:w-8 sm:shrink-0 sm:opacity-100
+      className={`fixed right-0 z-30 w-9 top-30 bottom-0 transition-opacity duration-200
+        sm:w-10 sm:opacity-100
         ${isActive ? 'opacity-100' : 'opacity-[0.15]'}`}
     >
       <div

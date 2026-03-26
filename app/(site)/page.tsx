@@ -16,7 +16,13 @@ import { getTranslations } from 'next-intl/server'
 
 // ─── Section Header ────────────────────────────────────────────────────────────
 
-function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+function SectionHeader({
+  title,
+  subtitle,
+}: {
+  title: string
+  subtitle?: string
+}) {
   return (
     <div className="flex items-baseline justify-between mb-12">
       <h2 className="font-headline text-3xl font-bold">{title}</h2>
@@ -38,11 +44,9 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen">
-
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="px-6 py-20 md:py-32 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-
           {/* Text column */}
           <div className="md:col-span-7 space-y-8">
             <div className="space-y-4">
@@ -63,10 +67,13 @@ export default async function Home() {
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-headline font-bold text-base shadow-lg hover:bg-primary/90 transition-all hover:-translate-y-0.5 group"
               >
                 {t('hero.ctaPrimary')}
-                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight
+                  size={18}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
               </Link>
               <Link
-                href="/search"
+                href="/practices"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-surface-container text-foreground font-headline font-bold text-base hover:bg-surface-container-high transition-all hover:-translate-y-0.5 border border-border/40"
               >
                 {t('hero.ctaSecondary')}
@@ -84,7 +91,10 @@ export default async function Home() {
       {/* ── Scripture ────────────────────────────────────────────────────── */}
       <section className="bg-surface-container-low py-24 px-6">
         <div className="max-w-7xl mx-auto">
-          <SectionHeader title={t('scripture.title')} subtitle={t('scripture.subtitle')} />
+          <SectionHeader
+            title={t('scripture.title')}
+            subtitle={t('scripture.subtitle')}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Final Testament — featured (2 cols) */}
@@ -147,7 +157,10 @@ export default async function Home() {
       {/* ── Miracle ──────────────────────────────────────────────────────── */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
-          <SectionHeader title={t('miracle.title')} subtitle={t('miracle.subtitle')} />
+          <SectionHeader
+            title={t('miracle.title')}
+            subtitle={t('miracle.subtitle')}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Main description card (2 cols) */}
@@ -180,7 +193,9 @@ export default async function Home() {
                 <FaYoutube size={24} />
               </div>
               <div>
-                <h3 className="font-headline font-bold text-lg mb-1">{t('miracle.youtubeTitle')}</h3>
+                <h3 className="font-headline font-bold text-lg mb-1">
+                  {t('miracle.youtubeTitle')}
+                </h3>
                 <p className="text-on-surface-variant text-sm leading-relaxed">
                   {t('miracle.youtubeDesc')}
                 </p>
@@ -227,8 +242,12 @@ export default async function Home() {
                 <div className="w-12 h-12 bg-surface-container rounded-xl flex items-center justify-center mb-6 text-muted-foreground group-hover:text-primary transition-colors">
                   {tool.icon}
                 </div>
-                <h3 className="font-headline font-bold text-lg mb-2">{tool.title}</h3>
-                <p className="text-on-surface-variant text-sm leading-relaxed">{tool.desc}</p>
+                <h3 className="font-headline font-bold text-lg mb-2">
+                  {tool.title}
+                </h3>
+                <p className="text-on-surface-variant text-sm leading-relaxed">
+                  {tool.desc}
+                </p>
               </Link>
             ))}
           </div>
@@ -252,32 +271,60 @@ export default async function Home() {
 
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm text-muted-foreground">
             <div className="flex gap-6">
-              <Link href="/contact" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Link
+                href="/contact"
+                className="flex items-center gap-1.5 hover:text-primary transition-colors"
+              >
                 <FaEnvelope size={14} /> {tNav('contact')}
               </Link>
-              <Link href="/donate" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Link
+                href="/donate"
+                className="flex items-center gap-1.5 hover:text-primary transition-colors"
+              >
                 <FaHeart size={14} /> {tNav('donate')}
               </Link>
             </div>
 
             <div className="flex gap-4 text-foreground/50">
-              <Link href={About.social.github} className="hover:text-foreground transition-colors">
+              <Link
+                href={About.social.github}
+                className="hover:text-foreground transition-colors"
+              >
                 <FaGithub size={18} />
               </Link>
-              <Link href={About.social.twitter} className="hover:text-foreground transition-colors">
+              <Link
+                href={About.social.twitter}
+                className="hover:text-foreground transition-colors"
+              >
                 <FaTwitter size={18} />
               </Link>
-              <Link href={About.social.youtube} className="hover:text-foreground transition-colors">
+              <Link
+                href={About.social.youtube}
+                className="hover:text-foreground transition-colors"
+              >
                 <FaYoutube size={18} />
               </Link>
-              <Link href={About.social.discord} className="hover:text-foreground transition-colors">
+              <Link
+                href={About.social.discord}
+                className="hover:text-foreground transition-colors"
+              >
                 <FaDiscord size={18} />
               </Link>
             </div>
 
             <div className="flex gap-4">
-              <Link href="/legal/terms-of-use" className="hover:text-primary transition-colors">{t('terms')}</Link>
-              <Link href="/legal/privacy-policy" className="hover:text-primary transition-colors">{t('privacy')}</Link>
+              <Link
+                href="/legal/terms-of-use"
+                className="hover:text-primary transition-colors"
+              >
+                {t('terms')}
+              </Link>
+              <Link
+                href="/legal/privacy-policy"
+                className="hover:text-primary transition-colors"
+              >
+                {t('privacy')}
+              </Link>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
@@ -16,12 +16,11 @@ import { VerseCard, toQuranVerse } from '../mini-components/verse-card'
 import { VerseMinimap } from '../mini-components/verse-minimap'
 import { ReadingView } from '../mini-components/reading-view'
 import { useTranslations } from 'next-intl'
-import { useVirtualizer } from '@tanstack/react-virtual'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import {
   useQuranPlayer,
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
-import { useNavScroll } from '@/hooks/use-nav-scroll'
 
 export function ChapterReader({
   chapterNumber,
@@ -114,23 +113,27 @@ export function ChapterReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Fixed-container virtualizer ───────────────────────────────────────────
-  const parentRef = useRef<HTMLDivElement>(null)
-  const readingRef = useRef<HTMLDivElement>(null)
-  // Collapse SiteNav on scroll (Apple-style) — hooks on both scroll containers.
-  useNavScroll(parentRef)
-  useNavScroll(readingRef)
+  // ── Window virtualizer (page-level scroll) ────────────────────────────────
+  // scrollMargin = distance from document top to the virtual list container.
+  // Measured via useLayoutEffect so it's ready before any useEffect seeks fire.
+  const listRef = useRef<HTMLDivElement>(null)
+  const [scrollMargin, setScrollMargin] = useState(0)
 
-  const virtualizer = useVirtualizer({
+  useLayoutEffect(() => {
+    if (listRef.current) {
+      const rect = listRef.current.getBoundingClientRect()
+      setScrollMargin(rect.top + window.scrollY)
+    }
+  }, [])
+
+  const virtualizer = useWindowVirtualizer({
     count: reader.verses.length,
-    getScrollElement: () => parentRef.current,
-    // Conservative high estimate — better to overshoot than undershoot.
-    // Underestimates cause scroll-position jumps when items are measured;
-    // overshoots just leave a little extra space that self-corrects.
     estimateSize: () => 400,
-    // 25 was too aggressive: it rendered 50 extra cards (25 above + 25 below)
-    // and biased the centre-verse calculation used by the URL sync and minimap.
     overscan: 12,
+    scrollMargin,
+    // scrollPaddingStart keeps scrollToIndex results below the fixed headers
+    // (SiteNav 64px + sub-header 56px = 120px).
+    scrollPaddingStart: 120,
   })
 
   const virtualItems = virtualizer.getVirtualItems()
@@ -233,9 +236,7 @@ export function ChapterReader({
   useEffect(() => {
     if (lastVirtualIndex < 0 || reader.verses.length === 0) return
     const timer = setTimeout(() => {
-      const container = parentRef.current
-      if (!container) return
-      const centerY = container.scrollTop + container.clientHeight / 2
+      const centerY = window.scrollY + window.innerHeight / 2
       const items = virtualizer.getVirtualItems()
       const centerItem =
         items.find((v) => v.start <= centerY && v.start + v.size > centerY) ??
@@ -261,11 +262,8 @@ export function ChapterReader({
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}`
 
   // Current verse number for minimap highlight.
-  // Same overscan bias fix: use scroll position to find the item at the viewport centre
-  // rather than the midpoint of all rendered items (which includes overscan).
-  const scrollTop = parentRef.current?.scrollTop ?? 0
-  const clientH = parentRef.current?.clientHeight ?? 0
-  const centerY = scrollTop + clientH / 2
+  // Reads window.scrollY — reliable since useWindowVirtualizer re-renders on scroll.
+  const centerY = window.scrollY + window.innerHeight / 2
   const centerVirtualItem =
     virtualItems.find(
       (v) => v.start <= centerY && v.start + v.size > centerY
@@ -293,7 +291,7 @@ export function ChapterReader({
       : undefined
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-2 max-w-4xl mx-auto w-full">
+    <div className="flex flex-col gap-2 max-w-4xl mx-auto w-full px-4 pb-32">
       {/* Chapter title */}
       <div className="shrink-0 flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
         <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -333,9 +331,9 @@ export function ChapterReader({
         </div>
       </div>
 
-      {/* Reading mode — full prose view bypasses the virtual list */}
+      {/* Reading mode — full prose view, window scrolls naturally */}
       {displayMode === 'reading' && (
-        <div ref={readingRef} className="flex-1 min-h-0 overflow-y-auto bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40" style={{ scrollbarWidth: 'none' }}>
+        <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 pr-10 sm:pr-12">
           <ReadingView
             verses={reader.verses}
             hasMore={reader.hasMore}
@@ -346,127 +344,119 @@ export function ChapterReader({
         </div>
       )}
 
-      {/* Verse/Word viewport + minimap. `relative` anchors the minimap's absolute
-          position on mobile; `items-stretch` lets the desktop sidebar fill height.
-          `overflow-hidden` clips minimap milestone labels/badges so they cannot
-          cause a page-level scrollbar when the minimap is active. */}
+      {/* Verse/Word mode — window virtualizer, page scrolls naturally.
+          pr-10 sm:pr-12 keeps content clear of the fixed minimap overlay. */}
       {displayMode !== 'reading' && (
-      <div className="relative flex flex-1 min-h-0 gap-2 items-stretch overflow-hidden">
-        {/* Fixed-height scrollable container — the document never scrolls */}
+      <div className="pr-10 sm:pr-12">
+        {/* Virtual list container — height drives the page scroll range */}
         <div
-          ref={parentRef}
-          className="flex-1 min-w-0 h-full bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-y-auto overscroll-contain"
-          style={{ scrollbarWidth: 'none' }}
+          ref={listRef}
+          className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden"
+          style={{
+            position: 'relative',
+            height: Math.max(virtualizer.getTotalSize(), 300),
+          }}
         >
           {reader.verses.length === 0 ? (
-            <div className="p-12 flex justify-center">
+            <div className="absolute inset-0 flex items-center justify-center">
               <Spinner />
             </div>
           ) : (
-            <>
-              {/* Virtual list */}
-              <div
-                style={{
-                  height: virtualizer.getTotalSize(),
-                  position: 'relative',
-                }}
-              >
-                {virtualItems.map((virtualItem) => {
-                  const verse = reader.verses[virtualItem.index]
-                  const isLast =
-                    virtualItem.index === reader.verses.length - 1 &&
-                    !reader.hasMore
-                  return (
-                    <div
-                      key={verse.vk ?? virtualItem.index}
-                      data-index={virtualItem.index}
-                      ref={virtualizer.measureElement}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                    >
-                      <VerseCard
-                        verse={verse}
-                        isLast={isLast}
-                        isScrollTarget={
-                          seekTarget !== null &&
-                          verse.vk?.split(':')[1] === seekTarget
-                        }
-                        optsKey={optsKey}
-                        isCurrentAudio={
-                          currentVerse?.verse_id === (verse.vk ?? '')
-                        }
-                        isPlaying={isPlaying}
-                        isBuffering={isBuffering}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Prev / Next chapter nav — lives inside the scroll container
-                  so it never causes the outer page to grow. Appears after the
-                  last verse when the user scrolls to the end. */}
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  showNav ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
-                }`}
-              >
-                <div className="flex justify-between items-center gap-4 p-6 pb-24">
-                  {chapterNumber > 1 ? (
-                    <Link href={`/quran/${chapterNumber - 1}`} prefetch>
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        className="flex items-center gap-2"
-                      >
-                        <ArrowLeft className="size-4 shrink-0" />
-                        <span>
-                          <span className="hidden sm:inline">
-                            {tCommon('chapter')}{' '}
-                          </span>
-                          {chapterNumber - 1}
-                        </span>
-                      </Button>
-                    </Link>
-                  ) : (
-                    <span />
-                  )}
-
-                  {chapterNumber < 114 ? (
-                    <Link
-                      href={`/quran/${chapterNumber + 1}`}
-                      prefetch
-                      className="ml-auto"
-                    >
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        className="flex items-center gap-2"
-                      >
-                        <span>
-                          <span className="hidden sm:inline">
-                            {tCommon('chapter')}{' '}
-                          </span>
-                          {chapterNumber + 1}
-                        </span>
-                        <ArrowRight className="size-4 shrink-0" />
-                      </Button>
-                    </Link>
-                  ) : (
-                    <span />
-                  )}
+            virtualItems.map((virtualItem) => {
+              const verse = reader.verses[virtualItem.index]
+              const isLast =
+                virtualItem.index === reader.verses.length - 1 &&
+                !reader.hasMore
+              return (
+                <div
+                  key={verse.vk ?? virtualItem.index}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualItem.start - virtualizer.options.scrollMargin}px)`,
+                  }}
+                >
+                  <VerseCard
+                    verse={verse}
+                    isLast={isLast}
+                    isScrollTarget={
+                      seekTarget !== null &&
+                      verse.vk?.split(':')[1] === seekTarget
+                    }
+                    optsKey={optsKey}
+                    isCurrentAudio={
+                      currentVerse?.verse_id === (verse.vk ?? '')
+                    }
+                    isPlaying={isPlaying}
+                    isBuffering={isBuffering}
+                  />
                 </div>
-              </div>
-            </>
+              )
+            })
           )}
         </div>
 
-        {/* Verse number minimap */}
+        {/* Prev / Next chapter nav — appears below the list once all verses are loaded */}
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-in-out ${
+            showNav ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="flex justify-between items-center gap-4 p-6">
+            {chapterNumber > 1 ? (
+              <Link href={`/quran/${chapterNumber - 1}`} prefetch>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="size-4 shrink-0" />
+                  <span>
+                    <span className="hidden sm:inline">
+                      {tCommon('chapter')}{' '}
+                    </span>
+                    {chapterNumber - 1}
+                  </span>
+                </Button>
+              </Link>
+            ) : (
+              <span />
+            )}
+
+            {chapterNumber < 114 ? (
+              <Link
+                href={`/quran/${chapterNumber + 1}`}
+                prefetch
+                className="ml-auto"
+              >
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className="flex items-center gap-2"
+                >
+                  <span>
+                    <span className="hidden sm:inline">
+                      {tCommon('chapter')}{' '}
+                    </span>
+                    {chapterNumber + 1}
+                  </span>
+                  <ArrowRight className="size-4 shrink-0" />
+                </Button>
+              </Link>
+            ) : (
+              <span />
+            )}
+          </div>
+        </div>
+      </div>
+      )}
+
+      {/* Verse number minimap — fixed right overlay (window-scroll compatible) */}
+      {displayMode !== 'reading' && (
         <VerseMinimap
           chapterNumber={chapterNumber}
           currentVerseNumber={currentVerseNumber}
@@ -474,7 +464,6 @@ export function ChapterReader({
           onSeek={handleSeek}
           onPreview={handlePreview}
         />
-      </div>
       )}
 
       {reader.error && (

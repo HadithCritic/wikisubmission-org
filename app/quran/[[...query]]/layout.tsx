@@ -37,42 +37,40 @@ export default async function QuranLayout({
   if (chaptersRes.data && appendicesRes.data) {
     return (
       <QuranPlayerProvider>
-        <div className="h-svh flex flex-col">
-          {/* Site nav — collapses on scroll via CSS [data-nav-hidden] */}
-          <div className="quran-sitenav-wrapper shrink-0">
-            <SiteNav />
-          </div>
-
-          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            {/* Seed language direction data into the client Zustand store */}
-            <LanguagesInit languages={languagesRes.data ?? []} />
-            {/* Seed chapters + appendices for search autocomplete */}
-            <QuranNavInit chapters={chaptersRes.data ?? []} appendices={appendicesRes.data ?? []} />
-            {/* Sub-header: nav trigger + search + mode selector + settings */}
-            {query && (
-              <header className="sticky top-0 z-40 h-14 shrink-0 glass-nav bg-background/80 border-b border-border/40">
-                <div className="px-3 h-full flex items-center gap-2">
-                  <QuranNavSheet
-                    chapters={chaptersRes.data}
-                    appendices={appendicesRes.data}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <QuranSearchBar />
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <QuranModeSelector />
-                  </div>
-                  <QuranSettings />
+        {/* Fixed header stack — SiteNav + optional sub-header.
+            CSS slides this up by 64px on scroll-down (data-nav-hidden),
+            so the sub-header rises to top-0 giving more reading space. */}
+        <div className="quran-fixed-headers">
+          <SiteNav />
+          {query && (
+            <header className="h-14 glass-nav bg-background/80 border-b border-border/40">
+              <div className="px-3 h-full flex items-center gap-2">
+                <QuranNavSheet
+                  chapters={chaptersRes.data}
+                  appendices={appendicesRes.data}
+                />
+                <div className="flex-1 min-w-0">
+                  <QuranSearchBar />
                 </div>
-              </header>
-            )}
-            {/* Main content — scroll container manages data-nav-hidden on <html> */}
-            <QuranScrollContainer>
-              {children}
-            </QuranScrollContainer>
-            <MetricsCollector />
-            <QuranPlayer />
-          </div>
+                <div className="flex gap-2 shrink-0">
+                  <QuranModeSelector />
+                </div>
+                <QuranSettings />
+              </div>
+            </header>
+          )}
+        </div>
+
+        {/* Content offset below fixed headers.
+            pt-16 (64px) when no sub-header, pt-[120px] (64+56) when sub-header present. */}
+        <div className={query ? 'pt-30' : 'pt-16'}>
+          <LanguagesInit languages={languagesRes.data ?? []} />
+          <QuranNavInit chapters={chaptersRes.data ?? []} appendices={appendicesRes.data ?? []} />
+          <QuranScrollContainer>
+            {children}
+          </QuranScrollContainer>
+          <MetricsCollector />
+          <QuranPlayer />
         </div>
       </QuranPlayerProvider>
     )

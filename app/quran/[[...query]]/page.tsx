@@ -242,7 +242,7 @@ export default async function QuranPage({
     }
 
     return (
-      <main className="flex-1 min-h-0 flex flex-col">
+      <main>
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             key={parsed.chapterNumber}
@@ -278,7 +278,7 @@ export default async function QuranPage({
     }
 
     return (
-      <main className="flex-1 min-h-0 flex flex-col">
+      <main>
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             chapterNumber={parsed.chapterNumber}
@@ -323,7 +323,7 @@ export default async function QuranPage({
 
   // ── Verse ref & text search: client-side via SearchResult ────────────────────
   return (
-    <main className="whitespace-pre-line h-full">
+    <main className="whitespace-pre-line">
       <section>
         <Suspense fallback={<Spinner />}>
           <SearchResult props={{ query: queryText }} />

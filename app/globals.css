@@ -178,13 +178,19 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
-  /* Quran layout: SiteNav collapses on scroll */
-  .quran-sitenav-wrapper {
-    overflow: hidden;
-    max-height: 64px;
-    transition: max-height 280ms ease;
+  /* Quran layout: fixed header stack slides up when scrolling down.
+     SiteNav (h-16 = 64px) + optional sub-header (h-14 = 56px) are fixed.
+     On data-nav-hidden the whole stack shifts up by SiteNav height so
+     the sub-header glides to top-0, giving more reading space. */
+  .quran-fixed-headers {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    transition: transform 280ms ease;
   }
-  html[data-nav-hidden] .quran-sitenav-wrapper {
-    max-height: 0;
+  html[data-nav-hidden] .quran-fixed-headers {
+    transform: translateY(-64px);
   }
 }

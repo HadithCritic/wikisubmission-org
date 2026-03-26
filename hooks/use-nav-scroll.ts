@@ -1,32 +1,29 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect } from 'react'
 
 /**
- * Attaches a scroll listener to `ref` and toggles `data-nav-hidden` on <html>:
- *   - scroll down > 60px  → set attribute  (SiteNav collapses via CSS)
+ * Listens to window scroll and toggles `data-nav-hidden` on <html>:
+ *   - scroll down > 64px  → set attribute  (SiteNav slides up via CSS)
  *   - scroll up           → remove attribute
- *   - back at top         → remove attribute
- * Cleans up on unmount.
+ *   - back at top (y=0)   → remove attribute
  */
-export function useNavScroll(ref: RefObject<HTMLElement | null>) {
+export function useNavScroll() {
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
     let lastY = 0
     const onScroll = () => {
-      const y = el.scrollTop
+      const y = window.scrollY
       if (y === 0) {
         document.documentElement.removeAttribute('data-nav-hidden')
-      } else if (y > lastY && y > 60) {
+      } else if (y > lastY && y > 64) {
         document.documentElement.setAttribute('data-nav-hidden', '')
       } else if (y < lastY) {
         document.documentElement.removeAttribute('data-nav-hidden')
       }
       lastY = y
     }
-    el.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
-      el.removeEventListener('scroll', onScroll)
+      window.removeEventListener('scroll', onScroll)
       document.documentElement.removeAttribute('data-nav-hidden')
     }
-  }, [ref])
+  }, [])
 }
