@@ -177,4 +177,14 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+
+  /* Quran layout: SiteNav collapses on scroll */
+  .quran-sitenav-wrapper {
+    overflow: hidden;
+    max-height: 64px;
+    transition: max-height 280ms ease;
+  }
+  html[data-nav-hidden] .quran-sitenav-wrapper {
+    max-height: 0;
+  }
 }

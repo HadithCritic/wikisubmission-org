@@ -21,6 +21,7 @@ import {
   useQuranPlayer,
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
+import { useNavScroll } from '@/hooks/use-nav-scroll'
 
 export function ChapterReader({
   chapterNumber,
@@ -115,6 +116,10 @@ export function ChapterReader({
 
   // ── Fixed-container virtualizer ───────────────────────────────────────────
   const parentRef = useRef<HTMLDivElement>(null)
+  const readingRef = useRef<HTMLDivElement>(null)
+  // Collapse SiteNav on scroll (Apple-style) — hooks on both scroll containers.
+  useNavScroll(parentRef)
+  useNavScroll(readingRef)
 
   const virtualizer = useVirtualizer({
     count: reader.verses.length,
@@ -330,7 +335,7 @@ export function ChapterReader({
 
       {/* Reading mode — full prose view bypasses the virtual list */}
       {displayMode === 'reading' && (
-        <div className="flex-1 min-h-0 overflow-y-auto bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40" style={{ scrollbarWidth: 'none' }}>
+        <div ref={readingRef} className="flex-1 min-h-0 overflow-y-auto bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40" style={{ scrollbarWidth: 'none' }}>
           <ReadingView
             verses={reader.verses}
             hasMore={reader.hasMore}
