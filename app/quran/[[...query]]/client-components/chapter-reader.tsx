@@ -21,6 +21,7 @@ import {
   useQuranPlayer,
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
+import { useChapterBorderLoader } from '@/hooks/use-chapter-border-loader'
 
 export function ChapterReader({
   chapterNumber,
@@ -135,6 +136,9 @@ export function ChapterReader({
     // (SiteNav 64px + sub-header 56px = 120px).
     scrollPaddingStart: 120,
   })
+
+  // GSAP border-glow while loading; completion flash when verses arrive.
+  useChapterBorderLoader(listRef, reader.loading)
 
   const virtualItems = virtualizer.getVirtualItems()
   const lastVirtualIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
@@ -357,11 +361,7 @@ export function ChapterReader({
             height: Math.max(virtualizer.getTotalSize(), 300),
           }}
         >
-          {reader.verses.length === 0 ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Spinner />
-            </div>
-          ) : (
+          {reader.verses.length === 0 ? null : (
             virtualItems.map((virtualItem) => {
               const verse = reader.verses[virtualItem.index]
               const isLast =
