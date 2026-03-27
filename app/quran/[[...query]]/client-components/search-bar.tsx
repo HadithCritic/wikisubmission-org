@@ -158,11 +158,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
               key={ap.code}
               onMouseDown={() => {
                 setOpen(false)
-                window.open(
-                  `https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${ap.code}`,
-                  '_blank',
-                  'noopener,noreferrer'
-                )
+                router.push(`/appendices/${ap.code}`)
               }}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted/60 text-left"
             >

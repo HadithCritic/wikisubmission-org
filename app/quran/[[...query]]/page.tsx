@@ -9,9 +9,9 @@ import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { ArrowRight, BookOpen, ChevronDown, ExternalLink } from 'lucide-react'
-import { RandomVerseTile } from './mini-components/random-verse-tile'
+import { ArrowRight, BookOpen } from 'lucide-react'
 import { VerseListResult } from './mini-components/verse-list-result'
+import { QuranAccordions } from './mini-components/quran-accordions'
 
 // Detect query intent: chapter, verse, range, verse-list, or text search
 function parseQueryType(q: string): {
@@ -64,9 +64,9 @@ export default async function QuranPage({
   searchParams,
 }: {
   params: Promise<{ query?: string[] }>
-  searchParams: Promise<{ q?: string; verse?: string }>
+  searchParams: Promise<{ q?: string; verse?: string; ch?: string; ap?: string }>
 }) {
-  const { q, verse } = await searchParams
+  const { q, verse, ch, ap } = await searchParams
   const { query } = await params
 
   const rawQuery = q || query?.join(' ')
@@ -83,10 +83,9 @@ export default async function QuranPage({
         next: { revalidate: 86400 },
       }),
     ])
-    const [tQuran, tNav, tSidebar, tCommon] = await Promise.all([
+    const [tQuran, tNav, tCommon] = await Promise.all([
       getTranslations('quran'),
       getTranslations('nav'),
-      getTranslations('sidebar'),
       getTranslations('common'),
     ])
 
@@ -131,10 +130,8 @@ export default async function QuranPage({
               </p>
             </Link>
 
-            <a
+            <Link
               href="/introduction"
-              target="_blank"
-              rel="noopener noreferrer"
               className="group flex flex-col gap-2 p-5 rounded-2xl border border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border transition-all"
             >
               <div className="flex items-center justify-between">
@@ -142,69 +139,20 @@ export default async function QuranPage({
                   <BookOpen className="size-4 text-primary/70" />
                   {tNav('introduction')}
                 </div>
-                <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-all" />
+                <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {tQuran('introductionDesc')}
               </p>
-            </a>
+            </Link>
           </section>
 
-          {/* ── Chapters accordion ────────────────────────────────────── */}
-          <details open className="group/ch">
-            <summary className="flex items-center justify-between cursor-pointer list-none py-2 border-b border-border/40">
-              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                {tSidebar('chapters')}
-              </h2>
-              <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/ch:rotate-180" />
-            </summary>
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-              <RandomVerseTile />
-              {chapters.map((ch) => (
-                <Link
-                  key={ch.chapter_number}
-                  href={`/quran/${ch.chapter_number}`}
-                  className="flex flex-col gap-1 p-3 rounded-xl border border-border/40 bg-muted/20 hover:bg-muted/50 hover:border-border transition-all group"
-                >
-                  <span className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors">
-                    {ch.chapter_number}
-                  </span>
-                  <span className="text-sm font-medium leading-snug line-clamp-2">
-                    {ch.title}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </details>
-
-          {/* ── Appendices accordion ──────────────────────────────────── */}
-          <details open className="group/ap">
-            <summary className="flex items-center justify-between cursor-pointer list-none py-2 border-b border-border/40">
-              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                {tSidebar('appendices')}
-              </h2>
-              <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/ap:rotate-180" />
-            </summary>
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {appendices.map((app) => (
-                <a
-                  key={app.code}
-                  href={`https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${app.code}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-muted/20 hover:bg-muted/50 hover:border-border transition-all group"
-                >
-                  <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
-                    {app.code}
-                  </span>
-                  <span className="text-sm flex-1 min-w-0 truncate group-hover:text-foreground transition-colors">
-                    {app.title}
-                  </span>
-                  <ExternalLink className="size-3.5 text-muted-foreground/50 shrink-0" />
-                </a>
-              ))}
-            </div>
-          </details>
+          <QuranAccordions
+            chapters={chapters}
+            appendices={appendices}
+            chaptersOpen={ch !== '0'}
+            appendicesOpen={ap !== '0'}
+          />
         </div>
       </main>
     )

@@ -265,8 +265,7 @@ function NavSheetContent({
                 {filteredAppendices.map((appendix) => (
                   <SheetClose key={appendix.code} asChild>
                     <Link
-                      href={`https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${appendix.code}`}
-                      target="_blank"
+                      href={`/appendices/${appendix.code}`}
                       className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 transition-colors"
                     >
                       <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
