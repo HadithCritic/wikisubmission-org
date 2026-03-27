@@ -7,7 +7,6 @@ import { ScrollToTop } from '@/components/scroll-to-top'
 import { GeometryDots } from '@/components/geometry-dots'
 import Providers from '@/components/providers'
 import type { Viewport } from 'next'
-import { ClerkProvider } from '@clerk/nextjs'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale } from 'next-intl/server'
 import { ReactScanInit } from '@/components/react-scan-init'
@@ -25,30 +24,28 @@ export default async function RootLayout({
   const dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
 
   return (
-    <ClerkProvider signInUrl="/auth/sign-in" signUpUrl="/auth/sign-up">
-      <html lang={locale} dir={dir} suppressHydrationWarning>
-        <body
-          className={`${Fonts.sora.className} ${Fonts.amiri.variable} ${Fonts.jakartaSans.variable} antialiased wrap-break-words`}
-          suppressHydrationWarning
-        >
-          <NextIntlClientProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              disableTransitionOnChange
-            >
-              <Providers>
-                <GeometryDots />
-                {children}
-                <ScrollToTop />
-                <Toaster />
-                {process.env.NODE_ENV === 'development' && <ReactScanInit />}
-              </Providers>
-            </ThemeProvider>
-          </NextIntlClientProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <body
+        className={`${Fonts.sora.className} ${Fonts.amiri.variable} ${Fonts.jakartaSans.variable} antialiased wrap-break-words`}
+        suppressHydrationWarning
+      >
+        <NextIntlClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            disableTransitionOnChange
+          >
+            <Providers>
+              <GeometryDots />
+              {children}
+              <ScrollToTop />
+              <Toaster />
+              {process.env.NODE_ENV === 'development' && <ReactScanInit />}
+            </Providers>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   )
 }
 

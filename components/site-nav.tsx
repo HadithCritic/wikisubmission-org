@@ -7,18 +7,18 @@ import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
-// import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs' // Phase 3
+// import { SignInButton, SignedIn, SignedOut, UserButton } from '' // Phase 3, but using supabase auth
 import { cn } from '@/lib/utils'
 import { useTranslations, useLocale } from 'next-intl'
 
 const NAV_LINKS = [
-  { label: 'home',      href: '/'          },
-  { label: 'scripture', href: '/quran'     },
-  { label: 'miracle',   href: '/miracle'   },
+  { label: 'home', href: '/' },
+  { label: 'scripture', href: '/quran' },
+  { label: 'miracle', href: '/miracle' },
   { label: 'practices', href: '/practices' },
-  { label: 'archive',   href: '/archive'   },
-  { label: 'music',     href: '/music'     },
-  { label: 'blog',      href: '/blog'      },
+  { label: 'archive', href: '/archive' },
+  { label: 'music', href: '/music' },
+  { label: 'blog', href: '/blog' },
 ]
 
 export function SiteNav() {

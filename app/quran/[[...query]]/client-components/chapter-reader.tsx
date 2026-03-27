@@ -266,16 +266,49 @@ export function ChapterReader({
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}`
 
   // Current verse number for minimap highlight.
-  // Guard against SSR: window is undefined on the server even in 'use client' components.
-  const centerY = typeof window !== 'undefined' ? window.scrollY + window.innerHeight / 2 : 0
-  const centerVirtualItem =
-    virtualItems.find(
-      (v) => v.start <= centerY && v.start + v.size > centerY
-    ) ?? virtualItems[Math.floor(virtualItems.length / 2)]
-  const centerVerse = reader.verses[centerVirtualItem?.index ?? 0]
-  const currentVerseNumber = centerVerse
-    ? parseInt(centerVerse.vk?.split(':')[1] ?? '1')
-    : 1
+  // Computed in a dedicated scroll listener (not in the render body) so the
+  // minimap syncs immediately on every scroll event rather than waiting for
+  // React to re-render from the virtualizer's scroll subscription.
+  // stateRef keeps a live reference to verses + virtualizer so the [] listener
+  // never closes over stale values.
+  const [currentVerseNumber, setCurrentVerseNumber] = useState(1)
+  const minimapStateRef = useRef({ verses: reader.verses, virtualizer })
+  minimapStateRef.current = { verses: reader.verses, virtualizer }
+
+  useEffect(() => {
+    const computeCurrentVerse = () => {
+      const { verses, virtualizer: virt } = minimapStateRef.current
+      if (verses.length === 0) return
+      const scrollY = window.scrollY
+      const viewportH = window.innerHeight
+      const docH = document.documentElement.scrollHeight
+      const isAtTop = scrollY <= 8
+      const isAtBottom = scrollY + viewportH >= docH - 8
+
+      let vNum: number
+      if (isAtTop) {
+        const first = verses[0]
+        vNum = first ? parseInt(first.vk?.split(':')[1] ?? '1') : 1
+      } else if (isAtBottom) {
+        const last = verses[verses.length - 1]
+        vNum = last ? parseInt(last.vk?.split(':')[1] ?? '1') : 1
+      } else {
+        const centerY = scrollY + viewportH / 2
+        const items = virt.getVirtualItems()
+        const centerItem =
+          items.find((v) => v.start <= centerY && v.start + v.size > centerY) ??
+          items[Math.floor(items.length / 2)]
+        const centerVerse = verses[centerItem?.index ?? 0]
+        vNum = centerVerse ? parseInt(centerVerse.vk?.split(':')[1] ?? '1') : 1
+      }
+      setCurrentVerseNumber(vNum)
+    }
+
+    window.addEventListener('scroll', computeCurrentVerse, { passive: true })
+    // Also run once on mount so the initial position is correct.
+    computeCurrentVerse()
+    return () => window.removeEventListener('scroll', computeCurrentVerse)
+  }, [])
 
   // Show prev/next nav once the last verse is visible
   const [showNav, setShowNav] = useState(false)
@@ -337,7 +370,7 @@ export function ChapterReader({
 
       {/* Reading mode — full prose view, window scrolls naturally */}
       {displayMode === 'reading' && (
-        <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 pr-10 sm:pr-12">
+        <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40">
           <ReadingView
             verses={reader.verses}
             hasMore={reader.hasMore}
@@ -348,10 +381,9 @@ export function ChapterReader({
         </div>
       )}
 
-      {/* Verse/Word mode — window virtualizer, page scrolls naturally.
-          pr-10 sm:pr-12 keeps content clear of the fixed minimap overlay. */}
+      {/* Verse/Word mode — window virtualizer, page scrolls naturally. */}
       {displayMode !== 'reading' && (
-      <div className="pr-10 sm:pr-12">
+      <div>
         {/* Virtual list container — height drives the page scroll range */}
         <div
           ref={listRef}

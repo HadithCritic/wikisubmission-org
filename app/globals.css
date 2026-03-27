@@ -140,6 +140,16 @@
     overflow-x: clip;
   }
 
+  /* Hide native scrollbar on Quran reader pages — the minimap is the
+     sole scroll indicator. Applied via JS class toggle in scroll-container.tsx. */
+  html.quran-page::-webkit-scrollbar {
+    display: none;
+  }
+  html.quran-page {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
