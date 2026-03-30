@@ -8,7 +8,7 @@ export const metadata = buildPageMetadata({
   title: 'The Mathematical Miracle | WikiSubmission',
   description: 'Discover Code 19 — the mathematical miracle of the Quran, a built-in divine authentication discovered by Dr. Rashad Khalifa in 1974.',
   url: '/miracle',
-}
+})
 
 export default async function MiraclePage() {
   const t = await getTranslations('miracle')
