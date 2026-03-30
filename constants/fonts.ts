@@ -1,9 +1,10 @@
 import { Sora, Geist_Mono, Amiri, Plus_Jakarta_Sans } from 'next/font/google'
+import localFont from "next/font/local";
 
-const sora = Sora({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-})
+const glacial = localFont({
+    src: "../public/font/GlacialIndifference-Regular.otf",
+    weight: '400'
+});
 
 const geistMono = Geist_Mono({
   subsets: ['latin'],
@@ -16,15 +17,8 @@ const amiri = Amiri({
   variable: '--font-amiri',
 })
 
-const jakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-jakarta',
-})
-
 export const Fonts = {
-  sora: sora,
+  glacial: glacial,
   geistMono: geistMono,
   amiri: amiri,
-  jakartaSans: jakartaSans,
 }

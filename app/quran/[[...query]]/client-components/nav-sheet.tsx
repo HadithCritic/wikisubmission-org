@@ -38,6 +38,7 @@ function BackToQuranLink({ alreadyShown }: { alreadyShown: boolean }) {
     <SheetClose asChild>
       <Link
         href="/quran"
+        onClick={() => { document.body.style.top = '0px' }}
         className="flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
       >
         {t('quran')}
@@ -100,6 +101,7 @@ function NavSheetContent({
         <SheetClose asChild>
           <Link
             href="/proclamation"
+            onClick={() => { document.body.style.top = '0px' }}
             className="flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
           >
             {tNav('proclamation')}
@@ -111,6 +113,7 @@ function NavSheetContent({
             href="/introduction"
             target="_blank"
             prefetch={false}
+            onClick={() => { document.body.style.top = '0px' }}
             className="flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
           >
             {tNav('introduction')}
@@ -184,6 +187,7 @@ function NavSheetContent({
                       <Link
                         href={`/quran/${chapter.chapter_number}`}
                         prefetch
+                        onClick={() => { document.body.style.top = '0px' }}
                         className={cn(
                           'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all',
                           isActive
@@ -266,6 +270,7 @@ function NavSheetContent({
                   <SheetClose key={appendix.code} asChild>
                     <Link
                       href={`/appendices/${appendix.code}`}
+                      onClick={() => { document.body.style.top = '0px' }}
                       className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 transition-colors"
                     >
                       <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
