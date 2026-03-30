@@ -63,7 +63,7 @@ export function SiteFooter() {
                 POWERED BY YOUR CONTRIBUTIONS
               </p>
               <p className="text-xs text-muted-foreground">
-                We are commmitted to continue developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <Link href="/donate" className='text-primary/70'>make a contribution.</Link> As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.
+                We are committed to continue developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <Link href="/donate" className='text-primary/70'>make a contribution.</Link> As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.
               </p>
             </div>
 
