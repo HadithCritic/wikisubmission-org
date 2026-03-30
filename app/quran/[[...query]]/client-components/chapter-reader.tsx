@@ -143,6 +143,11 @@ export function ChapterReader({
     // scrollPaddingStart keeps scrollToIndex results below the fixed headers
     // (SiteNav 64px + sub-header 56px = 120px).
     scrollPaddingStart: 120,
+    // Override the library default of `() => window.scrollY` — without this,
+    // navigating from the chapter list while scrolled down causes the virtualizer
+    // to initialise with the inherited scroll offset and render items at the wrong
+    // position before the useLayoutEffect scroll-reset can take effect.
+    initialOffset: 0,
   })
 
   // GSAP border-glow while loading; completion flash when verses arrive.
