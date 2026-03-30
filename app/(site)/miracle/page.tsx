@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import { FaYoutube } from 'react-icons/fa'
-import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: 'The Mathematical Miracle | WikiSubmission',
-  description:
-    'Discover Code 19 — the mathematical miracle of the Quran, a built-in divine authentication discovered by Dr. Rashad Khalifa in 1974.',
+  description: 'Discover Code 19 — the mathematical miracle of the Quran, a built-in divine authentication discovered by Dr. Rashad Khalifa in 1974.',
+  url: '/miracle',
 }
 
 export default async function MiraclePage() {

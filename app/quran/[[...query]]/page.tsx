@@ -9,6 +9,7 @@ import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
+import { buildPageMetadata } from '@/constants/metadata'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import { VerseListResult } from './mini-components/verse-list-result'
 import { QuranAccordions } from './mini-components/quran-accordions'
@@ -294,31 +295,50 @@ export async function generateMetadata({
   const { query } = await params
   const queryText = decodeURIComponent(q || query?.join(' ') || '')
 
-  let title = `Quran | The Final Testament | WikiSubmission`
-  let description = `Access the Final Testament at WikiSubmission, a free and open-source platform for Submission.`
-  const openGraph = {
-    images: [{ url: '/brand-assets/logo-black.png', width: 64, height: 64 }],
+  if (!queryText) {
+    return buildPageMetadata({
+      title: 'Quran | The Final Testament | WikiSubmission',
+      description: 'Read and study the Final Testament (Quran) at WikiSubmission — a free and open-source platform for Submission.',
+      url: '/quran',
+    })
   }
-
-  if (!queryText)
-    return {
-      title,
-      description,
-      openGraph: { title, description, ...openGraph },
-    }
 
   const parsed = parseQueryType(queryText)
 
-  if (parsed.type === 'chapter') {
-    title = `Sura ${parsed.chapterNumber} | Quran | WikiSubmission`
-    description = `Read and study Chapter ${parsed.chapterNumber} of the Final Testament`
-  } else if (parsed.type === 'verse-list' || parsed.type === 'range') {
-    title = `${queryText} | Quran | WikiSubmission`
-    description = `Verse ${queryText} of the Final Testament`
-  } else {
-    title = `Search: ${queryText} | Quran | WikiSubmission`
-    description = `Search results for "${queryText}" in the Final Testament`
+  if (parsed.type === 'chapter' && parsed.chapterNumber) {
+    let chapterTitle = ''
+    let verseCount = ''
+    try {
+      const result = await wsApiServer.GET('/chapters', {
+        params: { query: { lang: 'en' } },
+        next: { revalidate: 86400 },
+      })
+      const ch = result.data?.find((c) => c.chapter_number === parsed.chapterNumber)
+      if (ch?.title) chapterTitle = ch.title
+      if (ch?.verse_count) verseCount = ` · ${ch.verse_count} verses`
+    } catch {}
+
+    const title = chapterTitle
+      ? `Sura ${parsed.chapterNumber}: ${chapterTitle} | Quran | WikiSubmission`
+      : `Sura ${parsed.chapterNumber} | Quran | WikiSubmission`
+    const description = `Read Sura ${parsed.chapterNumber}${chapterTitle ? ` (${chapterTitle})` : ''} of the Final Testament${verseCount}.`
+    return buildPageMetadata({ title, description, url: `/quran/${parsed.chapterNumber}` })
   }
 
-  return { title, description, openGraph: { title, description, ...openGraph } }
+  if (parsed.type === 'range' && parsed.chapterNumber) {
+    const title = `${queryText} | Quran | WikiSubmission`
+    const description = `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament.`
+    return buildPageMetadata({ title, description, url: `/quran/${queryText}` })
+  }
+
+  if (parsed.type === 'verse-list') {
+    const title = `${queryText} | Quran | WikiSubmission`
+    const description = `Read ${queryText} from the Final Testament (Quran) at WikiSubmission.`
+    return buildPageMetadata({ title, description })
+  }
+
+  // text search
+  const title = `"${queryText}" | Quran Search | WikiSubmission`
+  const description = `Search results for "${queryText}" in the Final Testament (Quran).`
+  return buildPageMetadata({ title, description, url: `/quran?q=${encodeURIComponent(queryText)}` })
 }

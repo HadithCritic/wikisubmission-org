@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import { Metadata } from 'next'
 import { QuranRef } from '@/components/quran-ref'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: 'Proclamation | WikiSubmission',
-  description:
-    'Proclaiming One Unified Religion for All the People — Rashad Khalifa, November 1989',
-}
+  description: 'Proclaiming One Unified Religion for All the People — Rashad Khalifa, November 1989',
+  url: '/proclamation',
+})
 
 function ScriptureQuote({
   children,

@@ -253,26 +253,6 @@ function ArchiveLoadingSkeleton() {
   )
 }
 
-/** Renders <b>…</b> as highlighted spans */
-function HighlightText({ text }: { text?: string | null }) {
-  if (!text) return null
-  return (
-    <>
-      {text.split(/(<b>.*?<\/b>)/g).map((part, i) =>
-        part.startsWith('<b>') && part.endsWith('</b>') ? (
-          <span
-            key={i}
-            className="bg-primary/10 text-primary rounded-sm font-bold"
-          >
-            {part.slice(3, -4)}
-          </span>
-        ) : (
-          part || null
-        )
-      )}
-    </>
-  )
-}
 
 function MediaSection({
   results,
@@ -411,7 +391,7 @@ function MediaCard({ items }: { items: MediaRow[] }) {
                   <span className="text-[10px] font-mono font-bold">{item.start_timestamp}</span>
                 </Link>
                 <p className="leading-relaxed flex-1 min-w-0">
-                  <HighlightText text={item.transcript} />
+                  {highlightMarkdown(item.transcript)}
                 </p>
               </div>
             ))}

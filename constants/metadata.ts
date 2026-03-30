@@ -1,5 +1,45 @@
 import type { Metadata as _Metadata } from 'next'
 
+const DEFAULT_IMAGE = '/brand-assets/logo-transparent.png'
+
+/**
+ * Builds a complete Metadata object with consistent OG + Twitter cards.
+ * Use this on every page instead of manually constructing openGraph/twitter.
+ */
+export function buildPageMetadata({
+  title,
+  description,
+  url,
+  image,
+}: {
+  title: string
+  description: string
+  url?: string
+  image?: string
+}): _Metadata {
+  const img = image ?? DEFAULT_IMAGE
+  return {
+    title,
+    description,
+    ...(url ? { alternates: { canonical: url } } : {}),
+    openGraph: {
+      title,
+      description,
+      ...(url ? { url } : {}),
+      siteName: 'WikiSubmission',
+      images: [{ url: img, width: 1200, height: 630, alt: title }],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [img],
+    },
+  }
+}
+
 export const Metadata: _Metadata = {
   title: 'WikiSubmission',
   description:
