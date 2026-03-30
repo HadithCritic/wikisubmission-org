@@ -126,6 +126,9 @@ export function ChapterReader({
   const [scrollMargin, setScrollMargin] = useState(0)
 
   useLayoutEffect(() => {
+    // Reset scroll before measuring — prevents inheriting the previous page's
+    // scroll position and ensures scrollMargin is computed from the true top.
+    window.scrollTo(0, 0)
     if (listRef.current) {
       const rect = listRef.current.getBoundingClientRect()
       setScrollMargin(rect.top + window.scrollY)
