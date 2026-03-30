@@ -54,12 +54,12 @@ export function SiteFooter() {
               <span className="font-bold text-lg">WikiSubmission</span>
             </Link>
 
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
+            <p className="text-muted-foreground leading-relaxed max-w-sm">
               Faith-based 501(c)(3) nonprofit organization providing free and open-source technology, educational resources, and creative works in the cause of God.
             </p>
 
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary/70">
+              <p className="text-xs font-semibold uppercase tracking-widest">
                 POWERED BY YOUR CONTRIBUTIONS
               </p>
               <p className="text-xs text-muted-foreground">
@@ -68,7 +68,7 @@ export function SiteFooter() {
             </div>
 
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary/70">
+              <p className="text-xs font-semibold uppercase tracking-widest">
                 CONNECT WITH US
               </p>
               <p className="text-xs text-muted-foreground">
@@ -90,26 +90,11 @@ export function SiteFooter() {
               </div>
             </a>
 
-            {/* Social icons */}
-            <div className="flex items-center gap-3 pt-1">
-              {SOCIAL.map(({ icon: Icon, href, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="size-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <Icon size={16} />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Scripture */}
           <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest">
               Scripture
             </p>
             <ul className="space-y-2.5">
@@ -128,7 +113,7 @@ export function SiteFooter() {
 
           {/* Explore */}
           <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest">
               Explore
             </p>
             <ul className="space-y-2.5">
@@ -147,7 +132,7 @@ export function SiteFooter() {
 
           {/* Organization */}
           <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest">
               Organization
             </p>
             <ul className="space-y-2.5">
@@ -166,8 +151,22 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-16 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+        <div className="mt-8 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} WikiSubmission. All rights reserved.</p>
+          <div className="flex items-center gap-3">
+            {SOCIAL.map(({ icon: Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <Icon size={14} />
+              </a>
+            ))}
+          </div>
         </div>
 
       </div>
