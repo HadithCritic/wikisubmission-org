@@ -72,7 +72,7 @@ export function SiteFooter() {
                 CONNECT WITH US
               </p>
               <p className="text-xs text-muted-foreground">
-                Our team is growing. If you&apos;d like to get involved, or have any questions, connect with us on <Link href="/donate" className='text-primary/70'>Discord</Link> or email us at <Link href={`mailto:${About.email}`} className='text-primary/70'>{About.email}</Link>
+                Our team is growing. If you&apos;d like to get involved, or have any questions, connect with us on <Link href={About.social.discord} className='text-primary/70'>Discord</Link> or email us at <Link href={`mailto:${About.email}`} className='text-primary/70'>{About.email}</Link>
               </p>
             </div>
 
