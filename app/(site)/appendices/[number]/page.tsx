@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Metadata } from 'next'
 import { APPENDICES } from '@/constants/appendices'
+import { buildPageMetadata } from '@/constants/metadata'
 import { ArticleAnimations } from '@/components/article-animations'
 
 interface Props {
@@ -15,10 +16,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const appendix = APPENDICES.find((a) => a.number === n)
   if (!appendix) return {}
 
-  return {
+  return buildPageMetadata({
     title: `Appendix ${appendix.number}: ${appendix.title} | WikiSubmission`,
     description: `Appendix ${appendix.number} of the Final Testament — ${appendix.title}.`,
-  }
+    url: `/appendices/${appendix.number}`,
+  })
 }
 
 export function generateStaticParams() {

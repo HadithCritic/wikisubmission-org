@@ -1,14 +1,14 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import { Metadata } from 'next'
 import { QuranRef } from '@/components/quran-ref'
 import { ArticleAnimations } from '@/components/article-animations'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: 'Introduction | WikiSubmission',
-  description:
-    "An introduction to the Final Testament — God's final message to humanity, the purification and consolidation of all scriptures into one universal religion of Submission.",
-}
+  description: "An introduction to the Final Testament — God's final message to humanity, the purification and consolidation of all scriptures into one universal religion of Submission.",
+  url: '/introduction',
+})
 
 function ScriptureQuote({
   children,

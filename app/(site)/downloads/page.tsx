@@ -4,12 +4,13 @@ import { FaAndroid, FaApple } from 'react-icons/fa'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import type { Metadata } from 'next'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: 'Downloads | WikiSubmission',
   description: 'Download the Quran, books, and apps from WikiSubmission.',
-}
+  url: '/downloads',
+})
 
 const DownloadLink = ({ href, label }: { href: string; label: string }) => (
   <a

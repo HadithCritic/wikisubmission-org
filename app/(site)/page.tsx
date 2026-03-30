@@ -1,5 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { buildPageMetadata } from '@/constants/metadata'
+
+export const metadata = buildPageMetadata({
+  title: 'WikiSubmission',
+  description: 'WikiSubmission is a faith-based nonprofit providing free and open-source tools for the Final Testament (Quran), Bible, and religious education.',
+  url: '/',
+})
 import { HeroCardDeck } from '@/components/hero-card-deck'
 import {
   FaApple,

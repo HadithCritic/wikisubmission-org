@@ -1,18 +1,13 @@
 import PracticesClient from './practices-client'
 import { wsApiServer } from '@/src/api/server-client'
-import { Metadata } from 'next'
 import type { components } from '@/src/api/types.gen'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: 'Practices | WikiSubmission',
-  description:
-    'Prayer times, Ramadan schedule, and Zakat calculator for any location.',
-  openGraph: {
-    title: 'Practices | WikiSubmission',
-    description:
-      'Prayer times, Ramadan schedule, and Zakat calculator for any location.',
-  },
-}
+  description: 'Prayer times, Ramadan schedule, and Zakat calculator for any location.',
+  url: '/practices',
+})
 
 type VerseData = components['schemas']['VerseData']
 

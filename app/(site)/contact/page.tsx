@@ -1,12 +1,13 @@
 import { About } from '@/constants/about'
 import { Mail, Github, MessageSquare, ExternalLink, ArrowRight } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import type { Metadata } from 'next'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: 'Contact | WikiSubmission',
   description: 'Get in touch with the WikiSubmission team.',
-}
+  url: '/contact',
+})
 
 export default async function ContactPage() {
   const t = await getTranslations('contact')
