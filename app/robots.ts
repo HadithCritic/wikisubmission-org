@@ -9,6 +9,9 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/test', '/dashboard', '/api'],
       },
     ],
-    sitemap: 'https://wikisubmission.org/sitemap.xml',
+    sitemap: [
+      'https://wikisubmission.org/sitemap.xml',
+      'https://wikisubmission.org/llms.txt',
+    ],
   }
 }

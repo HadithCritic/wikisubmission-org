@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { ArrowLeftIcon } from 'lucide-react'
 import { getLocale } from 'next-intl/server'
+import { buildPageMetadata } from '@/constants/metadata'
 
 // Must match @sanity/document-internationalization supportedLanguages in studio
 const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
@@ -91,13 +92,19 @@ export async function generateMetadata({
       post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug, language: 'en' })
     }
     if (!post) return {}
-    return {
+    const base = buildPageMetadata({
       title: `${post.title} | WikiSubmission`,
-      description: post.excerpt,
+      description: post.excerpt ?? '',
+      url: `https://wikisubmission.org/blog/${slug}`,
+      image: post.thumbnailUrl,
+    })
+    return {
+      ...base,
       openGraph: {
-        title: post.title,
-        description: post.excerpt,
-        images: post.thumbnailUrl ? [post.thumbnailUrl] : [],
+        ...base.openGraph,
+        type: 'article',
+        ...(post.publishedAt ? { publishedTime: post.publishedAt } : {}),
+        ...(post.authorName ? { authors: [post.authorName] } : {}),
       },
     }
   } catch {

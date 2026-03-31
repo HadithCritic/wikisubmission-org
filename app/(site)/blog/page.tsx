@@ -7,6 +7,7 @@ import { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { BlogBrowser } from './blog-browser'
 import type { Post, Category } from './blog-browser'
+import { buildPageMetadata } from '@/constants/metadata'
 
 // Must match @sanity/document-internationalization supportedLanguages in studio
 const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
@@ -17,14 +18,11 @@ function toSanityLanguage(locale: string): SanityLanguage {
     : 'en'
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'Blog | WikiSubmission',
   description: 'Articles, reflections, and research from the WikiSubmission community.',
-  openGraph: {
-    title: 'Blog | WikiSubmission',
-    description: 'Articles, reflections, and research from the WikiSubmission community.',
-  },
-}
+  url: 'https://wikisubmission.org/blog',
+})
 
 // Top 3 newest for the Featured strip
 const FEATURED_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) [0...3] {
