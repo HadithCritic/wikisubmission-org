@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText, Download } from 'lucide-react'
 import { Metadata } from 'next'
-import { APPENDICES } from '@/constants/appendices'
+import { APPENDICES, appendixPdfUrl } from '@/constants/appendices'
 import { buildPageMetadata } from '@/constants/metadata'
 import { ArticleAnimations } from '@/components/article-animations'
 
@@ -76,6 +76,26 @@ export default async function AppendixPage({ params }: Props) {
                     [{appendix.quranRef}]
                   </p>
                 )}
+                <div className="flex items-center gap-3 mt-2">
+                  <a
+                    href={appendixPdfUrl(appendix.number)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <FileText className="size-3.5" />
+                    Read
+                  </a>
+                  <span className="text-border/60 text-xs">·</span>
+                  <a
+                    href={appendixPdfUrl(appendix.number)}
+                    download
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Download className="size-3.5" />
+                    Download
+                  </a>
+                </div>
               </div>
             </div>
           </header>

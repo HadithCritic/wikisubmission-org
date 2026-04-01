@@ -4,6 +4,10 @@ export interface AppendixMeta {
   quranRef?: string
 }
 
+export function appendixPdfUrl(number: number): string {
+  return `https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${number}`
+}
+
 export const APPENDICES: AppendixMeta[] = [
   { number: 1, title: 'One of the Great Miracles', quranRef: '74:35' },
   { number: 2, title: "God's Messenger of the Covenant", quranRef: '3:81' },
