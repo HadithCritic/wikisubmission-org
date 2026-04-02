@@ -2,7 +2,7 @@ import { Geist_Mono, Amiri } from 'next/font/google'
 import localFont from "next/font/local";
 
 const glacial = localFont({
-    src: "../public/font/GlacialIndifference-Regular.otf",
+    src: "../public/font/GlacialIndifference-Regular.ttf",
     weight: '400'
 });
 
