@@ -1,6 +1,6 @@
 import type { Metadata as _Metadata } from 'next'
 
-const DEFAULT_IMAGE = '/brand-assets/logo-transparent.png'
+const DEFAULT_IMAGE = '/opengraph-image'
 
 /**
  * Builds a complete Metadata object with consistent OG + Twitter cards.
@@ -35,7 +35,7 @@ export function buildPageMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: [img],
+      images: [{ url: img, width: 1200, height: 630 }],
     },
   }
 }
@@ -75,14 +75,7 @@ export const Metadata: _Metadata = {
       'Access the Final Testament at WikiSubmission – a free and open source platform for Submission.',
     url: 'https://wikisubmission.org',
     siteName: 'WikiSubmission',
-    images: [
-      {
-        url: '/brand-assets/logo-transparent.png',
-        width: 1200,
-        height: 630,
-        alt: 'WikiSubmission Logo',
-      },
-    ],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'WikiSubmission' }],
     locale: 'en_US',
     type: 'website',
   },
