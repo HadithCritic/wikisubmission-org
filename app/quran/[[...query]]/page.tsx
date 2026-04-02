@@ -298,7 +298,7 @@ export async function generateMetadata({
   if (!queryText) {
     return buildPageMetadata({
       title: 'Quran | The Final Testament | WikiSubmission',
-      description: 'Read and study the Final Testament (Quran) at WikiSubmission — a free and open-source platform for Submission.',
+      description: 'Read and study the Final Testament (Quran) at WikiSubmission — a free and open-source platform for Submission',
       url: '/quran',
     })
   }
@@ -321,24 +321,24 @@ export async function generateMetadata({
     const title = chapterTitle
       ? `Sura ${parsed.chapterNumber}: ${chapterTitle} | Quran | WikiSubmission`
       : `Sura ${parsed.chapterNumber} | Quran | WikiSubmission`
-    const description = `Read Sura ${parsed.chapterNumber}${chapterTitle ? ` (${chapterTitle})` : ''} of the Final Testament${verseCount}.`
+    const description = `Read Sura ${parsed.chapterNumber}${chapterTitle ? ` (${chapterTitle})` : ''} of the Final Testament${verseCount}`
     return buildPageMetadata({ title, description, url: `/quran/${parsed.chapterNumber}` })
   }
 
   if (parsed.type === 'range' && parsed.chapterNumber) {
     const title = `${queryText} | Quran | WikiSubmission`
-    const description = `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament.`
+    const description = `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament`
     return buildPageMetadata({ title, description, url: `/quran/${queryText}` })
   }
 
   if (parsed.type === 'verse-list') {
     const title = `${queryText} | Quran | WikiSubmission`
-    const description = `Read ${queryText} from the Final Testament (Quran) at WikiSubmission.`
+    const description = `Read ${queryText} from the Final Testament (Quran) at WikiSubmission`
     return buildPageMetadata({ title, description })
   }
 
   // text search
   const title = `"${queryText}" | Quran Search | WikiSubmission`
-  const description = `Search results for "${queryText}" in the Final Testament (Quran).`
+  const description = `Search results for "${queryText}" in the Final Testament (Quran)`
   return buildPageMetadata({ title, description, url: `/quran?q=${encodeURIComponent(queryText)}` })
 }
