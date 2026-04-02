@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react'
+import { memo, useMemo, useCallback, useState } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useIsTouch } from '@/hooks/use-is-touch'
