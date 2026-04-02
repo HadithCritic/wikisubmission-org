@@ -80,6 +80,16 @@ function NavSheetContent({
       <div className="px-3 py-2 space-y-0.5 border-b border-border/40">
         <SheetClose asChild>
           <Link
+            href="/quran"
+            onClick={() => { document.body.style.top = '0px' }}
+            className="flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
+          >
+            {tNav('browse')}
+            <ChevronRight className="size-3.5 text-muted-foreground" />
+          </Link>
+        </SheetClose>
+        <SheetClose asChild>
+          <Link
             href="/proclamation"
             onClick={() => { document.body.style.top = '0px' }}
             className="flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
