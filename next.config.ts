@@ -70,6 +70,11 @@ const nextConfig: NextConfig = {
         destination: '/quran/:query*',
         permanent: true,
       },
+      {
+        source: '/appendix/:path*',
+        destination: '/appendices/:path*',
+        permanent: true
+      }
     ]
   },
 }
