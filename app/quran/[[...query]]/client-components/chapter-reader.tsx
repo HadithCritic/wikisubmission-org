@@ -460,7 +460,7 @@ export function ChapterReader({
       : undefined
 
   return (
-    <div className={`flex flex-col gap-2 ${ZOOM_WIDTH_CLASS[zoomLevel]} mx-auto w-full px-4 pb-32`}>
+    <div className={`flex flex-col gap-2 ${ZOOM_WIDTH_CLASS[zoomLevel]} mx-auto w-full px-4 pt-3 pb-32`}>
       {/* Chapter title */}
       <div className="shrink-0 flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
         <div className="flex flex-col gap-1 flex-1 min-w-0">
