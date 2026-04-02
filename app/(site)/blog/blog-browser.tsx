@@ -99,20 +99,20 @@ function SearchResultRow({ post, query }: { post: SearchPost; query: string }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex items-start gap-4 bg-background rounded-xl border border-border/40 p-4 transition-colors hover:border-border/80"
+      className="group flex flex-col sm:flex-row sm:items-start bg-background rounded-xl border border-border/40 overflow-hidden transition-colors hover:border-border/80"
     >
-      <div className="shrink-0 w-24 h-14 rounded-lg overflow-hidden bg-muted">
+      <div className="w-full sm:shrink-0 sm:w-24 sm:h-14 sm:m-3 sm:rounded-lg overflow-hidden bg-muted">
         {post.thumbnailUrl && (
           <Image
             src={post.thumbnailUrl}
             alt={post.title}
-            width={96}
-            height={54}
-            className="object-cover w-full h-full"
+            width={320}
+            height={180}
+            className="object-cover w-full aspect-video sm:h-full sm:aspect-auto"
           />
         )}
       </div>
-      <div className="flex flex-col flex-1 min-w-0 gap-1.5">
+      <div className="flex flex-col flex-1 min-w-0 gap-1.5 p-4 sm:py-3 sm:pl-0 sm:pr-3">
         {post.category && (
           <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">
             {post.category}
