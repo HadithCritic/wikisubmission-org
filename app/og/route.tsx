@@ -42,15 +42,13 @@ export async function GET(request: NextRequest) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 36,
-          padding: '0 100px',
+          gap: 48,
+          padding: '0 120px',
         }}
       >
-        {/* Logo */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoSrc} width={88} height={88} alt="" />
+        <img src={logoSrc} width={128} height={128} alt="" />
 
-        {/* Title */}
         <div
           style={{
             color: '#ffffff',
@@ -58,23 +56,11 @@ export async function GET(request: NextRequest) {
             fontFamily: 'GlacialIndifference',
             fontWeight: 400,
             textAlign: 'center',
-            lineHeight: 1.25,
+            lineHeight: 1.3,
             letterSpacing: '-0.01em',
           }}
         >
           {title}
-        </div>
-
-        {/* Domain */}
-        <div
-          style={{
-            color: '#555555',
-            fontSize: 22,
-            fontFamily: 'GlacialIndifference',
-            letterSpacing: '0.06em',
-          }}
-        >
-          wikisubmission.org
         </div>
       </div>
     ),

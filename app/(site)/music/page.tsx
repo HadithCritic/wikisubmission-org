@@ -1,5 +1,6 @@
 import MusicClient from './music-client'
 import { ws } from '@/lib/wikisubmission-sdk'
+import { buildPageMetadata } from '@/constants/metadata'
 import type { Metadata } from 'next'
 
 export default async function MusicPage() {
@@ -24,29 +25,19 @@ export async function generateMetadata({
       if (track && track.artistObj) {
         const title = `${track.name} by ${track.artistObj.name} | Music (Zikr) | WikiSubmission`
         const description = `Listen to ${track.name} by ${track.artistObj.name} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`
-
         return {
-          title,
-          description,
+          ...buildPageMetadata({
+            title,
+            description,
+            url: `https://wikisubmission.org/music?track=${trackId}`,
+          }),
           itunes: {
             appId: '6444260632',
             appArgument: `wikisubmission://music/track/${trackId}`,
           },
           openGraph: {
-            title,
-            description,
+            ...buildPageMetadata({ title, description }).openGraph,
             type: 'music.song',
-            images: track.artistObj.image_url
-              ? [track.artistObj.image_url]
-              : [],
-          },
-          twitter: {
-            card: 'summary_large_image',
-            title,
-            description,
-            images: track.artistObj.image_url
-              ? [track.artistObj.image_url]
-              : [],
           },
         }
       }
@@ -55,21 +46,9 @@ export async function generateMetadata({
     }
   }
 
-  const defaultTitle = 'Music (Zikr) | WikiSubmission'
-  const defaultDescription =
-    'Glorification and commemoration of God through beautiful recitations and melodies.'
-
-  return {
-    title: defaultTitle,
-    description: defaultDescription,
-    openGraph: {
-      title: defaultTitle,
-      description: defaultDescription,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: defaultTitle,
-      description: defaultDescription,
-    },
-  }
+  return buildPageMetadata({
+    title: 'Music (Zikr) | WikiSubmission',
+    description: 'Glorification and commemoration of God through beautiful recitations and melodies.',
+    url: 'https://wikisubmission.org/music',
+  })
 }
