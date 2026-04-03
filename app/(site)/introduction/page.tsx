@@ -1,12 +1,13 @@
 import Link from 'next/link'
-import { ChevronLeft, FileText, Download } from 'lucide-react'
+import { ChevronLeft, FileText, Download, PlugZap } from 'lucide-react'
 import { QuranRef } from '@/components/quran-ref'
 import { ArticleAnimations } from '@/components/article-animations'
 import { buildPageMetadata } from '@/constants/metadata'
 
 export const metadata = buildPageMetadata({
   title: 'Introduction | WikiSubmission',
-  description: "An introduction to the Final Testament — God's final message to humanity, the purification and consolidation of all scriptures into one universal religion of Submission.",
+  description:
+    "An introduction to the Final Testament — God's final message to humanity, the purification and consolidation of all scriptures into one universal religion of Submission.",
   url: '/introduction',
 })
 
@@ -94,6 +95,23 @@ export default function IntroductionPage() {
               including the Old Testament, the New Testament, and this Final
               Testament.
             </p>
+            <ScriptureQuote source="Deuteronomy 6:4–5, Mark 12:29–30, Quran 3:18">
+              Hear, O Israel! The Lord our God is One God!
+              <br />
+              Therefore you shall adore the Lord your God
+              <br />
+              with all your heart, with all your soul,
+              <br />
+              with all your mind, and with all your strength.
+            </ScriptureQuote>
+
+            <ScriptureQuote source="Gayatri Mantra, Yajur Veda">
+              Let us meditate on God, His glorious attributes, who is the basis
+              of everything in this universe as its Creator, who is fit to be
+              worshiped as Omnipresent, Omnipotent, Omniscient and self existent
+              conscious being, who removes all ignorance and impurities from the
+              mind and purifies and sharpens our intellect.
+            </ScriptureQuote>
             <p>
               While every religion has been corrupted by innovations,
               traditions, and false, idolatrous doctrines, there may be
@@ -115,27 +133,6 @@ export default function IntroductionPage() {
               how we came into this world, where do we go from here, which
               religion is the right one, was it evolution or creation, etc.
             </p>
-          </section>
-
-          {/* ── Scripture quotes ───────────────────────────────────────────── */}
-          <section className="space-y-6">
-            <ScriptureQuote source="Deuteronomy 6:4–5, Mark 12:29–30, Quran 3:18">
-              Hear, O Israel! The Lord our God is One God!
-              <br />
-              Therefore you shall adore the Lord your God
-              <br />
-              with all your heart, with all your soul,
-              <br />
-              with all your mind, and with all your strength.
-            </ScriptureQuote>
-
-            <ScriptureQuote source="Gayatri Mantra, Yajur Veda">
-              Let us meditate on God, His glorious attributes, who is the basis
-              of everything in this universe as its Creator, who is fit to be
-              worshiped as Omnipresent, Omnipotent, Omniscient and self existent
-              conscious being, who removes all ignorance and impurities from the
-              mind and purifies and sharpens our intellect.
-            </ScriptureQuote>
           </section>
 
           {/* ── Population / timing ────────────────────────────────────────── */}
@@ -207,9 +204,15 @@ export default function IntroductionPage() {
           </section>
 
           {/* ── The Four Categories ────────────────────────────────────────── */}
-          <SectionDivider label="The Four Categories" />
+          <SectionDivider label="" />
 
           <section className="space-y-8 text-base leading-relaxed text-foreground/90">
+            <div className="space-y-3">
+              <p>
+                The dispute in the Heavenly Community led to the classification
+                of God&apos;s creatures into different categories:
+              </p>
+            </div>
             <div className="space-y-3">
               <h3 className="font-semibold text-foreground">(1) The Angels</h3>
               <p>
@@ -234,16 +237,17 @@ export default function IntroductionPage() {
                 denounce their crime, repent, and submit to His absolute
                 authority (
                 <QuranRef reference="33:72" />
-                ). The vast majority of the rebels took advantage of God&apos;s
-                gracious offer to re-enter His kingdom. They agreed to kill
-                their egos, come to this world to perform a submissive role, as
-                an expiation for their blasphemy. In return for their submissive
-                role in this world, these creatures are redeemed back to
-                God&apos;s eternal kingdom (
+                ). As represented in the diagram above, the vast majority of the
+                rebels took advantage of God&apos;s gracious offer to re-enter
+                His kingdom. They agreed to kill their egos, come to this world
+                to perform a submissive role, as an expiation for their
+                blasphemy. In return for their submissive role in this world,
+                these creatures are redeemed back to God&apos;s eternal kingdom
+                (
                 <QuranRef reference="6:38" />
                 ). The horse, the dog, the tree, the sun, the moon, the stars,
                 as well as deformed and retarded children are among the
-                intelligent creatures who denounced their crime and repented.
+                intelligent creatures who denounced their crime and repented:
               </p>
             </div>
 
@@ -271,10 +275,9 @@ export default function IntroductionPage() {
               no matter how rich or poor the owner might be. The sun rises and
               sets every day at precisely the times prescribed by God. The moon
               follows its synchronized orbit around the earth, without the
-              slightest deviation. The human body—a temporary garment—belongs
-              to the Earth; as such, it is a submitter. The heart, lungs,
-              kidneys, and other organs perform their functions without our
-              control.
+              slightest deviation. The human body—a temporary garment—belongs to
+              the Earth; as such, it is a submitter. The heart, lungs, kidneys,
+              and other organs perform their functions without our control.
             </p>
 
             <div className="space-y-3">
@@ -569,7 +572,7 @@ export default function IntroductionPage() {
             className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-2 text-sm"
           >
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-              Proof of Authenticity — Verify Yourself
+              Proof of Authenticity to be Verified by the Reader
             </p>
             <div className="flex items-baseline gap-3">
               <span className="shrink-0 text-primary font-mono text-xs">●</span>
@@ -591,8 +594,10 @@ export default function IntroductionPage() {
           {/* ── Scientific facts ───────────────────────────────────────────── */}
           <section className="space-y-4">
             <p className="text-base font-medium">
-              A large number of Quranic facts are proven or theorized by modern
-              science:
+              In addition to the Quran&apos;s extraordinary mathematical
+              composition, we find a large number of Quranic facts which are
+              proven or theorized by modern science. Here are a few examples of
+              such advance scientific information:
             </p>
             <ol className="space-y-2 text-sm text-foreground/90 leading-relaxed list-none">
               {(
@@ -692,7 +697,7 @@ export default function IntroductionPage() {
               As recently as 1975, and in the same location where the Quran was
               revealed, the president of the Islamic University of Medina, Saudi
               Arabia, Sheikh Abdul Aziz Ben Baz, declared that the earth is flat
-              and standing still.
+              and standing still (see insert)!!
             </p>
             <blockquote className="border-l-4 border-primary/30 pl-5 py-1 space-y-1">
               <p className="italic text-foreground/90 leading-relaxed">
@@ -707,7 +712,7 @@ export default function IntroductionPage() {
             </blockquote>
           </section>
 
-          <SectionDivider label="Perfect Happiness" />
+          <SectionDivider label="Perfect Happiness: Now and Forever" />
 
           <section className="space-y-5 text-base leading-relaxed text-foreground/90">
             <p>
@@ -729,6 +734,11 @@ export default function IntroductionPage() {
               </Link>
               ).
             </p>
+            <p>
+              In the numerous verses throughout this proven Testament, God
+              personally guarantees the believers&apos; happiness, now and
+              forever:
+            </p>
           </section>
 
           <div
@@ -746,7 +756,7 @@ export default function IntroductionPage() {
             </p>
           </div>
 
-          <SectionDivider label="One Acceptable Religion" />
+          <SectionDivider label="All Believers Constitute the One Acceptable Religion" />
 
           <section className="space-y-5 text-base leading-relaxed text-foreground/90">
             <p>
@@ -813,7 +823,20 @@ export default function IntroductionPage() {
 
           <section className="text-sm text-muted-foreground leading-relaxed space-y-1 text-right">
             <p className="font-medium text-foreground/70">Rashad Khalifa</p>
-            <p>Tucson · Ramadan 26, 1409</p>
+            <p>
+              Tucson · Ramadan 26, 1409
+              <br />
+              <br />
+              <br />
+            </p>
+
+            <hr className="flex-1 border-border/50" />
+            <p>
+              * The final draft of the first printing was completed in the Night
+              of Destiny 1409. If we add the day, month, and year of this date,
+              we get 1444, or 19x19x4 [Ramadan 26, 1409: 9+26+1409 = 1444.]
+            </p>
+            <hr className="flex-1 border-border/50" />
           </section>
 
           {/* ── Navigation ─────────────────────────────────────────────────── */}

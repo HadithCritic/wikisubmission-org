@@ -3,6 +3,22 @@ import { QuranRef } from '@/components/quran-ref'
 export function AppendixContent() {
   return (
     <>
+      <section>
+        <p>
+          The Quran is characterized by a unique phenomenon never found in any
+          human authored book. Every element of the Quran is mathematically
+          composed — the suras, the verses, the words, the number of certain
+          letters, the number of words from the same root, the number and
+          variety of divine names, the unique spelling of certain words, the
+          absence or deliberate alteration of certain letters within certain
+          words, and many other elements of the Quran besides its content. There
+          are two major facets of the Quran&apon;s mathematical system: (1) The
+          mathematical literary composition, and (2) The mathematical structure
+          involving the numbers of suras and verses. Because of this
+          comprehensive mathematical coding, the slightest distortion of the
+          Quran&apos;s text or physical arrangement is immediately exposed.
+        </p>
+      </section>
       {/* ── Opening card ─────────────────────────────────────────────────── */}
       <div
         data-card
@@ -11,36 +27,36 @@ export function AppendixContent() {
         <p className="text-sm font-semibold uppercase tracking-widest text-primary">
           Simple to Understand · Impossible to Imitate
         </p>
-        <p className="text-base leading-relaxed text-muted-foreground">
-          For the first time in history we have a scripture with built-in proof
-          of divine authorship — a superhuman mathematical composition.
-        </p>
       </div>
 
       {/* ── Intro ────────────────────────────────────────────────────────── */}
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
+          For the first time in history we have a scripture with built-in proof
+          of divine authorship — a superhuman mathematical composition.
+        </p>
+        <p>
           Any reader of this book can easily verify the Quran&apos;s
-          mathematical miracle. The word &ldquo;God&rdquo; (Allah) is written
-          in bold capital letters throughout the text. The cumulative frequency
-          of occurrence of the word &ldquo;God&rdquo; is noted at the bottom of
+          mathematical miracle. The word &ldquo;God&rdquo; (Allah) is written in
+          bold capital letters throughout the text. The cumulative frequency of
+          occurrence of the word &ldquo;God&rdquo; is noted at the bottom of
           each page in the left hand corner. The number in the right hand corner
           is the cumulative total of the numbers for verses containing the word
           &ldquo;God.&rdquo; The last page of the text shows that the total
-          occurrence of the word &ldquo;God&rdquo; is 2698, or 19×142. The
-          total sum of verse numbers for all verses containing the word
-          &ldquo;God&rdquo; is 118123, also a multiple of 19 (118123 =
-          19×6217). Nineteen is the common denominator throughout the
-          Quran&apos;s mathematical system.
+          occurrence of the word &ldquo;God&rdquo; is 2698, or 19×142. The total
+          sum of verse numbers for all verses containing the word
+          &ldquo;God&rdquo; is 118123, also a multiple of 19 (118123 = 19×6217).
+          Nineteen is the common denominator throughout the Quran&apos;s
+          mathematical system.
         </p>
         <p>
           This phenomenon alone suffices as incontrovertible proof that the
-          Quran is God&apos;s message to the world. No human being(s) could
-          have kept track of 2698 occurrences of the word &ldquo;God,&rdquo;
-          and the numbers of verses where they occur. This is especially
-          impossible in view of (1) the age of ignorance during which the Quran
-          was revealed, and (2) the fact that the suras and verses were widely
-          separated in time and place of revelation.
+          Quran is God&apos;s message to the world. No human being(s) could have
+          kept track of 2698 occurrences of the word &ldquo;God,&rdquo; and the
+          numbers of verses where they occur. This is especially impossible in
+          view of (1) the age of ignorance during which the Quran was revealed,
+          and (2) the fact that the suras and verses were widely separated in
+          time and place of revelation.
         </p>
         <p>
           The Quran is characterized by a unique phenomenon never found in any
@@ -117,8 +133,8 @@ export function AppendixContent() {
           other book: 29 suras are prefixed with 14 different sets of
           &ldquo;Quranic Initials,&rdquo; consisting of one to five letters per
           set. Fourteen letters, half the Arabic alphabet, participate in these
-          initials. The significance of the Quranic initials remained a
-          divinely guarded secret for 14 centuries.
+          initials. The significance of the Quranic initials remained a divinely
+          guarded secret for 14 centuries.
         </p>
         <p>
           The Quran states in <QuranRef reference="10:20" /> and{' '}
@@ -129,7 +145,10 @@ export function AppendixContent() {
       </section>
 
       {/* ── Initials table ───────────────────────────────────────────────── */}
-      <div data-card className="rounded-xl border border-border/60 overflow-hidden">
+      <div
+        data-card
+        className="rounded-xl border border-border/60 overflow-hidden"
+      >
         <div className="px-4 py-3 bg-primary/5 border-b border-border/40">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             The Quranic Initials and Their Suras
@@ -139,10 +158,18 @@ export function AppendixContent() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/40 bg-muted/30">
-                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">#</th>
-                <th className="text-left px-4 py-2 font-medium text-muted-foreground">Sura</th>
-                <th className="text-left px-4 py-2 font-medium text-muted-foreground">Title</th>
-                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">Initials</th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">
+                  #
+                </th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground">
+                  Sura
+                </th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground">
+                  Title
+                </th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">
+                  Initials
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -213,10 +240,10 @@ export function AppendixContent() {
           translations of the Quran did not present the truthful message of
           God&apos;s Final Testament. He purchased all the available books of
           Quranic translations and exegeses, placed them on a large table, and
-          began his translation. The first verse in Sura 2 is &ldquo;A.L.M.&rdquo;
-          The translation of this verse took four years, and coincided with the
-          divine unveiling of &ldquo;the secret,&rdquo; the great mathematical
-          Miracle of the Quran.
+          began his translation. The first verse in Sura 2 is
+          &ldquo;A.L.M.&rdquo; The translation of this verse took four years,
+          and coincided with the divine unveiling of &ldquo;the secret,&rdquo;
+          the great mathematical Miracle of the Quran.
         </p>
         <p>
           The books of Quranic exegeses unanimously agreed that &ldquo;no one
@@ -254,7 +281,10 @@ export function AppendixContent() {
           gematrical value of 57: M(40) + J(3) + I(10) + D(4) = 57.
         </p>
 
-        <div data-card className="rounded-xl border border-border/60 overflow-hidden">
+        <div
+          data-card
+          className="rounded-xl border border-border/60 overflow-hidden"
+        >
           <div className="px-4 py-3 bg-primary/5 border-b border-border/40">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Q-Related Data
@@ -293,20 +323,20 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          <strong>NuN (Noon)</strong> — This initial is unique; it occurs in
-          one sura (68), and the name of the letter is spelled out as three
+          <strong>NuN (Noon)</strong> — This initial is unique; it occurs in one
+          sura (68), and the name of the letter is spelled out as three
           letters—Noon Wow Noon—and is therefore counted as two N&apos;s. The
           total count of this letter in the N-initialed sura is 133 = 19×7.
         </p>
         <p>
           <strong>S (Saad)</strong> — This initial prefixes three suras (7, 19,
-          and 38), and the total occurrence of the letter &ldquo;S&rdquo;
-          (Saad) in these three suras is 152 = 19×8 (97 + 26 + 29).
+          and 38), and the total occurrence of the letter &ldquo;S&rdquo; (Saad)
+          in these three suras is 152 = 19×8 (97 + 26 + 29).
         </p>
         <p>
           <strong>Y.S. (Ya Seen)</strong> — These two letters prefix Sura 36.
-          The letter &ldquo;Y&rdquo; occurs 237 times and &ldquo;S&rdquo;
-          (Seen) occurs 48 times. The total of both letters is 285 = 19×15.
+          The letter &ldquo;Y&rdquo; occurs 237 times and &ldquo;S&rdquo; (Seen)
+          occurs 48 times. The total of both letters is 285 = 19×15.
         </p>
         <p>
           <strong>H.M. (Ha Mim)</strong> — Seven suras are prefixed with the
@@ -325,9 +355,9 @@ export function AppendixContent() {
           19×498.
         </p>
         <p>
-          <strong>K.H.Y.ʿA.S.</strong> — The longest set of initials
-          (five letters), occurring in Sura 19. The five letters occur 137, 175,
-          343, 117, and 26 times respectively. Total: 798 = 19×42.
+          <strong>K.H.Y.ʿA.S.</strong> — The longest set of initials (five
+          letters), occurring in Sura 19. The five letters occur 137, 175, 343,
+          117, and 26 times respectively. Total: 798 = 19×42.
         </p>
       </section>
 
@@ -346,7 +376,8 @@ export function AppendixContent() {
           Hijrah). This makes the number of years from the revelation of the
           Quran to the revelation of its miracle 1393 + 13 = 1406 = 19×74. The
           unveiling of the Miracle took place in 1974 — and &ldquo;19&rdquo; is
-          mentioned in Sura 74 (<QuranRef reference="74:30" />).
+          mentioned in Sura 74 (<QuranRef reference="74:30" />
+          ).
         </p>
       </div>
 
@@ -371,8 +402,8 @@ export function AppendixContent() {
           Fourteen Arabic letters, half the Arabic alphabet, participate in the
           formation of 14 different sets of Quranic Initials. By adding the
           gematrical value of each one of these letters, plus the number of
-          suras which are prefixed with Quranic Initials (29), we obtain a
-          total of 722 = 19×19×2.
+          suras which are prefixed with Quranic Initials (29), we obtain a total
+          of 722 = 19×19×2.
         </p>
         <p>
           Additionally, if we add the total gematrical value of all 14 initials,
@@ -380,8 +411,8 @@ export function AppendixContent() {
           grand total of 988 = 19×52.
         </p>
         <p>
-          The Grand Total for all initialed suras — combining total frequency
-          of initials with their total gematrical values — is 1,089,479 =
+          The Grand Total for all initialed suras — combining total frequency of
+          initials with their total gematrical values — is 1,089,479 =
           19×57,341. The slightest alteration or distortion destroys the system.
         </p>
       </section>

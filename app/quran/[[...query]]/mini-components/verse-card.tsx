@@ -7,7 +7,7 @@ import { useIsTouch } from '@/hooks/use-is-touch'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { useQuranPlayerCallbacks, type QuranVerse } from '@/lib/quran-audio-context'
 import { RootWordOccurrences } from './root-word-occurrences'
-import { Play, Pause, Loader2 } from 'lucide-react'
+import { Play, Pause, Loader2, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -290,10 +290,22 @@ export const VerseCard = memo(
   const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
   const verseId = verse.vk ?? ''
 
+  const [copied, setCopied] = useState(false)
+
   const audioVerse = useMemo(
     () => ({ verse_id: verseId, ws_quran_text: {} } satisfies QuranVerse),
     [verseId]
   )
+
+  const handleCopy = useCallback(() => {
+    const parts: string[] = [`[${verseId}]`]
+    if (prefs.text && tr?.tx) parts.push(tr.tx)
+    if (secondaryTr?.tx) parts.push(secondaryTr.tx)
+    if ((prefs.arabic || prefs.wordByWord) && arTr?.tx) parts.push(arTr.tx)
+    navigator.clipboard.writeText(parts.join('\n'))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }, [verseId, prefs.text, prefs.arabic, prefs.wordByWord, tr?.tx, secondaryTr?.tx, arTr?.tx])
 
   const handlePlay = useCallback(() => {
     if (isCurrentAudio) {
@@ -328,22 +340,36 @@ export const VerseCard = memo(
             <span>:</span>
             <span className="w-full text-lg font-semibold">{vNum}</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
-            onClick={handlePlay}
-          >
-            {isCurrentAudio && isPlaying ? (
-              isBuffering ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+              onClick={handleCopy}
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-green-500" />
               ) : (
-                <Pause className="w-4 h-4 fill-current" />
-              )
-            ) : (
-              <Play className="w-4 h-4 ml-0.5 fill-current" />
-            )}
-          </Button>
+                <Copy className="w-4 h-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+              onClick={handlePlay}
+            >
+              {isCurrentAudio && isPlaying ? (
+                isBuffering ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Pause className="w-4 h-4 fill-current" />
+                )
+              ) : (
+                <Play className="w-4 h-4 ml-0.5 fill-current" />
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-4 sm:gap-6">

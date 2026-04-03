@@ -5,7 +5,8 @@ import { buildPageMetadata } from '@/constants/metadata'
 
 export const metadata = buildPageMetadata({
   title: 'Proclamation | WikiSubmission',
-  description: 'Proclaiming One Unified Religion for All the People — Rashad Khalifa, November 1989',
+  description:
+    'Proclaiming One Unified Religion for All the People — Rashad Khalifa, November 1989',
   url: '/proclamation',
 })
 
@@ -107,14 +108,13 @@ export default function ProclamationPage() {
           <p className="text-base leading-relaxed">
             Anyone who seeks other than Submission as his religion, it will not
             be accepted from him and, in the Hereafter, he will be with the
-            losers.{' '}
-            <QuranRef reference="3:85" />
+            losers. <QuranRef reference="3:85" />
           </p>
         </div>
 
         {/* ── Scripture prophecies ───────────────────────────────────────── */}
         <section className="space-y-6">
-          <ScriptureQuote source="Moses — Deuteronomy 18:15">
+          <ScriptureQuote source="Moses in Deuteronomy 18:15">
             A prophet like me will the Lord, your God, raise up for you from
             among your kinsmen; to him you shall listen.
           </ScriptureQuote>
@@ -126,13 +126,13 @@ export default function ProclamationPage() {
             he speaks in My name, I Myself will make him answer for it.
           </ScriptureQuote>
 
-          <ScriptureQuote source="Jesus — John 14:16–17">
+          <ScriptureQuote source="Jesus in John 14:16–17">
             I will ask the Father, and He will give you another Paraclete — to
             be with you always:{' '}
             <strong className="uppercase">The Spirit of Truth.</strong>
           </ScriptureQuote>
 
-          <ScriptureQuote source="Jesus — John 16:13">
+          <ScriptureQuote source="Jesus in John 16:13">
             When <strong className="uppercase">The Spirit of Truth</strong>{' '}
             comes to you, he will guide you to all truth, and will announce to
             you the things to come.
