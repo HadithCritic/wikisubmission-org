@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { SiteNav } from '@/components/site-nav'
 import { SiteFooter } from '@/components/site-footer'
 import { BibleNavSheet } from './client-components/bible-nav-sheet'
 import { BibleModeSelector } from './client-components/bible-mode-selector'
 import BibleSettings from './client-components/bible-settings'
+import BibleSearchBar from './client-components/bible-search-bar'
 
 export default async function BibleLayout({
   children,
@@ -22,7 +24,9 @@ export default async function BibleLayout({
           <header className="h-14 glass-nav bg-background/80 border-b border-border/40">
             <div className="px-3 h-full flex items-center gap-2">
               <BibleNavSheet />
-              <div className="flex-1 min-w-0" />
+              <Suspense>
+                <BibleSearchBar className="flex-1 min-w-0 max-w-sm" />
+              </Suspense>
               <div className="flex gap-2 shrink-0">
                 <BibleModeSelector />
               </div>

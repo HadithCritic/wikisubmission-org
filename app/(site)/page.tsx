@@ -131,7 +131,7 @@ export default async function Home() {
                   {t('scripture.badge')}
                 </span>
                 <h3 className="font-headline text-3xl font-extrabold">
-                  {t('services.finalTestament')}
+                  {t('services.finalTestament')} · Quran
                 </h3>
                 <p className="text-on-surface-variant leading-relaxed max-w-md">
                   {t('services.finalTestamentDesc')}
@@ -153,8 +153,11 @@ export default async function Home() {
               </div>
             </Link>
 
-            {/* The Bible — secondary (1 col, disabled) */}
-            <div className="group bg-background p-8 rounded-2xl editorial-shadow opacity-50 grayscale pointer-events-none space-y-4">
+            {/* The Bible — secondary (1 col) */}
+            <Link
+              href="/bible"
+              className="group bg-background p-8 rounded-2xl editorial-shadow space-y-4 transition-all hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(99,14,212,0.08)]"
+            >
               <div className="w-12 h-12 bg-surface-container rounded-xl flex items-center justify-center">
                 <Image
                   src="/brand-assets/logo-transparent.png"
@@ -165,15 +168,15 @@ export default async function Home() {
                 />
               </div>
               <h3 className="font-headline text-2xl font-bold">
-                {t('services.bible')}
+                {t('services.bible')} · Old &amp; New Testaments
               </h3>
               <p className="text-on-surface-variant text-sm leading-relaxed">
                 {t('services.bibleDesc')}
               </p>
-              <span className="inline-block mt-4 text-xs font-bold uppercase tracking-widest text-muted-foreground border border-border/50 px-3 py-1 rounded-full">
-                Coming soon
-              </span>
-            </div>
+              <div className="flex items-center gap-2 text-primary font-semibold text-sm pt-2 group-hover:gap-3 transition-all">
+                {t('scripture.readNow')} <ArrowRight size={16} />
+              </div>
+            </Link>
           </div>
         </div>
       </section>

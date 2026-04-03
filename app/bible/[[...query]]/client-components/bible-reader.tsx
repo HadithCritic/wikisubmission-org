@@ -20,6 +20,14 @@ import type { components } from '@/src/api/types.gen'
 
 type BibleVerseData = components['schemas']['BibleVerseData']
 
+const BIBLE_ZOOM_CLASS: Record<string, string> = {
+  compact: 'max-w-lg',
+  normal: 'max-w-xl',
+  comfortable: 'max-w-2xl',
+  wide: 'max-w-3xl',
+  full: 'max-w-4xl',
+}
+
 type FootnoteDialogState =
   | { kind: 'manuscript'; text: string; label: string }
   | { kind: 'theological'; entries: string[]; label: string }
@@ -74,6 +82,8 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
   const prefs = useBiblePreferences()
   const router = useRouter()
 
+  const maxW = BIBLE_ZOOM_CLASS[prefs.zoomLevel ?? 'comfortable']
+
   const [verses, setVerses] = useState<BibleVerseData[]>(initialVerses)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(hasError ? 'Failed to load chapter.' : null)
@@ -117,7 +127,7 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
   return (
     <main className="min-h-screen">
       {/* Chapter header */}
-      <div className="max-w-2xl mx-auto px-4 pt-8 pb-4 flex items-center justify-between gap-4">
+      <div className={`${maxW} mx-auto px-4 pt-8 pb-4 flex items-center justify-between gap-4`}>
         <div>
           <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
             {book.t === 'OT' ? 'Old Testament' : 'New Testament'}
@@ -159,7 +169,7 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
       )}
 
       {error && !loading && (
-        <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+        <div className={`${maxW} mx-auto px-4 py-12 text-center`}>
           <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
@@ -174,7 +184,7 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
 
       {!loading && !error && prefs.displayMode === 'verse' && (
         <>
-          <div className="max-w-2xl mx-auto px-4 pb-8 space-y-1">
+          <div className={`${maxW} mx-auto px-4 pb-8 space-y-1`}>
             {verses.map((verse) => {
               const tr = verse.tr?.['en']
               const hasManuscript = prefs.manuscriptFootnotes && !!tr?.f
@@ -211,6 +221,7 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
               verses={verses}
               showManuscript={prefs.manuscriptFootnotes}
               showTheological={prefs.theologicalFootnotes}
+              maxW={maxW}
             />
           )}
         </>
@@ -218,7 +229,7 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
 
       {/* Prev / Next chapter nav — bottom */}
       {!loading && (
-        <div className="max-w-2xl mx-auto px-4 py-8 flex justify-between">
+        <div className={`${maxW} mx-auto px-4 py-8 flex justify-between`}>
           <Button
             variant="ghost"
             onClick={() => prevChapter && navigate(prevChapter)}
@@ -253,10 +264,12 @@ function ChapterFootnotes({
   verses,
   showManuscript,
   showTheological,
+  maxW,
 }: {
   verses: BibleVerseData[]
   showManuscript: boolean
   showTheological: boolean
+  maxW: string
 }) {
   const manuscriptNotes: { vn: number; text: string; idx: number }[] = []
   const theologicalNotes: { vn: number; text: string; idx: number }[] = []
@@ -279,7 +292,7 @@ function ChapterFootnotes({
   if (manuscriptNotes.length === 0 && theologicalNotes.length === 0) return null
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-12 space-y-6 border-t border-border/40 pt-6">
+    <div className={`${maxW} mx-auto px-4 pb-12 space-y-6 border-t border-border/40 pt-6`}>
       {manuscriptNotes.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

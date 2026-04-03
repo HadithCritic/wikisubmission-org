@@ -1,9 +1,12 @@
 import { wsApiServer } from '@/src/api/server-client'
-import { bookFromSlug, BIBLE_BOOKS, OT_BOOKS, NT_BOOKS } from '@/constants/bible-books'
+import { bookFromSlug, OT_BOOKS, NT_BOOKS } from '@/constants/bible-books'
 import { BibleReader } from './client-components/bible-reader'
+import { BibleSearchResults } from './client-components/bible-search-results'
+import BibleSearchBar from './client-components/bible-search-bar'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 
 type Props = { params: Promise<{ query?: string[] }> }
@@ -29,7 +32,7 @@ export default async function BiblePage({ params }: Props) {
     return (
       <main className="min-h-screen py-16 px-4">
         <div className="max-w-2xl mx-auto space-y-10">
-          <header className="space-y-2 text-center">
+          <header className="space-y-4 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Scripture
             </p>
@@ -37,6 +40,11 @@ export default async function BiblePage({ params }: Props) {
             <p className="text-sm text-muted-foreground">
               Old &amp; New Testament — English translation
             </p>
+            <div className="max-w-sm mx-auto">
+              <Suspense>
+                <BibleSearchBar className="w-full max-w-none" large />
+              </Suspense>
+            </div>
           </header>
 
           {/* OT */}
@@ -91,6 +99,15 @@ export default async function BiblePage({ params }: Props) {
     )
   }
 
+  // ── /bible/search?q=... ────────────────────────────────────────────────────
+  if (query[0] === 'search') {
+    return (
+      <Suspense>
+        <BibleSearchResults />
+      </Suspense>
+    )
+  }
+
   // ── /bible/[book] — redirect to chapter 1 ─────────────────────────────────
   if (query.length === 1) {
     const book = bookFromSlug(query[0])
@@ -129,7 +146,9 @@ export default async function BiblePage({ params }: Props) {
   })
 
   const initialVerses =
-    data?.books?.flatMap((b) => b.chapters?.flatMap((c) => c.verses ?? []) ?? []) ?? []
+    data?.books?.flatMap(
+      (b) => b.chapters?.flatMap((c) => c.verses ?? []) ?? []
+    ) ?? []
 
   return (
     <BibleReader

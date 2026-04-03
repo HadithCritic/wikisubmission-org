@@ -12,9 +12,12 @@ import {
   CrossIcon,
   LanguagesIcon,
   SettingsIcon,
+  ZoomInIcon,
 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { useBiblePreferences } from '@/hooks/use-bible-preferences'
+import { ZOOM_LEVELS } from '@/lib/quran-zoom'
+import { cn } from '@/lib/utils'
 
 function SettingTile({
   icon,
@@ -54,8 +57,43 @@ export default function BibleSettings() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-72" align="end">
-        {/* Footnotes */}
+        {/* Zoom */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
+          <ZoomInIcon className="size-4" />
+          <strong>Zoom</strong>
+        </DropdownMenuLabel>
+
+        <div className="px-3 py-2">
+          <div className="flex gap-1.5">
+            {ZOOM_LEVELS.map((level) => {
+              const labels: Record<string, string> = {
+                compact: 'Compact',
+                normal: 'Normal',
+                comfortable: 'Comfortable',
+                wide: 'Wide',
+                full: 'Full',
+              }
+              const isActive = (prefs.zoomLevel ?? 'comfortable') === level
+              return (
+                <button
+                  key={level}
+                  onClick={() => prefs.setPreferences({ ...prefs, zoomLevel: level })}
+                  className={cn(
+                    'flex-1 px-1.5 py-1 rounded-lg text-xs font-medium transition-all border',
+                    isActive
+                      ? 'bg-primary/10 text-primary border-primary/20'
+                      : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
+                  )}
+                >
+                  {labels[level]}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Footnotes */}
+        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
           <BookOpenTextIcon className="size-4" />
           <strong>Footnotes</strong>
         </DropdownMenuLabel>

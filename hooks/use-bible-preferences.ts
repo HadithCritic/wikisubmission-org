@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import type { ZoomLevel } from '@/lib/quran-zoom'
 
 export type BibleDisplayMode = 'verse' | 'reading'
 
@@ -11,6 +12,7 @@ export type BiblePreferences = {
   theologicalFootnotes: boolean
   /** UI language. English is the only option for now. */
   language: 'en'
+  zoomLevel: ZoomLevel
   setPreferences: (prefs: BiblePreferences) => void
 }
 
@@ -21,6 +23,7 @@ export const useBiblePreferences = create(
       manuscriptFootnotes: true,
       theologicalFootnotes: true,
       language: 'en',
+      zoomLevel: 'comfortable',
       setPreferences: (prefs) => set(prefs),
     }),
     {

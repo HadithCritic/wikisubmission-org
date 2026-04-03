@@ -13,7 +13,7 @@ import { useTranslations, useLocale } from 'next-intl'
 
 const NAV_LINKS = [
   { label: 'home', href: '/' },
-  { label: 'scripture', href: '/quran' },
+  { label: 'quran', href: '/quran' },
   { label: 'bible', href: '/bible' },
   { label: 'miracle', href: '/miracle' },
   { label: 'practices', href: '/practices' },
