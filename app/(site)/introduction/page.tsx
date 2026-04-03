@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { ChevronLeft, FileText, Download, PlugZap } from 'lucide-react'
+import { ChevronLeft, FileText, Download, ArrowUpRight } from 'lucide-react'
 import { QuranRef } from '@/components/quran-ref'
 import { ArticleAnimations } from '@/components/article-animations'
 import { buildPageMetadata } from '@/constants/metadata'
+import Image from 'next/image'
 
 export const metadata = buildPageMetadata({
   title: 'Introduction | WikiSubmission',
@@ -35,6 +36,154 @@ function SectionDivider({ label }: { label: string }) {
       </h2>
       <hr className="flex-1 border-border/50" />
     </div>
+  )
+}
+
+/** Small animated Earth (oblate spheroid) rendered as an inline SVG.
+ *  Land masses scroll horizontally to simulate rotation. */
+function AnimatedEarth() {
+  return (
+    <svg
+      width="36"
+      height="30"
+      viewBox="0 0 36 30"
+      className="inline-block align-middle mx-1.5"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <clipPath id="earth-clip-intro">
+          <ellipse cx="18" cy="15" rx="17" ry="14" />
+        </clipPath>
+      </defs>
+      {/* Ocean */}
+      <ellipse cx="18" cy="15" rx="17" ry="14" fill="#1565c0" />
+      {/* Sliding continents (two copies for seamless loop) */}
+      <g clipPath="url(#earth-clip-intro)">
+        <g>
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            from="0 0"
+            to="-36 0"
+            dur="10s"
+            repeatCount="indefinite"
+          />
+          {/* Copy 1 */}
+          <ellipse cx="12" cy="8" rx="8" ry="6" fill="#2e7d32" />
+          <ellipse cx="27" cy="20" rx="7" ry="8" fill="#388e3c" />
+          <ellipse cx="5" cy="22" rx="4" ry="5" fill="#2e7d32" />
+          {/* Copy 2 — offset by full width (36px) for seamless repeat */}
+          <ellipse cx="48" cy="8" rx="8" ry="6" fill="#2e7d32" />
+          <ellipse cx="63" cy="20" rx="7" ry="8" fill="#388e3c" />
+          <ellipse cx="41" cy="22" rx="4" ry="5" fill="#2e7d32" />
+        </g>
+      </g>
+      {/* Atmospheric rim */}
+      <ellipse
+        cx="18"
+        cy="15"
+        rx="17"
+        ry="14"
+        fill="none"
+        stroke="rgba(255,255,255,0.18)"
+        strokeWidth="1.5"
+      />
+    </svg>
+  )
+}
+
+/** Timeline bar showing world population since Adam vs. from 1989 to 2280. */
+function WorldPopulationBar() {
+  return (
+    <figure className="space-y-2 my-2">
+      <div className="relative h-10 rounded-lg overflow-hidden flex border border-border/30">
+        {/* Small dark section: population since Adam (~5%) */}
+        <div className="bg-foreground shrink-0" style={{ width: '5%' }} />
+        {/* Large lighter section: population from 1989 to 2280 */}
+        <div className="flex-1 bg-foreground/10 flex justify-center flex-row items-center px-4">
+          <span className="text-xs text-foreground/70 leading-tight">
+            World population from now (1989) to the end of the world (2280).
+          </span>
+        </div>
+      </div>
+      <figcaption className="text-xs text-muted-foreground italic">
+        The black section represents the world population since Adam
+      </figcaption>
+    </figure>
+  )
+}
+
+/** Two stacked ratio bars showing:
+ *  Top — angels (vast majority) vs. those who agreed with Satan (tiny right slice)
+ *  Bottom — zoomed view of that slice: those who repented (vast majority) vs. those who didn't
+ *  Dashed lines between the bars illustrate the zoom relationship. */
+function AngelsRatioBars() {
+  const smallPct = 8
+  return (
+    <figure className="my-2">
+      {/* Top bar */}
+      <div className="relative h-12 rounded-t-lg overflow-hidden flex border border-border/30">
+        <div className="flex-1 bg-white/60 dark:bg-white/10 border-r flex-row justify-center border-border/30 flex items-center px-4">
+          <span className="text-xs text-foreground/60 leading-tight">
+            The white area represents the vast majority that did not agree with
+            Satan.
+          </span>
+        </div>
+        <div
+          className="shrink-0 bg-foreground/30"
+          style={{ width: `${smallPct}%` }}
+        />
+      </div>
+
+      {/* Zoom connector — dashed lines from the small right section expanding to full bar width */}
+      <div className="relative h-7 overflow-visible">
+        <svg
+          className="absolute inset-0 w-full h-full"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <line
+            x1={`${100 - smallPct}%`}
+            y1="0%"
+            x2="0%"
+            y2="100%"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+            strokeOpacity="0.3"
+          />
+          <line
+            x1="100%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+            strokeOpacity="0.3"
+          />
+        </svg>
+      </div>
+
+      {/* Bottom bar — zoomed in view of the minority slice */}
+      <div className="relative h-12 rounded-b-lg overflow-hidden flex border border-border/30">
+        <div className="flex-1 bg-foreground/15 border-r flex-row justify-center border-border/30 flex items-center px-4">
+          <span className="text-xs text-foreground/60 leading-tight">
+            The grey area represents the vast majority that repented and
+            submitted.
+          </span>
+        </div>
+        <div
+          className="shrink-0 bg-foreground/55"
+          style={{ width: `${smallPct}%` }}
+        />
+      </div>
+      <figcaption className="text-xs text-muted-foreground italic mt-2">
+        The zoomed section shows those who agreed with Satan; within that group,
+        most repented.
+      </figcaption>
+    </figure>
   )
 }
 
@@ -154,9 +303,11 @@ export default function IntroductionPage() {
               </Link>
               ), it is estimated that the total world population will exceed
               75,000,000,000. Thus, the vast majority of people are destined to
-              receive God&apos;s purified and consolidated message.
+              receive God&apos;s purified and consolidated message (see
+              diagram).
             </p>
           </section>
+          <WorldPopulationBar />
 
           <hr className="border-border/40" />
 
@@ -202,7 +353,7 @@ export default function IntroductionPage() {
               ).
             </p>
           </section>
-
+          <AngelsRatioBars />
           {/* ── The Four Categories ────────────────────────────────────────── */}
           <SectionDivider label="" />
 
@@ -605,6 +756,7 @@ export default function IntroductionPage() {
                   {
                     refs: ['10:24', '39:5', '79:30'],
                     text: 'The earth is egg-shaped',
+                    extra: <AnimatedEarth />,
                   },
                   {
                     refs: ['27:88'],
@@ -647,14 +799,20 @@ export default function IntroductionPage() {
                     refs: ['53:45-46'],
                     text: "The man's seminal fluid decides the baby's gender",
                   },
-                ] as { refs: string[]; text: string; appendix?: number }[]
+                ] as {
+                  refs: string[]
+                  text: string
+                  appendix?: number
+                  extra?: React.ReactNode
+                }[]
               ).map((item, i) => (
                 <li key={i} className="flex items-baseline gap-3">
                   <span className="shrink-0 flex items-center justify-center size-6 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
                     {i + 1}
                   </span>
                   <span>
-                    {item.text} (
+                    {item.text}
+                    {item.extra} (
                     {item.refs.map((ref, j) => (
                       <span key={ref}>
                         {j > 0 && ', '}
@@ -699,17 +857,42 @@ export default function IntroductionPage() {
               Arabia, Sheikh Abdul Aziz Ben Baz, declared that the earth is flat
               and standing still (see insert)!!
             </p>
-            <blockquote className="border-l-4 border-primary/30 pl-5 py-1 space-y-1">
-              <p className="italic text-foreground/90 leading-relaxed">
-                &ldquo;If the earth is rotating as they claim, the countries,
-                the mountains, the trees, the rivers, and the oceans will have
-                no bottom and the people will see the eastern countries move to
-                the west and the western countries move to the east.&rdquo;
-              </p>
-              <p className="text-xs text-muted-foreground text-right">
-                Translation from Ben Baz&apos; book, Page 23
-              </p>
-            </blockquote>
+            <div className="border-l-4 border-primary/30 pl-5 py-1 space-y-3">
+              {/* Original Arabic scan — landscape */}
+              <div className="rounded-lg border border-border/30 overflow-hidden bg-muted/20">
+                <Image
+                  src="/ben_baz_quote.png"
+                  alt="Original Arabic text of the Ben Baz quote"
+                  width={800}
+                  height={200}
+                  className="w-full h-auto"
+                />
+              </div>
+              {/* Translation and source */}
+              <div className="space-y-2">
+                <p className="italic text-foreground/90 leading-relaxed">
+                  &ldquo;If the earth is rotating as they claim, the countries,
+                  the mountains, the trees, the rivers, and the oceans will have
+                  no bottom and the people will see the eastern countries move
+                  to the west and the western countries move to the east.&rdquo;
+                </p>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    Translation from Ben Baz&apos; book, Page 23
+                  </p>
+                  <a
+                    href="/الأدلة النقلية والحسية على إمكان الصعود إلى الكواكب.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-violet-500 hover:text-violet-600 transition-colors"
+                  >
+                    <FileText className="size-3" />
+                    Source, page 11, left side
+                    <ArrowUpRight className="size-3" />
+                  </a>
+                </div>
+              </div>
+            </div>
           </section>
 
           <SectionDivider label="Perfect Happiness: Now and Forever" />

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ChevronLeft, FileText, Download } from 'lucide-react'
-import { QuranRef } from '@/components/quran-ref'
+import { QuranRef, ScriptureRef } from '@/components/quran-ref'
 import { buildPageMetadata } from '@/constants/metadata'
 
 export const metadata = buildPageMetadata({
@@ -69,23 +69,32 @@ export default function ProclamationPage() {
             prophets and the saints.
           </p>
           <p>
-            God&apos;s plan, as stated in the Old Testament (Malachi 3:1), the
-            New Testament (Luke 17:22–36 &amp; Matthew 24:27), and this Final
-            Testament (3:81), calls for the sending of God&apos;s Messenger of
-            the Covenant after all the scriptures have been delivered. The main
-            function of God&apos;s Messenger of the Covenant is to purify the
-            scriptures and unify them into one universal message to this world
-            from the Creator and Sustainer of this world.
+            God&apos;s plan, as stated in the Old Testament
+            <ScriptureRef reference={'Malachi 3:1'} />, the New Testament
+            <ScriptureRef reference="Luke 17:22-36" /> &amp;{' '}
+            <ScriptureRef reference="Matthew 24:27" />, and this Final Testament
+            <ScriptureRef reference="3:81" />, calls for the sending of
+            God&apos;s Messenger of the Covenant after all the scriptures have
+            been delivered. The main function of God&apos;s Messenger of the
+            Covenant is to purify the scriptures and unify them into one
+            universal message to this world from the Creator and Sustainer of
+            this world.
           </p>
           <p>
             This major scriptural prophecy has now been fulfilled. God&apos;s
             Messenger of the Covenant has arrived, supported by overwhelming
-            tangible proof (see Appendix Two). The purification and unification
-            process has begun. God&apos;s plan is supported by God&apos;s
-            invisible forces, and the enormous dimensions of this divine plan is
-            manifest in the recent exposure of false religionists, and the
-            removal of such anti-freedom barriers as the Berlin Wall, the Iron
-            Curtain, and the bamboo curtain.
+            tangible proof (see{' '}
+            <Link
+              href="/appendices/2"
+              className="text-primary hover:underline text-sm"
+            >
+              Appendix Two
+            </Link>
+            ) . The purification and unification process has begun. God&apos;s
+            plan is supported by God&apos;s invisible forces, and the enormous
+            dimensions of this divine plan is manifest in the recent exposure of
+            false religionists, and the removal of such anti-freedom barriers as
+            the Berlin Wall, the Iron Curtain, and the bamboo curtain.
           </p>
           <p>
             Henceforth, there is only one religion acceptable to God—Submission.
@@ -178,17 +187,28 @@ export default function ProclamationPage() {
             On the 27th night of Ramadan, 13 B.H. (Before Hijra) (610 A.D.), the
             prophet Muhammad (the soul—the real person—not the body) was
             summoned to the highest possible point, millions of light years from
-            the planet Earth, and this Quran was placed into his heart (2:185,
-            17:1, 44:3, 53:1–18, 97:1).
+            the planet Earth, and this Quran was placed into his heart (
+            <ScriptureRef reference="2:185" />,{' '}
+            <ScriptureRef reference="17:1" />,<ScriptureRef reference="44:3" />,{' '}
+            <ScriptureRef reference="53:1-18" />,{' '}
+            <ScriptureRef reference="97:1" />
+            ).
           </p>
           <p>
             Subsequently, the Quran was released into Muhammad&apos;s memory,
             with Gabriel&apos;s mediation, over a period of 23 years, 610 to 632
-            A.D. (17:106). At the moment of release, Muhammad scrupulously wrote
-            it down with his own hand (Appendix 28). What Muhammad left was the
-            complete Quran, written in the chronological sequence of revelation,
-            with detailed instructions for putting the revelations into the
-            sequence decreed by God.
+            A.D. (<ScriptureRef reference="17:106" />
+            ). At the moment of release, Muhammad scrupulously wrote it down
+            with his own hand (
+            <Link
+              href="/appendices/28"
+              className="text-primary hover:underline text-sm"
+            >
+              Appendix 28
+            </Link>
+            ). What Muhammad left was the complete Quran, written in the
+            chronological sequence of revelation, with detailed instructions for
+            putting the revelations into the sequence decreed by God.
           </p>
           <p>
             During the re-arrangement process, the scribes who idolized the
@@ -205,10 +225,30 @@ export default function ProclamationPage() {
           </p>
           <p>
             God&apos;s Messenger of the Covenant has presented overwhelming
-            evidence that 9:128–129 do not belong in the Quran (Appendix 24).
-            With the removal of these false verses, the Quran has finally been
-            restored. Our generation is the first ever to receive the Quran in
-            its purified and finalized form (see Appendices 1 and 28).
+            evidence that 9:128-129 do not belong in the Quran (
+            <Link
+              href="/appendices/24"
+              className="text-primary hover:underline text-sm"
+            >
+              Appendix 24
+            </Link>
+            ). With the removal of these false verses, the Quran has finally
+            been restored. Our generation is the first ever to receive the Quran
+            in its purified and finalized form (see{' '}
+            <Link
+              href="/appendices/1"
+              className="text-primary hover:underline text-sm"
+            >
+              Appendices 1
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/appendices/28"
+              className="text-primary hover:underline text-sm"
+            >
+              28
+            </Link>
+            ).
           </p>
         </section>
 

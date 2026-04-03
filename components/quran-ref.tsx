@@ -12,12 +12,18 @@ import {
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { useVerseFetch, parseQuranRef } from '@/hooks/use-verse-fetch'
+import {
+  useVerseFetch,
+  useBibleFetch,
+  parseQuranRef,
+  parseBibleRef,
+} from '@/hooks/use-verse-fetch'
 import { QuranRefText } from './quran-ref-text'
 import type { components } from '@/src/api/types.gen'
 import type { LangCode } from '@/hooks/use-quran-preferences'
 
 type VerseData = components['schemas']['VerseData']
+type BibleVerseData = components['schemas']['BibleVerseData']
 
 function VersePreview({
   verse,
@@ -70,13 +76,45 @@ function VersePreview({
   )
 }
 
+function BibleVersePreview({
+  verse,
+  bookDisplay,
+}: {
+  verse: BibleVerseData
+  bookDisplay: string
+}) {
+  const parts = (verse.vk ?? '').split(':')
+  const cn = parts[1] ? parseInt(parts[1]) : null
+  const vn = parts[2] ? parseInt(parts[2]) : null
+  const tr = verse.tr?.['en']
+
+  return (
+    <div className="space-y-2 py-3 border-b last:border-0">
+      <span className="text-xs text-violet-500 font-mono">
+        {bookDisplay} {cn}:{vn}
+      </span>
+      {tr?.tx && (
+        <p className="text-base leading-relaxed">
+          <strong>[{cn}:{vn}]</strong> {tr.tx}
+        </p>
+      )}
+      {tr?.f && (
+        <p className="text-sm text-muted-foreground italic">{tr.f}</p>
+      )}
+    </div>
+  )
+}
+
 /** Inline badge that opens a dialog showing the verse(s) on click.
  *
- *  Usage:
- *    <QuranRef reference="2:255" />
- *    <QuranRef reference="1:1-7" from="Appendix 1" />
+ *  Supports both Quran and Bible references:
+ *    Quran:  <ScriptureRef reference="2:255" />
+ *            <ScriptureRef reference="1:1-7" from="Appendix 1" />
+ *    Bible:  <ScriptureRef reference="Mark 4:12" />
+ *            <ScriptureRef reference="40:5:3" />     ← numeric (book 40 = Matthew)
+ *            <ScriptureRef reference="1 Sam 3:1-5" />
  */
-export function QuranRef({
+export function ScriptureRef({
   reference,
   from,
 }: {
@@ -84,72 +122,90 @@ export function QuranRef({
   from?: string
 }) {
   const prefs = useQuranPreferences()
-  const { verses, loading, error, fetch } = useVerseFetch()
+  const { verses: quranVerses, loading: quranLoading, error: quranError, fetch: fetchQuran } = useVerseFetch()
+  const { verses: bibleVerses, loading: bibleLoading, error: bibleError, fetch: fetchBible } = useBibleFetch()
   const [open, setOpen] = useState(false)
-  // History stack — each entry is a reference string. The current view is the last item.
   const [history, setHistory] = useState<string[]>([])
 
-  const parsed = parseQuranRef(reference)
+  const bibleRef = parseBibleRef(reference)
+  const isBible = bibleRef !== null
+  const quranRef = isBible ? null : parseQuranRef(reference)
 
   const primaryCode: LangCode =
     prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
 
-  // Define all hooks unconditionally before any early returns
-  const doFetch = useCallback(
-    (ref: string) => fetch(ref, primaryCode),
-    [fetch, primaryCode]
+  const doQuranFetch = useCallback(
+    (ref: string) => fetchQuran(ref, primaryCode),
+    [fetchQuran, primaryCode]
   )
 
   const handleNavigate = useCallback(
     (newRef: string) => {
       setHistory((prev) => [...prev, newRef])
-      doFetch(newRef)
+      doQuranFetch(newRef)
     },
-    [doFetch]
+    [doQuranFetch]
   )
 
   const handleBack = useCallback(() => {
     setHistory((prev) => {
       const next = prev.slice(0, -1)
-      doFetch(next[next.length - 1] ?? reference)
+      doQuranFetch(next[next.length - 1] ?? reference)
       return next
     })
-  }, [doFetch, reference])
+  }, [doQuranFetch, reference])
 
   // If unparseable, render plain text so we don't swallow content
-  if (!parsed) {
+  if (!isBible && !quranRef) {
     return <span className="font-mono text-xs">{reference}</span>
   }
 
+  // Badge label
+  const label = (() => {
+    if (isBible && bibleRef) {
+      const suffix = bibleRef.ve !== bibleRef.vs ? `–${bibleRef.ve}` : ''
+      return `${bibleRef.displayBook} ${bibleRef.cs}:${bibleRef.vs}${suffix}`
+    }
+    if (quranRef) {
+      return quranRef.vs === quranRef.ve
+        ? `${quranRef.cn}:${quranRef.vs}`
+        : `${quranRef.cn}:${quranRef.vs}–${quranRef.ve}`
+    }
+    return reference
+  })()
+
+  // Dialog title (Quran supports in-dialog navigation; Bible does not)
   const currentRef = history[history.length - 1] ?? reference
-  const currentParsed = parseQuranRef(currentRef) ?? parsed
-
-  const label =
-    parsed.vs === parsed.ve
-      ? `${parsed.cn}:${parsed.vs}`
-      : `${parsed.cn}:${parsed.vs}–${parsed.ve}`
-
-  const currentLabel =
-    currentParsed.vs === currentParsed.ve
+  const currentParsed = !isBible ? (parseQuranRef(currentRef) ?? quranRef) : null
+  const currentLabel = !isBible && currentParsed
+    ? currentParsed.vs === currentParsed.ve
       ? `${currentParsed.cn}:${currentParsed.vs}`
       : `${currentParsed.cn}:${currentParsed.vs}–${currentParsed.ve}`
+    : label
 
   function handleOpenChange(val: boolean) {
     setOpen(val)
     if (val) {
-      setHistory([reference])
-      doFetch(reference)
+      if (isBible && bibleRef) {
+        fetchBible(bibleRef)
+      } else {
+        setHistory([reference])
+        doQuranFetch(reference)
+      }
     } else {
       setHistory([])
     }
   }
+
+  const loading = isBible ? bibleLoading : quranLoading
+  const error = isBible ? bibleError : quranError
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <button
         onClick={() => handleOpenChange(true)}
         className="inline-flex items-center font-mono text-xs bg-violet-600/10 text-violet-600 hover:bg-violet-600/20 active:bg-violet-600/25 px-1.5 py-0.5 rounded-md transition-colors cursor-pointer align-baseline select-none mx-0.5"
-        aria-label={`View verse ${reference}`}
+        aria-label={`View ${isBible ? 'Bible' : 'Quran'} verse ${reference}`}
       >
         {label}
       </button>
@@ -157,7 +213,7 @@ export function QuranRef({
       <DialogContent className="max-w-lg rounded-3xl">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            {history.length > 1 && (
+            {!isBible && history.length > 1 && (
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -169,7 +225,7 @@ export function QuranRef({
             )}
             <DialogTitle className="flex items-center gap-2 flex-wrap">
               <span className="font-mono text-violet-600">{currentLabel}</span>
-              {from && history.length === 1 && (
+              {from && (isBible || history.length === 1) && (
                 <span className="text-xs text-muted-foreground font-normal">
                   — from {from}
                 </span>
@@ -187,18 +243,26 @@ export function QuranRef({
           {error && (
             <p className="text-sm text-destructive text-center py-6">{error}</p>
           )}
-          {verses.map((verse, i) => (
-            <VersePreview
-              key={verse.vk ?? i}
-              verse={verse}
-              primaryCode={primaryCode}
-              showArabic={prefs.arabic}
-              onNavigateRef={handleNavigate}
-            />
-          ))}
+          {isBible
+            ? bibleVerses.map((verse, i) => (
+                <BibleVersePreview
+                  key={verse.vk ?? i}
+                  verse={verse}
+                  bookDisplay={bibleRef?.displayBook ?? ''}
+                />
+              ))
+            : quranVerses.map((verse, i) => (
+                <VersePreview
+                  key={verse.vk ?? i}
+                  verse={verse}
+                  primaryCode={primaryCode}
+                  showArabic={prefs.arabic}
+                  onNavigateRef={handleNavigate}
+                />
+              ))}
         </div>
 
-        {verses.length > 0 && (
+        {!isBible && quranVerses.length > 0 && currentParsed && (
           <div className="pt-3 border-t">
             <Link
               href={`/quran/${currentParsed.cn}?verse=${currentParsed.vs}`}
@@ -214,3 +278,6 @@ export function QuranRef({
     </Dialog>
   )
 }
+
+// Backward-compat alias — existing <QuranRef> usage continues to work
+export const QuranRef = ScriptureRef
