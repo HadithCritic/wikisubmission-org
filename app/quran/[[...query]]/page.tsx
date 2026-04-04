@@ -167,7 +167,9 @@ export default async function QuranPage({
   // estimation error that occurs when scrolling past dozens of unmeasured items.
   if (parsed.type === 'chapter' && parsed.chapterNumber) {
     const targetVerse = verse ? parseInt(verse) : undefined
-    const ssrVerseStart = targetVerse ? Math.max(1, targetVerse - 5) : 1
+    // Chapters 1 and 9 have no pre-verse Basmala; all others start at verse 0.
+    const verseFloor = (parsed.chapterNumber === 1 || parsed.chapterNumber === 9) ? 1 : 0
+    const ssrVerseStart = targetVerse ? Math.max(verseFloor, targetVerse - 5) : verseFloor
     const ssrVerseEnd = ssrVerseStart + 49 // always fetch a 50-verse window
 
     let data = null
@@ -289,9 +291,9 @@ export async function generateMetadata({
   searchParams,
 }: {
   params: Promise<{ query?: string[] }>
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; verse?: string }>
 }): Promise<Metadata> {
-  const { q } = await searchParams
+  const { q, verse: verseParam } = await searchParams
   const { query } = await params
   const queryText = decodeURIComponent(q || query?.join(' ') || '')
 
@@ -308,6 +310,50 @@ export async function generateMetadata({
   const LOGO = '/brand-assets/logo-transparent.png'
 
   if (parsed.type === 'chapter' && parsed.chapterNumber) {
+    // If a specific verse is anchored, resolve metadata for that verse instead
+    const specificVerse = verseParam ? parseInt(verseParam) : undefined
+    if (specificVerse && specificVerse > 0) {
+      let verseText = ''
+      let chapterTitle = ''
+      try {
+        const [chaptersRes, verseRes] = await Promise.all([
+          wsApiServer.GET('/chapters', {
+            params: { query: { lang: 'en' } },
+            next: { revalidate: 86400 },
+          }),
+          wsApiServer.GET('/quran', {
+            params: {
+              query: {
+                chapter_number_start: parsed.chapterNumber,
+                langs: ['en'],
+                verse_start: specificVerse,
+                verse_end: specificVerse,
+              },
+            },
+          }),
+        ])
+        const ch = chaptersRes.data?.find((c) => c.chapter_number === parsed.chapterNumber)
+        if (ch?.title) chapterTitle = ch.title
+        const tx = verseRes.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
+        verseText = tx.length > 220 ? tx.slice(0, 217) + '…' : tx
+      } catch {}
+      const ref = `${parsed.chapterNumber}:${specificVerse}`
+      const title = chapterTitle
+        ? `${ref} | ${chapterTitle} | Quran | WikiSubmission`
+        : `${ref} | Quran | WikiSubmission`
+      const chapterNote = chapterTitle ? `Sura ${parsed.chapterNumber}, ${chapterTitle}. ` : ''
+      const description = verseText
+        ? `${chapterNote}${verseText}`
+        : `Verse ${ref} of the Final Testament`
+      return buildPageMetadata({
+        title,
+        description,
+        url: `/quran/${parsed.chapterNumber}?verse=${specificVerse}`,
+        image: LOGO,
+        twitterCard: 'summary',
+      })
+    }
+
     let chapterTitle = ''
     let verseCount = 0
     let versePreview = ''
@@ -358,26 +404,36 @@ export async function generateMetadata({
   if (parsed.type === 'range' && parsed.chapterNumber) {
     const title = `${queryText} | Quran | WikiSubmission`
     let verseText = ''
+    let chapterTitle = ''
     try {
-      const result = await wsApiServer.GET('/quran', {
-        params: {
-          query: {
-            chapter_number_start: parsed.chapterNumber,
-            langs: ['en'],
-            verse_start: parsed.verseStart,
-            verse_end: parsed.verseEnd,
+      const [chaptersRes, versesRes] = await Promise.all([
+        wsApiServer.GET('/chapters', {
+          params: { query: { lang: 'en' } },
+          next: { revalidate: 86400 },
+        }),
+        wsApiServer.GET('/quran', {
+          params: {
+            query: {
+              chapter_number_start: parsed.chapterNumber,
+              langs: ['en'],
+              verse_start: parsed.verseStart,
+              verse_end: parsed.verseEnd,
+            },
           },
-        },
-      })
-      const verses = result.data?.chapters?.[0]?.verses ?? []
+        }),
+      ])
+      const ch = chaptersRes.data?.find((c) => c.chapter_number === parsed.chapterNumber)
+      if (ch?.title) chapterTitle = ch.title
+      const verses = versesRes.data?.chapters?.[0]?.verses ?? []
       const joined = verses
         .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
         .join(' ')
         .trim()
       verseText = joined.length > 220 ? joined.slice(0, 217) + '…' : joined
     } catch {}
+    const chapterNote = chapterTitle ? `Sura ${parsed.chapterNumber}, ${chapterTitle}. ` : ''
     const description = verseText
-      ? verseText
+      ? `${chapterNote}${verseText}`
       : `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament`
     return buildPageMetadata({
       title,
