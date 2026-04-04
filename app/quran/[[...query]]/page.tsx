@@ -305,30 +305,59 @@ export async function generateMetadata({
 
   const parsed = parseQueryType(queryText)
 
+  const LOGO = '/brand-assets/logo-transparent.png'
+
   if (parsed.type === 'chapter' && parsed.chapterNumber) {
     let chapterTitle = ''
-    let verseCount = ''
+    let verseCount = 0
+    let versePreview = ''
     try {
-      const result = await wsApiServer.GET('/chapters', {
-        params: { query: { lang: 'en' } },
-        next: { revalidate: 86400 },
-      })
-      const ch = result.data?.find((c) => c.chapter_number === parsed.chapterNumber)
+      const [chaptersRes, versesRes] = await Promise.all([
+        wsApiServer.GET('/chapters', {
+          params: { query: { lang: 'en' } },
+          next: { revalidate: 86400 },
+        }),
+        wsApiServer.GET('/quran', {
+          params: {
+            query: {
+              chapter_number_start: parsed.chapterNumber,
+              langs: ['en'],
+              verse_start: 1,
+              verse_end: 3,
+            },
+          },
+        }),
+      ])
+      const ch = chaptersRes.data?.find((c) => c.chapter_number === parsed.chapterNumber)
       if (ch?.title) chapterTitle = ch.title
-      if (ch?.verse_count) verseCount = ` · ${ch.verse_count} verses`
+      if (ch?.verse_count) verseCount = ch.verse_count
+      const verses = versesRes.data?.chapters?.[0]?.verses ?? []
+      const joined = verses
+        .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
+        .join(' ')
+        .trim()
+      versePreview = joined.length > 220 ? joined.slice(0, 217) + '…' : joined
     } catch {}
 
     const title = chapterTitle
       ? `Sura ${parsed.chapterNumber}: ${chapterTitle} | Quran | WikiSubmission`
       : `Sura ${parsed.chapterNumber} | Quran | WikiSubmission`
-    const description = `Read Sura ${parsed.chapterNumber}${chapterTitle ? ` (${chapterTitle})` : ''} of the Final Testament${verseCount}`
-    return buildPageMetadata({ title, description, url: `/quran/${parsed.chapterNumber}` })
+    const countNote = verseCount ? ` (${verseCount} verses)` : ''
+    const description = versePreview
+      ? versePreview
+      : `Read Sura ${parsed.chapterNumber}${chapterTitle ? ` (${chapterTitle})` : ''} of the Final Testament${countNote}`
+    return buildPageMetadata({
+      title,
+      description,
+      url: `/quran/${parsed.chapterNumber}`,
+      image: LOGO,
+      twitterCard: 'summary',
+    })
   }
 
   if (parsed.type === 'range' && parsed.chapterNumber) {
     const title = `${queryText} | Quran | WikiSubmission`
-    const description = `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament`
-    let subtitle = ''
+    let verseText = ''
     try {
       const result = await wsApiServer.GET('/quran', {
         params: {
@@ -336,22 +365,32 @@ export async function generateMetadata({
             chapter_number_start: parsed.chapterNumber,
             langs: ['en'],
             verse_start: parsed.verseStart,
-            verse_end: parsed.verseStart,
+            verse_end: parsed.verseEnd,
           },
         },
       })
-      const tx = result.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
-      subtitle = tx.length > 150 ? tx.slice(0, 147) + '…' : tx
+      const verses = result.data?.chapters?.[0]?.verses ?? []
+      const joined = verses
+        .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
+        .join(' ')
+        .trim()
+      verseText = joined.length > 220 ? joined.slice(0, 217) + '…' : joined
     } catch {}
-    const image = `/og?title=${encodeURIComponent(title)}&small=1${subtitle ? `&subtitle=${encodeURIComponent(subtitle)}` : ''}`
-    return buildPageMetadata({ title, description, url: `/quran/${queryText}`, image, imageSize: { width: 600, height: 315 } })
+    const description = verseText
+      ? verseText
+      : `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament`
+    return buildPageMetadata({
+      title,
+      description,
+      url: `/quran/${queryText}`,
+      image: LOGO,
+      twitterCard: 'summary',
+    })
   }
 
   if (parsed.type === 'verse-list') {
     const title = `${queryText} | Quran | WikiSubmission`
-    const description = `Read ${queryText} from the Final Testament (Quran) at WikiSubmission`
-    // For a single verse ref like "2:255", fetch the verse text for the OG subtitle
-    let subtitle = ''
+    let verseText = ''
     const firstPart = queryText.split(',')[0].trim()
     const singleVerseMatch = firstPart.match(/^(\d+):(\d+)$/)
     if (singleVerseMatch) {
@@ -367,15 +406,28 @@ export async function generateMetadata({
           },
         })
         const tx = result.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
-        subtitle = tx.length > 150 ? tx.slice(0, 147) + '…' : tx
+        verseText = tx.length > 220 ? tx.slice(0, 217) + '…' : tx
       } catch {}
     }
-    const image = `/og?title=${encodeURIComponent(title)}&small=1${subtitle ? `&subtitle=${encodeURIComponent(subtitle)}` : ''}`
-    return buildPageMetadata({ title, description, image, imageSize: { width: 600, height: 315 } })
+    const description = verseText
+      ? verseText
+      : `Read ${queryText} from the Final Testament (Quran)`
+    return buildPageMetadata({
+      title,
+      description,
+      image: LOGO,
+      twitterCard: 'summary',
+    })
   }
 
   // text search
   const title = `"${queryText}" | Quran Search | WikiSubmission`
   const description = `Search results for "${queryText}" in the Final Testament (Quran)`
-  return buildPageMetadata({ title, description, url: `/quran?q=${encodeURIComponent(queryText)}` })
+  return buildPageMetadata({
+    title,
+    description,
+    url: `/quran?q=${encodeURIComponent(queryText)}`,
+    image: LOGO,
+    twitterCard: 'summary',
+  })
 }

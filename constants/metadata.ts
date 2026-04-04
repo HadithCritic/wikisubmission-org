@@ -11,16 +11,19 @@ export function buildPageMetadata({
   url,
   image,
   imageSize,
+  twitterCard,
 }: {
   title: string
   description: string
   url?: string
   image?: string
   imageSize?: { width: number; height: number }
+  twitterCard?: 'summary' | 'summary_large_image'
 }): _Metadata {
   const img = image ?? `/og?title=${encodeURIComponent(title)}`
+  const card = twitterCard ?? 'summary_large_image'
   const imgW = imageSize?.width ?? 1200
-  const imgH = imageSize?.height ?? 630
+  const imgH = imageSize?.height ?? 480
   return {
     title,
     description,
@@ -35,10 +38,10 @@ export function buildPageMetadata({
       type: 'website',
     },
     twitter: {
-      card: 'summary_large_image',
+      card,
       title,
       description,
-      images: [{ url: img, width: imgW, height: imgH }],
+      images: [{ url: img }],
     },
   }
 }
@@ -78,7 +81,7 @@ export const Metadata: _Metadata = {
       'Access the Final Testament at WikiSubmission – a free and open source platform for Submission.',
     url: 'https://wikisubmission.org',
     siteName: 'WikiSubmission',
-    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 630, alt: 'WikiSubmission' }],
+    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 480, alt: 'WikiSubmission' }],
     locale: 'en_US',
     type: 'website',
   },
@@ -87,6 +90,6 @@ export const Metadata: _Metadata = {
     title: 'WikiSubmission',
     description:
       'Access the Final Testament at WikiSubmission – a free and open source platform for Submission.',
-    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 630 }],
+    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 480 }],
   },
 }

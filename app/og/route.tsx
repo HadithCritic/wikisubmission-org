@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const subtitle = rawSubtitle.slice(0, 200).trim()
 
   const WIDTH = small ? 600 : 1200
-  const HEIGHT = small ? 315 : 630
+  const HEIGHT = small ? 240 : 480
 
   const fontData = toArrayBuffer(loadFile('public/font/GlacialIndifference-Regular.ttf'))
   const logoData = loadFile('public/brand-assets/logo-transparent.png')
