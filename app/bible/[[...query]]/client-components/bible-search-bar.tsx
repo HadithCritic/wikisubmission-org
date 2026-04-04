@@ -116,7 +116,7 @@ export default function BibleSearchBar({ className, large }: BibleSearchBarProps
   return (
     <div
       ref={containerRef}
-      className={cn('relative min-w-0 flex-1 max-w-sm', className)}
+      className={cn('relative min-w-0 flex-1', className)}
     >
       <form onSubmit={handleSubmit}>
         <SearchIcon className={cn(

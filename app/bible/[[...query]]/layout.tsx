@@ -25,7 +25,7 @@ export default async function BibleLayout({
             <div className="px-3 h-full flex items-center gap-2">
               <BibleNavSheet />
               <Suspense>
-                <BibleSearchBar className="flex-1 min-w-0 max-w-sm" />
+                <BibleSearchBar className="flex-1 min-w-0" />
               </Suspense>
               <div className="flex gap-2 shrink-0">
                 <BibleModeSelector />

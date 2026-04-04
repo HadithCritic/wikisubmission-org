@@ -90,7 +90,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   return (
     <div
       ref={containerRef}
-      className={cn('relative min-w-0', large ? 'w-full' : 'flex-1 max-w-sm')}
+      className={cn('relative min-w-0', large ? 'w-full' : 'flex-1')}
     >
       <form
         onSubmit={(e) => {
