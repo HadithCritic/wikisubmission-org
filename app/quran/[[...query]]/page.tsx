@@ -444,7 +444,8 @@ export async function generateMetadata({
 
   if (parsed.type === 'verse-list') {
     // Normalise: add space after each comma for display
-    const displayQuery = queryText.split(',').map((s) => s.trim()).join(', ')
+    const queryParts = queryText.split(',').map((s) => s.trim())
+    const displayQuery = queryParts.join(', ')
     const title = `${displayQuery} | Quran | WikiSubmission`
     let description = `Read ${displayQuery} from the Final Testament (Quran)`
     try {
@@ -457,18 +458,39 @@ export async function generateMetadata({
         },
       })
       const allVerses = (result.data?.chapters ?? []).flatMap((c) => c.verses ?? [])
-      const joined = allVerses
+      // Reorder verses to match the original query order (API returns by chapter number)
+      const sorted = [...allVerses].sort((a, b) => {
+        const vkA = a.vk ?? ''
+        const vkB = b.vk ?? ''
+        const indexOf = (vk: string) => {
+          const idx = queryParts.findIndex((qp) => {
+            if (vk === qp) return true
+            const rm = qp.match(/^(\d+):(\d+)-(\d+)$/)
+            if (rm) {
+              const vm = vk.match(/^(\d+):(\d+)$/)
+              if (vm && vm[1] === rm[1]) {
+                const n = parseInt(vm[2])
+                return n >= parseInt(rm[2]) && n <= parseInt(rm[3])
+              }
+            }
+            return false
+          })
+          return idx === -1 ? 999 : idx
+        }
+        return indexOf(vkA) - indexOf(vkB)
+      })
+      const joined = sorted
         .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
         .join(' ')
         .trim()
       if (joined) description = joined.length > 220 ? joined.slice(0, 217) + '...' : joined
     } catch {}
-    const image = `/og?title=${encodeURIComponent(title)}&small=1`
     return buildPageMetadata({
       title,
       description,
-      image,
-      imageSize: { width: 600, height: 240 },
+      url: `/quran?q=${encodeURIComponent(queryText)}`,
+      image: LOGO,
+      twitterCard: 'summary',
     })
   }
 

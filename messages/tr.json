@@ -209,9 +209,9 @@
     },
     "services": {
       "finalTestament": "Son Ahit",
-      "finalTestamentDesc": "Web'de Oku",
+      "finalTestamentDesc": "Kelime kelime analiz, ekler ve arama ile tam çeviri",
       "bible": "İncil",
-      "bibleDesc": "Yakında",
+      "bibleDesc": "El yazması ve teolojik dipnotlarla ayet ayet",
       "music": "Müzik",
       "musicDesc": "Yüceltme ve melodiler",
       "prayerTimes": "Namaz Vakitleri",
