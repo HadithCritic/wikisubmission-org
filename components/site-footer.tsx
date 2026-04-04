@@ -56,7 +56,7 @@ export async function SiteFooter() {
                 height={32}
                 className="rounded-full size-8"
               />
-              <span className="font-bold text-lg">WikiSubmission</span>
+              <h1 className="text-lg">WikiSubmission</h1>
             </Link>
 
             <p className="text-muted-foreground leading-relaxed max-w-sm">

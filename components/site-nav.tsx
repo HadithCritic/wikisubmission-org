@@ -44,9 +44,9 @@ export function SiteNav() {
             height={32}
             className="rounded-full size-8"
           />
-          <span className="font-headline font-bold text-lg hidden sm:block">
+          <h1 className="text-lg hidden sm:block">
             WikiSubmission
-          </span>
+          </h1>
         </Link>
 
         {/* Desktop nav links */}
