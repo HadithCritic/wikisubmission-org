@@ -2,6 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
+import { AskProvider } from '@/components/ask-sidebar/ask-context'
+import { AskSidebar } from '@/components/ask-sidebar/ask-sidebar'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -16,6 +18,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   )
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <AskProvider>
+        {children}
+        <AskSidebar />
+      </AskProvider>
+    </QueryClientProvider>
   )
 }

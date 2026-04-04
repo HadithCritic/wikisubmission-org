@@ -10,6 +10,7 @@ import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 // import { SignInButton, SignedIn, SignedOut, UserButton } from '' // Phase 3, but using supabase auth
 import { cn } from '@/lib/utils'
 import { useTranslations, useLocale } from 'next-intl'
+import { useAsk } from '@/components/ask-sidebar/ask-context'
 
 const NAV_LINKS = [
   { label: 'home', href: '/' },
@@ -27,6 +28,7 @@ export function SiteNav() {
   const pathname = usePathname()
   const t = useTranslations('navbar')
   const locale = useLocale()
+  const { toggle: toggleAsk, state: askState } = useAsk()
 
   return (
     <nav className="sticky top-0 z-50 w-full glass-nav bg-background/80 border-b border-border/40">
@@ -70,18 +72,18 @@ export function SiteNav() {
 
         {/* Right controls */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/ask"
+          <button
+            onClick={toggleAsk}
             className={cn(
               'h-9 w-9 flex items-center justify-center rounded-md transition-colors',
-              pathname?.startsWith('/ask')
+              askState !== 'closed'
                 ? 'text-primary bg-primary/10'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
             )}
             aria-label="Ask AI"
           >
             <Sparkles size={18} />
-          </Link>
+          </button>
           <LocaleSwitcher currentLocale={locale} />
           <ThemeToggle />
           {/* Phase 3: auth
