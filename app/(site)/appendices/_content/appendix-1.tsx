@@ -12,7 +12,7 @@ export function AppendixContent() {
           variety of divine names, the unique spelling of certain words, the
           absence or deliberate alteration of certain letters within certain
           words, and many other elements of the Quran besides its content. There
-          are two major facets of the Quran&apon;s mathematical system: (1) The
+          are two major facets of the Quran&apos;s mathematical system: (1) The
           mathematical literary composition, and (2) The mathematical structure
           involving the numbers of suras and verses. Because of this
           comprehensive mathematical coding, the slightest distortion of the
@@ -57,15 +57,6 @@ export function AppendixContent() {
           view of (1) the age of ignorance during which the Quran was revealed,
           and (2) the fact that the suras and verses were widely separated in
           time and place of revelation.
-        </p>
-        <p>
-          The Quran is characterized by a unique phenomenon never found in any
-          human authored book. Every element of the Quran is mathematically
-          composed—the suras, the verses, the words, the number of certain
-          letters, the number of words from the same root, the number and
-          variety of divine names, the unique spelling of certain words, the
-          absence or deliberate alteration of certain letters within certain
-          words, and many other elements of the Quran besides its content.
         </p>
       </section>
 
@@ -416,6 +407,271 @@ export function AppendixContent() {
           19×57,341. The slightest alteration or distortion destroys the system.
         </p>
       </section>
+
+      {/* ── Mathematical Coding: The Word "God" ──────────────────────────── */}
+      <div className="flex items-center gap-4">
+        <hr className="flex-1 border-border/50" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
+          Mathematical Coding: The Word &ldquo;God&rdquo;
+        </h2>
+        <hr className="flex-1 border-border/50" />
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          The word &ldquo;God&rdquo; (Allah) occurs in the Quran 2,698 times
+          (19×142). The word &ldquo;God&rdquo; is found in 85 suras. Outside
+          the initialed section of the Quran (Suras 2–68), the word
+          &ldquo;God&rdquo; occurs 57 times (19×3). Between the first
+          initialed sura (2) and the last initialed sura (68), the word
+          &ldquo;God&rdquo; occurs 2,641 times (19×139). The sum of all sura
+          and verse numbers containing the word &ldquo;God&rdquo; in the 85
+          suras is 8,170 (19×430). The total sum of verse numbers for all
+          verses containing &ldquo;God&rdquo; is 118,123 (19×6,217).
+        </p>
+      </section>
+
+      {/* ── The Basmalah's Four Words ─────────────────────────────────────── */}
+      <div className="flex items-center gap-4">
+        <hr className="flex-1 border-border/50" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
+          The Basmalah&apos;s Four Words
+        </h2>
+        <hr className="flex-1 border-border/50" />
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          The opening statement of the Quran — &ldquo;In the name of God, Most
+          Gracious, Most Merciful&rdquo; — consists of four words. Each word
+          occurs in the Quran a number of times that is a multiple of 19:
+        </p>
+      </section>
+
+      <div
+        data-card
+        className="rounded-xl border border-border/60 overflow-hidden"
+      >
+        <div className="px-4 py-3 bg-primary/5 border-b border-border/40">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Frequency of the Basmalah&apos;s Four Words
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border/40 bg-muted/30">
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground">
+                  Word
+                </th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">
+                  Occurrences
+                </th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">
+                  Multiple of 19
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['Name (Ism)', '19', '19 × 1'],
+                ['God (Allah)', '2,698', '19 × 142'],
+                ['Most Gracious (Al-Rahman)', '57', '19 × 3'],
+                ['Most Merciful (Al-Raheem)', '114', '19 × 6'],
+              ].map(([word, count, multiple], i) => (
+                <tr
+                  key={i}
+                  className="border-b border-border/20 hover:bg-muted/20 transition-colors"
+                >
+                  <td className="px-4 py-2 text-xs">{word}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-primary font-medium">
+                    {count}
+                  </td>
+                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                    {multiple}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── The Five Pillars of Islam ─────────────────────────────────────── */}
+      <div className="flex items-center gap-4">
+        <hr className="flex-1 border-border/50" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
+          The Five Pillars of Islam
+        </h2>
+        <hr className="flex-1 border-border/50" />
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          The mathematical coding of the Quran extends to its five fundamental
+          religious duties — confirming that these pillars are part of the
+          divinely composed scripture.
+        </p>
+
+        <ol className="space-y-3 list-none">
+          {[
+            {
+              title: 'Shahaadah (One God)',
+              detail:
+                'The statement "LAA ELAAHA ELLA HOO" (There is no other god besides Him) occurs in 19 suras. The sum of all sura and verse numbers of every occurrence equals 316,502 = 19 × 16,658.',
+            },
+            {
+              title: 'Salat (Contact Prayers)',
+              detail:
+                'The word "Salat" occurs 67 times in the Quran. The sum of all sura and verse numbers for every occurrence equals 4,674 = 19 × 246.',
+            },
+            {
+              title: 'Seyaam (Fasting)',
+              detail:
+                'The commandments for fasting appear in specific verses across the Quran. The sum of all relevant sura and verse numbers equals 1,387 = 19 × 73.',
+            },
+            {
+              title: 'Zakat & Hajj (Charity & Pilgrimage)',
+              detail:
+                'The sum of all sura and verse numbers for Zakat and Hajj commandments combined equals 3,040 = 19 × 160, confirming their divine origin.',
+            },
+          ].map((pillar, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold mt-0.5">
+                {i + 1}
+              </span>
+              <span className="text-sm leading-relaxed">
+                <strong>{pillar.title}:</strong> {pillar.detail}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* ── Mathematical Structure: Suras and Verses ─────────────────────── */}
+      <div className="flex items-center gap-4">
+        <hr className="flex-1 border-border/50" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
+          The Quran&apos;s Mathematical Structure
+        </h2>
+        <hr className="flex-1 border-border/50" />
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          The numbers of suras and verses are themselves mathematically
+          structured. The sum of all sura numbers (1 through 114) plus the
+          total number of verses in each sura, plus the sum of all verse
+          numbers — equals 346,199 = 19 × 19 × 959. This extraordinary
+          result holds for initialed and un-initialed suras alike:
+        </p>
+      </section>
+
+      <div
+        data-card
+        className="rounded-xl border border-border/60 overflow-hidden"
+      >
+        <div className="px-4 py-3 bg-primary/5 border-b border-border/40">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Sura &amp; Verse Number Totals
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border/40 bg-muted/30">
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground">
+                  Category
+                </th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">
+                  Total
+                </th>
+                <th className="text-left px-4 py-2 font-medium text-muted-foreground font-mono">
+                  Multiple of 19
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['All suras (sum of sura numbers + verses + verse number sums)', '346,199', '19 × 19 × 959'],
+                ['Initialed suras only', '190,133', '19 × 10,007'],
+                ['Un-initialed suras only', '156,066', '19 × 8,214'],
+              ].map(([cat, total, mult], i) => (
+                <tr
+                  key={i}
+                  className="border-b border-border/20 hover:bg-muted/20 transition-colors"
+                >
+                  <td className="px-4 py-2 text-xs">{cat}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-primary font-medium">
+                    {total}
+                  </td>
+                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                    {mult}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          Beyond these totals, the Quran&apos;s mathematical miracle extends
+          to superhuman numerical combinations. When the numbers of every sura
+          and every verse are written side by side in sequence, the resulting
+          number &mdash; thousands of digits long &mdash; is still divisible
+          by 19. This holds regardless of whether the numbers are arranged
+          left-to-right or right-to-left, forward or backward. Fifteen
+          different such combinations have been verified, each producing a
+          number divisible by 19. No human being could have engineered this
+          while simultaneously composing a book of profound literary and
+          spiritual content.
+        </p>
+      </section>
+
+      {/* ── Why 19? ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-4">
+        <hr className="flex-1 border-border/50" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
+          Why 19?
+        </h2>
+        <hr className="flex-1 border-border/50" />
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          The number 19 possesses unique mathematical properties that make it
+          the ideal &ldquo;signature&rdquo; of the Creator:
+        </p>
+
+        <ul className="space-y-2 text-sm text-foreground/80">
+          {[
+            'It is a prime number — indivisible, like God.',
+            'It encompasses the first numeral (1) and the last numeral (9), proclaiming God\'s attribute in the Quran (57:3): "He is the Alpha and the Omega."',
+            'Its Arabic spelling is "WAHD" (One), with a gematrical value of 6+1+8+4 = 19.',
+            'Its Hebrew equivalent "VAHD" also sums to 19 (6+1+8+4).',
+            'It is the sum of the first and last single-digit numbers: 9 + 10 = 19.',
+            'It equals the difference of their squares: 10² − 9² = 100 − 81 = 19.',
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className="text-primary font-bold mt-0.5">·</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+
+        <p>
+          The Quran itself hints at this number in{' '}
+          <QuranRef reference="74:30" />:{' '}
+          &ldquo;Over it is Nineteen.&rdquo; The following verse (
+          <QuranRef reference="74:31" />) explains that this number was made
+          to disturb the disbelievers, to convince the Christians and Jews
+          (People of the Scripture), and to strengthen the faith of the
+          believers.
+        </p>
+      </section>
+
     </>
   )
 }
