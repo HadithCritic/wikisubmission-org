@@ -505,7 +505,7 @@ export function ChapterReader({
                 {t('versesRange', { start: rangeStart, end: rangeEnd })}
               </span>
               <Link
-                href={`/quran/${chapterNumber}`}
+                href={`/quran/${chapterNumber}?verse=${rangeStart}`}
                 className="text-xs text-primary hover:underline flex items-center gap-1 shrink-0"
               >
                 {tCommon('viewFullChapter')}
