@@ -1,5 +1,9 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { ZOOM_FONT, ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -50,23 +54,21 @@ function segmentHref(seg: Segment): string {
   return `/quran/${seg.cn}?verse=${verse}`
 }
 
-// ── Arabic word display (non-interactive, server-rendered) ───────────────────
+// ── Arabic word display ───────────────────────────────────────────────────────
 
-function ArabicWords({ words }: { words: VerseData['w'] }) {
+function ArabicWords({ words, arabicClass }: { words: VerseData['w']; arabicClass: string }) {
   if (!words || words.length === 0) return null
   const sorted = [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
   return (
     <p
       dir="rtl"
-      className="pt-2 font-arabic text-lg leading-relaxed text-foreground/85 text-right"
+      className={`pt-2 font-arabic ${arabicClass} leading-loose text-foreground/90 text-right w-full`}
     >
       {sorted.map((w) => {
         const arabic = (w.tx as Record<string, string> | undefined)?.['ar']
         if (!arabic) return null
         return (
-          <span key={w.wi ?? arabic} className="mx-1">
-            {arabic}
-          </span>
+          <span key={w.wi ?? arabic}>{arabic}{' '}</span>
         )
       })}
     </p>
@@ -75,7 +77,17 @@ function ArabicWords({ words }: { words: VerseData['w'] }) {
 
 // ── Single verse row ─────────────────────────────────────────────────────────
 
-function VerseRow({ verse, isLast }: { verse: VerseData; isLast: boolean }) {
+function VerseRow({
+  verse,
+  isLast,
+  translationClass,
+  arabicClass,
+}: {
+  verse: VerseData
+  isLast: boolean
+  translationClass: string
+  arabicClass: string
+}) {
   const en = verse.tr?.['en']
   const ar = verse.tr?.['ar']
 
@@ -86,30 +98,23 @@ function VerseRow({ verse, isLast }: { verse: VerseData; isLast: boolean }) {
         <p className="text-xs italic text-muted-foreground">{en.s}</p>
       )}
 
-      <div className="flex items-start gap-3">
-        {/* Verse key badge */}
-        <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-mono font-bold">
-          {verse.vk}
-        </span>
+      <div className="space-y-2">
+        {/* English text */}
+        {en?.tx && (
+          <p className={`${translationClass} leading-relaxed`}>{en.tx}</p>
+        )}
 
-        <div className="flex-1 min-w-0 space-y-2">
-          {/* English text */}
-          {en?.tx && (
-            <p className="text-sm leading-relaxed">{en.tx}</p>
-          )}
-
-          {/* Arabic — word-by-word if available, fallback to block text */}
-          {verse.w && verse.w.length > 0 ? (
-            <ArabicWords words={verse.w} />
-          ) : ar?.tx ? (
-            <p
-              dir="rtl"
-              className="font-arabic text-right text-lg leading-relaxed text-foreground/85 pt-1"
-            >
-              {ar.tx}
-            </p>
-          ) : null}
-        </div>
+        {/* Arabic — word-by-word if available, fallback to block text */}
+        {verse.w && verse.w.length > 0 ? (
+          <ArabicWords words={verse.w} arabicClass={arabicClass} />
+        ) : ar?.tx ? (
+          <p
+            dir="rtl"
+            className={`font-arabic text-right ${arabicClass} leading-loose text-foreground/90 pt-1 w-full`}
+          >
+            {ar.tx}
+          </p>
+        ) : null}
       </div>
     </div>
   )
@@ -121,10 +126,14 @@ function SegmentBlock({
   seg,
   verses,
   chapterTitle,
+  translationClass,
+  arabicClass,
 }: {
   seg: Segment
   verses: VerseData[]
   chapterTitle: string
+  translationClass: string
+  arabicClass: string
 }) {
   if (verses.length === 0) return null
 
@@ -147,6 +156,8 @@ function SegmentBlock({
           key={verse.vk}
           verse={verse}
           isLast={i === verses.length - 1}
+          translationClass={translationClass}
+          arabicClass={arabicClass}
         />
       ))}
     </div>
@@ -164,9 +175,14 @@ export function VerseListResult({
   data: QuranResponse | undefined
   apiError: boolean
 }) {
+  const { zoomLevel } = useQuranPreferences()
+  const zoom = zoomLevel ?? 'comfortable'
+  const zoomFont = ZOOM_FONT[zoom]
+  const maxW = ZOOM_WIDTH_CLASS[zoom]
+
   if (apiError || !data) {
     return (
-      <div className="max-w-5xl mx-auto py-12 text-center">
+      <div className={`${maxW} mx-auto py-12 text-center`}>
         <p className="text-sm text-muted-foreground">
           No verses found for &ldquo;{queryText}&rdquo;.
         </p>
@@ -187,7 +203,7 @@ export function VerseListResult({
   const segments = parseSegments(queryText)
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4">
+    <div className={`${maxW} mx-auto space-y-4`}>
       {segments.map((seg, i) => {
         const verses = getSegmentVerses(seg, byChapter)
         const title = chapterTitles.get(seg.cn) ?? `Chapter ${seg.cn}`
@@ -197,6 +213,8 @@ export function VerseListResult({
             seg={seg}
             verses={verses}
             chapterTitle={title}
+            translationClass={zoomFont.translation}
+            arabicClass={zoomFont.arabic}
           />
         )
       })}
