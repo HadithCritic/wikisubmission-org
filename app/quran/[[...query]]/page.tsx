@@ -335,15 +335,14 @@ export async function generateMetadata({
         const ch = chaptersRes.data?.find((c) => c.chapter_number === parsed.chapterNumber)
         if (ch?.title) chapterTitle = ch.title
         const tx = verseRes.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
-        verseText = tx.length > 220 ? tx.slice(0, 217) + '…' : tx
+        verseText = tx.length > 220 ? tx.slice(0, 217) + '...' : tx
       } catch {}
       const ref = `${parsed.chapterNumber}:${specificVerse}`
       const title = chapterTitle
         ? `${ref} | ${chapterTitle} | Quran | WikiSubmission`
         : `${ref} | Quran | WikiSubmission`
-      const chapterNote = chapterTitle ? `Sura ${parsed.chapterNumber}, ${chapterTitle}. ` : ''
       const description = verseText
-        ? `${chapterNote}${verseText}`
+        ? `[${ref}] ${verseText}`
         : `Verse ${ref} of the Final Testament`
       return buildPageMetadata({
         title,
@@ -382,7 +381,7 @@ export async function generateMetadata({
         .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
         .join(' ')
         .trim()
-      versePreview = joined.length > 220 ? joined.slice(0, 217) + '…' : joined
+      versePreview = joined.length > 220 ? joined.slice(0, 217) + '...' : joined
     } catch {}
 
     const title = chapterTitle
@@ -429,11 +428,10 @@ export async function generateMetadata({
         .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
         .join(' ')
         .trim()
-      verseText = joined.length > 220 ? joined.slice(0, 217) + '…' : joined
+      verseText = joined.length > 220 ? joined.slice(0, 217) + '...' : joined
     } catch {}
-    const chapterNote = chapterTitle ? `Sura ${parsed.chapterNumber}, ${chapterTitle}. ` : ''
     const description = verseText
-      ? `${chapterNote}${verseText}`
+      ? verseText
       : `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament`
     return buildPageMetadata({
       title,
@@ -462,7 +460,7 @@ export async function generateMetadata({
           },
         })
         const tx = result.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
-        verseText = tx.length > 220 ? tx.slice(0, 217) + '…' : tx
+        verseText = tx.length > 220 ? tx.slice(0, 217) + '...' : tx
       } catch {}
     }
     const description = verseText
