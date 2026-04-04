@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { X, ArrowUp, Loader2, ExternalLink, ChevronDown, Minus } from 'lucide-react'
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { X, ArrowUp, Loader2, ChevronDown } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useAsk } from './ask-context'
@@ -11,55 +11,28 @@ import { QuranRef } from '@/components/quran-ref'
 
 interface Message {
   question: string
-  answer: string
-  sources: string[]
+  answer?: string
+  sources?: string[]
   error?: string
+  pending?: boolean
 }
 
-interface ParsedSource {
-  label: string
-  href: string
-  external?: boolean
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-function parseSource(source: string): ParsedSource | null {
-  const appendixMatch = source.match(/^appendix:(\d+):\d+$/)
-  if (appendixMatch) {
-    return { label: `Appendix ${appendixMatch[1]}`, href: `/appendices/${appendixMatch[1]}` }
-  }
-  const qurantalkMatch = source.match(/^qurantalk:(.+)$/)
-  if (qurantalkMatch) {
-    const title = qurantalkMatch[1].trim()
-    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-    return { label: title, href: `https://www.qurantalk.com/${slug}`, external: true }
-  }
-  const verseMatch = source.match(/^(\d+):(\d+)(?:-\d+)?$/)
-  if (verseMatch) {
-    return { label: source, href: `/quran/${verseMatch[1]}?verse=${verseMatch[2]}` }
-  }
-  return null
-}
+// ── Inline text renderer ───────────────────────────────────────────────────────
 
 function parseInline(text: string): React.ReactNode[] {
   const re = /(\*\*.+?\*\*|\b\d{1,3}:\d{1,3}(?:-\d{1,3})?\b)/g
-  const parts: React.ReactNode[] = []
-  let last = 0
-  let key = 0
-  let match: RegExpExecArray | null
-  while ((match = re.exec(text)) !== null) {
-    if (match.index > last) parts.push(text.slice(last, match.index))
-    const m = match[0]
-    if (m.startsWith('**')) {
-      parts.push(<strong key={key++}>{m.slice(2, -2)}</strong>)
-    } else {
-      parts.push(<QuranRef key={key++} reference={m} />)
-    }
-    last = match.index + m.length
+  const nodes: React.ReactNode[] = []
+  let last = 0, key = 0
+  let m: RegExpExecArray | null
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) nodes.push(text.slice(last, m.index))
+    const s = m[0]
+    if (s.startsWith('**')) nodes.push(<strong key={key++}>{s.slice(2, -2)}</strong>)
+    else nodes.push(<QuranRef key={key++} reference={s} />)
+    last = m.index + s.length
   }
-  if (last < text.length) parts.push(text.slice(last))
-  return parts
+  if (last < text.length) nodes.push(text.slice(last))
+  return nodes
 }
 
 function AiAnswer({ text }: { text: string }) {
@@ -67,112 +40,106 @@ function AiAnswer({ text }: { text: string }) {
     <div className="space-y-3 text-sm leading-relaxed text-foreground/90">
       {text.split(/\n\n+/).map((para, i) => {
         const lines = para.split(/\n/).filter(Boolean)
-        if (/^\d+\.\s/.test(para)) {
+        if (/^\d+\.\s/.test(para))
           return (
-            <ol key={i} className="space-y-1.5 list-decimal list-outside pl-4">
-              {lines.map((line, j) => (
-                <li key={j}>{parseInline(line.replace(/^\d+\.\s*/, ''))}</li>
-              ))}
+            <ol key={i} className="list-decimal list-outside pl-4 space-y-1.5">
+              {lines.map((l, j) => <li key={j}>{parseInline(l.replace(/^\d+\.\s*/, ''))}</li>)}
             </ol>
           )
-        }
-        if (/^[-*]\s/.test(para)) {
+        if (/^[-*]\s/.test(para))
           return (
-            <ul key={i} className="space-y-1.5 list-disc list-outside pl-4">
-              {lines.map((line, j) => (
-                <li key={j}>{parseInline(line.replace(/^[-*]\s*/, ''))}</li>
-              ))}
+            <ul key={i} className="list-disc list-outside pl-4 space-y-1.5">
+              {lines.map((l, j) => <li key={j}>{parseInline(l.replace(/^[-*]\s*/, ''))}</li>)}
             </ul>
           )
-        }
         return <p key={i}>{parseInline(para)}</p>
       })}
     </div>
   )
 }
 
-function Sources({ sources }: { sources: string[] }) {
-  const verseSources = sources.filter((s) => /^\d+:\d+/.test(s))
-  const otherSources = sources
-    .filter((s) => !/^\d+:\d+/.test(s))
-    .map(parseSource)
-    .filter(Boolean) as ParsedSource[]
-
-  if (verseSources.length === 0 && otherSources.length === 0) return null
-
+function TypingDots() {
   return (
-    <div className="mt-2.5 flex flex-wrap gap-1.5">
-      {verseSources.length > 0 && (
-        <Link
-          href={`/quran/?q=${verseSources.join(',')}`}
-          className="inline-flex items-center text-[11px] font-mono bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20 px-2 py-0.5 rounded-md transition-colors"
-        >
-          {verseSources.join(', ')}
-        </Link>
-      )}
-      {otherSources.map((src) =>
-        src.external ? (
-          <a
-            key={src.href}
-            href={src.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground px-2 py-0.5 rounded-md transition-colors"
-          >
-            {src.label}
-            <ExternalLink className="size-2.5 opacity-50" />
-          </a>
-        ) : (
-          <Link
-            key={src.href}
-            href={src.href}
-            className="inline-flex items-center text-[11px] bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground px-2 py-0.5 rounded-md transition-colors"
-          >
-            {src.label}
-          </Link>
-        )
-      )}
+    <div className="flex gap-1 items-center h-5 px-1">
+      {[0, 120, 240].map((d) => (
+        <span
+          key={d}
+          className="size-1.5 rounded-full bg-muted-foreground/40 animate-bounce"
+          style={{ animationDelay: `${d}ms` }}
+        />
+      ))}
     </div>
   )
 }
 
-// ── Main sidebar ───────────────────────────────────────────────────────────────
+function VerseChip({ sources, onNavigate }: { sources: string[]; onNavigate: () => void }) {
+  const refs = sources.filter((s) => /^\d+:\d+/.test(s))
+  if (!refs.length) return null
+  return (
+    <Link
+      href={`/quran?q=${refs.join(',')}`}
+      onClick={onNavigate}
+      className="mt-2.5 inline-flex items-center text-[11px] font-mono text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 px-2 py-0.5 rounded-md transition-colors"
+    >
+      {refs.join(', ')}
+    </Link>
+  )
+}
 
-const OPEN_HEIGHT = 'min(600px, calc(100vh - 96px))'
-const CLOSED_HEIGHT = '52px'
+// ── Minimized pill ─────────────────────────────────────────────────────────────
+
+function MinimizedPill({ onOpen, onClose }: { onOpen: () => void; onClose: () => void }) {
+  return (
+    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-background border border-border/50 shadow-lg rounded-full px-3 py-2 text-sm font-medium">
+      <button onClick={onOpen} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+        <Image
+          src="/brand-assets/logo-transparent.png"
+          alt=""
+          width={20}
+          height={20}
+          className="rounded-full size-5"
+        />
+        SubmitterAI
+      </button>
+      <button onClick={onClose} className="flex items-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Dismiss">
+        <X size={13} />
+      </button>
+    </div>
+  )
+}
+
+// ── Sidebar ────────────────────────────────────────────────────────────────────
 
 export function AskSidebar() {
   const { state, open, close, minimize } = useAsk()
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const isOpen = state === 'open'
-  const isMinimized = state === 'minimized'
-  const visible = isOpen || isMinimized
 
   useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 150)
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 200)
   }, [isOpen])
 
   useEffect(() => {
-    if (isOpen && (messages.length > 0 || loading)) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [messages, loading, isOpen])
+    if (isOpen) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, isOpen])
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape' && isOpen) minimize() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
+    const fn = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape' && isOpen) minimize() }
+    document.addEventListener('keydown', fn)
+    return () => document.removeEventListener('keydown', fn)
   }, [isOpen, minimize])
 
   const submit = async (q: string) => {
     const trimmed = q.trim()
-    if (!trimmed || loading) return
+    if (!trimmed) return
     setInput('')
-    setLoading(true)
+
+    // Add message immediately with pending state
+    const idx = messages.length
+    setMessages((prev) => [...prev, { question: trimmed, pending: true }])
 
     try {
       const res = await fetch('/api/ask', {
@@ -182,175 +149,168 @@ export function AskSidebar() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || `Error ${res.status}`)
-      setMessages((prev) => [...prev, { question: trimmed, answer: data.answer, sources: data.sources ?? [] }])
+      setMessages((prev) =>
+        prev.map((m, i) =>
+          i === idx ? { question: trimmed, answer: data.answer, sources: data.sources ?? [], pending: false } : m
+        )
+      )
     } catch (err: unknown) {
-      setMessages((prev) => [
-        ...prev,
-        { question: trimmed, answer: '', sources: [], error: err instanceof Error ? err.message : 'Something went wrong.' },
-      ])
-    } finally {
-      setLoading(false)
+      setMessages((prev) =>
+        prev.map((m, i) =>
+          i === idx
+            ? { question: trimmed, error: err instanceof Error ? err.message : 'Something went wrong.', pending: false }
+            : m
+        )
+      )
     }
   }
 
-  if (!visible) return null
+  const handleKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') { e.preventDefault(); submit(input) }
+  }
+
+  if (state === 'minimized') return <MinimizedPill onOpen={open} onClose={close} />
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity duration-200 ${
+        aria-hidden
+        onClick={minimize}
+        className={`fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={minimize}
-        aria-hidden
       />
 
-      {/* Panel — body is always in DOM; height transition reveals/hides it */}
+      {/* Panel — full height, fixed width, slides from right */}
       <aside
-        style={{ height: isOpen ? OPEN_HEIGHT : CLOSED_HEIGHT }}
-        className="fixed bottom-4 right-4 z-50 w-[clamp(300px,420px,calc(100vw-32px))] bg-background rounded-2xl shadow-2xl border border-border/50 flex flex-col overflow-hidden transition-[height] duration-300 ease-in-out"
+        className={`fixed top-0 right-0 z-50 h-full flex flex-col bg-background border-l border-border/40 shadow-2xl transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ width: '420px', maxWidth: 'calc(100vw - 48px)' }}
       >
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-4 shrink-0 cursor-pointer select-none"
-          style={{ height: CLOSED_HEIGHT }}
-          onClick={() => isMinimized ? open() : minimize()}
-        >
-          <div className="flex items-center gap-2">
+        <div className="shrink-0 h-14 flex items-center justify-between px-4 border-b border-border/30">
+          <div className="flex items-center gap-2.5">
             <Image
               src="/brand-assets/logo-transparent.png"
               alt="WikiSubmission"
-              width={20}
-              height={20}
-              className="rounded-full size-5"
+              width={22}
+              height={22}
+              className="rounded-full"
             />
-            <span className="text-sm font-semibold">SubmitterAI</span>
+            <span className="text-sm font-semibold">Submission AI</span>
           </div>
-          <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={isMinimized ? open : minimize}
-              className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-              aria-label={isMinimized ? 'Expand' : 'Minimize'}
-            >
-              <Minus size={14} />
-            </button>
-            <button
-              onClick={close}
-              className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-              aria-label="Close"
-            >
-              <X size={14} />
-            </button>
-          </div>
+          <button
+            onClick={minimize}
+            className="size-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Close"
+          >
+            <X size={15} />
+          </button>
         </div>
 
-        {/* Body — always rendered, clipped by panel overflow-hidden when minimized */}
-        <div className="flex-1 flex flex-col overflow-hidden border-t border-border/30 min-h-0">
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 custom-scrollbar min-h-0">
-            {messages.length === 0 && !loading && (
-              <div className="flex flex-col items-center justify-center gap-4 text-center pt-6">
-                <div>
-                  <p className="text-sm font-medium">Ask about the Quran</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Submission, the Miracle, or Islamic practice</p>
-                </div>
-                <div className="flex flex-col gap-1.5 w-full">
-                  {[
-                    'What is the significance of 19?',
-                    'What does the Quran say about prayer?',
-                    'What are the Quran initials?',
-                  ].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => submit(s)}
-                      className="text-xs text-left text-muted-foreground hover:text-foreground border border-border/40 hover:border-border hover:bg-muted/20 px-3 py-2 rounded-lg transition-colors"
-                    >
-                      {s}
-                    </button>
-                  ))}
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6" style={{ minHeight: 0 }}>
+          {messages.length === 0 && (
+            <div className="h-full flex flex-col items-center justify-center gap-5 text-center">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">Ask about the Quran</p>
+                <p className="text-xs text-muted-foreground">
+                  Submission, the Miracle, or Islamic practice
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 w-full max-w-xs">
+                {[
+                  'What is the significance of 19?',
+                  'What does the Quran say about prayer?',
+                  'What are the Quran\'s unique initials?',
+                ].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => submit(s)}
+                    className="text-xs text-left text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/70 hover:bg-muted/20 px-3 py-2 rounded-lg transition-colors"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {messages.map((msg, i) => (
+            <div key={i} className="space-y-3">
+              {/* User bubble */}
+              <div className="flex justify-end">
+                <div className="max-w-[80%] bg-muted/50 text-foreground text-sm leading-relaxed px-3 py-1.5 rounded-2xl rounded-tr-sm">
+                  {msg.question}
                 </div>
               </div>
-            )}
 
-            {messages.map((msg, i) => (
-              <div key={i} className="space-y-3">
-                {/* User bubble */}
-                <div className="flex justify-end">
-                  <div className="max-w-[85%] bg-muted/50 rounded-2xl rounded-tr-sm px-3 py-1.5 text-sm leading-relaxed">
-                    {msg.question}
-                  </div>
-                </div>
-
-                {/* AI answer */}
-                {msg.error ? (
-                  <p className="text-xs text-destructive">{msg.error}</p>
-                ) : (
-                  <div>
+              {/* AI response */}
+              <div className="pr-4">
+                {msg.pending && <TypingDots />}
+                {msg.error && <p className="text-xs text-destructive">{msg.error}</p>}
+                {msg.answer && (
+                  <>
                     <AiAnswer text={msg.answer} />
-                    <Sources sources={msg.sources} />
-                  </div>
+                    <VerseChip sources={msg.sources ?? []} onNavigate={minimize} />
+                  </>
                 )}
               </div>
-            ))}
+            </div>
+          ))}
 
-            {loading && (
-              <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                <Loader2 className="size-3.5 animate-spin" />
-                <span>Thinking…</span>
-              </div>
-            )}
+          <div ref={bottomRef} />
+        </div>
 
-            <div ref={bottomRef} />
-          </div>
+        {/* Input */}
+        <div className="shrink-0 px-3 pb-4 pt-3 border-t border-border/30 space-y-2.5">
+          {/* Model selector */}
+          <button
+            disabled
+            className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-muted-foreground cursor-default select-none transition-colors"
+          >
+            <Image
+              src="/brand-assets/logo-transparent.png"
+              alt=""
+              width={14}
+              height={14}
+              className="rounded-full opacity-60"
+            />
+            <span><strong>Model:</strong> SubmitterAI</span>
+          </button>
 
-          {/* Input area */}
-          <div className="shrink-0 px-3 pt-2 pb-3 space-y-2 border-t border-border/30">
+          {/* Input row */}
+          <form
+            onSubmit={(e: FormEvent) => { e.preventDefault(); submit(input) }}
+            className="flex items-center gap-2"
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Ask anything…"
+              maxLength={500}
+              className="flex-1 h-9 rounded-xl border border-border/50 bg-muted/20 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-colors placeholder:text-muted-foreground/40"
+            />
             <button
-              disabled
-              className="flex items-center gap-1 text-[10px] text-muted-foreground/50 px-1 cursor-default select-none"
+              type="submit"
+              disabled={input.trim().length < 2}
+              className="shrink-0 size-9 flex items-center justify-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
             >
-              <Image
-                src="/brand-assets/logo-transparent.png"
-                alt=""
-                width={12}
-                height={12}
-                className="rounded-full opacity-50"
-              />
-              SubmitterAI
-              <ChevronDown className="size-2.5 opacity-40" />
+              {messages.at(-1)?.pending
+                ? <Loader2 className="size-4 animate-spin" />
+                : <ArrowUp className="size-4" />
+              }
             </button>
+          </form>
 
-            <form onSubmit={(e: FormEvent) => { e.preventDefault(); submit(input) }} className="relative">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    submit(input)
-                  }
-                }}
-                placeholder="Ask anything…"
-                maxLength={500}
-                rows={1}
-                className="w-full rounded-xl border border-border/50 bg-muted/20 px-3.5 py-2.5 pr-11 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all placeholder:text-muted-foreground/40 max-h-28 overflow-y-auto"
-                style={{ fieldSizing: 'content' } as React.CSSProperties}
-              />
-              <button
-                type="submit"
-                disabled={loading || input.trim().length < 2}
-                className="absolute right-2 bottom-2 size-7 flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-              >
-                {loading ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowUp className="size-3.5" />}
-              </button>
-            </form>
-
-            <p className="text-[10px] text-muted-foreground/40 text-center">
-              May contain inaccuracies — verify all information
-            </p>
-          </div>
+          <p className="text-[10px] text-muted-foreground/40 text-center">
+            May contain inaccuracies — verify all information
+          </p>
         </div>
       </aside>
     </>
