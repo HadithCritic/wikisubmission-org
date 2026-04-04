@@ -213,7 +213,9 @@ export function AppendixContent() {
           <QuranRef reference="4:48" />, <QuranRef reference="4:116" />). The world is
           divinely designed to manifest our decision to uphold either God&apos;s absolute
           authority or Satan&apos;s idolatrous views (<QuranRef reference="67:1-2" />).
-          Only those who are totally certain about God&apos;s absolute authority are
+          The day and the night change constantly to test our willingness to uphold
+          God&apos;s laws by observing the Dawn Prayer and fasting during the hottest
+          and longest days. Only those who are totally certain about God&apos;s absolute authority are
           redeemed (<QuranRef reference="26:89" />).
         </p>
       </section>
