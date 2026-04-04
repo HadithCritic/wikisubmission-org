@@ -62,7 +62,7 @@ export default async function BiblePage({ params }: Props) {
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{book.bk}</p>
                     <p className="text-[10px] text-muted-foreground font-mono">
-                      {book.cc} ch · {book.vc} v
+                      {book.cc} chapters · {book.vc} verses
                     </p>
                   </div>
                   <ChevronRight className="size-3.5 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
@@ -86,7 +86,7 @@ export default async function BiblePage({ params }: Props) {
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{book.bk}</p>
                     <p className="text-[10px] text-muted-foreground font-mono">
-                      {book.cc} ch · {book.vc} v
+                      {book.cc} chapters · {book.vc} verses
                     </p>
                   </div>
                   <ChevronRight className="size-3.5 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
