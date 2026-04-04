@@ -34,7 +34,7 @@ function flattenWords(
           verse_number: verseNumber,
           word_index: word.wi ?? 0,
           arabic: word.tx?.['ar'] ?? '',
-          english: word.m ?? word.tx?.['en'] ?? '',
+          english: word.tx?.['en'] ?? '',
           root: word.r ?? '',
         })
       }
@@ -138,12 +138,11 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
                     {t('word', { index: occ.word_index })}
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-foreground leading-tight group-hover:text-violet-600 transition-colors">
-                  {occ.english}
-                </p>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter italic">
-                  {occ.root}
-                </p>
+                {occ.english && (
+                  <p className="text-sm font-semibold text-foreground leading-tight group-hover:text-violet-600 transition-colors">
+                    {occ.english}
+                  </p>
+                )}
               </div>
               <div className="text-3xl font-arabic text-right text-foreground group-hover:text-violet-600 transition-colors shrink-0">
                 {occ.arabic}

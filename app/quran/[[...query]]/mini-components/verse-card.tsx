@@ -65,7 +65,7 @@ const WordByWordView = memo(
         {sorted.map((w) => {
           const arabic = (w.tx as Record<string, string>)?.['ar']
           const root = w.r
-          const meaning = (w.tx as Record<string, string>)?.['en'] ?? ''
+          const meaning = w.m ?? (w.tx as Record<string, string>)?.['en'] ?? ''
           const wordIndex = w.wi ?? 0
 
           if (isTouch) {
@@ -112,10 +112,10 @@ const WordByWordView = memo(
                   <DialogHeader>
                     <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
                       <span className="text-4xl font-arabic text-violet-600 mb-3">{arabic}</span>
-                      <span className="text-base font-semibold text-foreground">{meaning}</span>
                       <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
                         <span className="text-[10px] font-bold text-violet-600">Root: {root}</span>
                       </div>
+                      <span className="text-base font-semibold text-foreground">{meaning}</span>
                     </DialogTitle>
                   </DialogHeader>
                   <div className="mt-3">
@@ -164,10 +164,10 @@ const WordByWordView = memo(
                   <DialogHeader>
                     <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
                       <span className="text-4xl font-arabic text-violet-600 mb-3">{dialogWord.arabic}</span>
-                      <span className="text-base font-semibold text-foreground">{dialogWord.meaning}</span>
                       <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
                         <span className="text-[10px] font-bold text-violet-600">Root: {dialogWord.root}</span>
                       </div>
+                      <span className="text-base font-semibold text-foreground">{dialogWord.meaning}</span>
                     </DialogTitle>
                   </DialogHeader>
                   <div className="mt-3">
