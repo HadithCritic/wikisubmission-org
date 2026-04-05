@@ -285,6 +285,29 @@ export default async function Home() {
         </section>
       )}
 
+      {/* ── Submission AI ────────────────────────────────────────────────── */}
+      <section className="py-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative bg-surface-container-low rounded-2xl px-8 py-10 md:px-12 md:py-12 overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 relative z-10">
+              <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold tracking-wider">
+                AI
+              </span>
+              <h2 className="font-headline text-2xl font-bold">Ask Submission AI</h2>
+              <p className="text-on-surface-variant text-sm leading-relaxed max-w-md">
+                Have a question about the Quran, the mathematical miracle of 19, or Islamic practice? Get answers grounded in the Final Testament.
+              </p>
+            </div>
+            <Link
+              href="/chat"
+              className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all hover:-translate-y-0.5"
+            >
+              Ask a question <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── Platforms & Tools ────────────────────────────────────────────── */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">

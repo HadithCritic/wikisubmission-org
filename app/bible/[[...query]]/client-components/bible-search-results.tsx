@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
 import { wsApi } from '@/src/api/client'
-import { bookFromSlug, BIBLE_BOOKS } from '@/constants/bible-books'
+import { BIBLE_BOOKS } from '@/constants/bible-books'
 import { HighlightText, markQuery } from '@/components/highlight-text'
 import type { components } from '@/src/api/types.gen'
 
@@ -19,20 +19,15 @@ export function BibleSearchResults() {
   const q = searchParams.get('q') ?? ''
 
   const [results, setResults] = useState<ResultVerse[]>([])
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searched, setSearched] = useState('')
 
+  // Derived: loading when q has changed from last completed search and no error yet
+  const loading = q.length >= 2 && searched !== q && !error
+
   useEffect(() => {
-    if (!q || q.length < 2) {
-      setResults([])
-      setSearched('')
-      return
-    }
+    if (!q || q.length < 2) return
     let cancelled = false
-    setLoading(true)
-    setError(null)
-    setResults([])
 
     wsApi
       .GET('/bible/search', {
@@ -42,6 +37,7 @@ export function BibleSearchResults() {
         if (cancelled) return
         if (err) {
           setError('Search failed. Please try again.')
+          setSearched(q)
           return
         }
         const verses: ResultVerse[] = []
@@ -57,11 +53,9 @@ export function BibleSearchResults() {
             }
           }
         }
+        setError(null)
         setResults(verses)
         setSearched(q)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
       })
 
     return () => {
@@ -69,7 +63,7 @@ export function BibleSearchResults() {
     }
   }, [q])
 
-  if (!q) {
+  if (!q || q.length < 2) {
     return (
       <div className="text-center py-24 text-muted-foreground text-sm">
         Enter a search term above.

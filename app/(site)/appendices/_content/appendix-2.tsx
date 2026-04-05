@@ -187,7 +187,7 @@ export function AppendixContent() {
                 [17, 72, 10, 'Rashada'],
                 [18, 72, 14, 'Rashada'],
                 [19, 72, 21, 'Rashada'],
-              ].map(([n, sura, verse, word]) => (
+              ].map(([n, sura, verse]) => (
                 <tr
                   key={n as number}
                   className="border-b border-border/20 hover:bg-muted/20 transition-colors"

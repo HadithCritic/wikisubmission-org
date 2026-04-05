@@ -305,7 +305,7 @@ export const VerseCard = memo(
     navigator.clipboard.writeText(parts.join('\n'))
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
-  }, [verseId, prefs.text, prefs.arabic, prefs.wordByWord, tr?.tx, secondaryTr?.tx, arTr?.tx])
+  }, [verseId, prefs.text, prefs.arabic, prefs.wordByWord, tr, secondaryTr, arTr])
 
   const handlePlay = useCallback(() => {
     if (isCurrentAudio) {

@@ -2,8 +2,9 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
-import { AskProvider } from '@/components/ask-sidebar/ask-context'
-import { AskSidebar } from '@/components/ask-sidebar/ask-sidebar'
+import { ChatPanelProvider } from '@/components/chat-sidebar/panel-context'
+import { ChatSidebar } from '@/components/chat-sidebar/chat-sidebar'
+import { ChatProvider } from '@/components/chat/chat-context'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -19,10 +20,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AskProvider>
-        {children}
-        <AskSidebar />
-      </AskProvider>
+      <ChatPanelProvider>
+        <ChatProvider>
+          {children}
+          <ChatSidebar />
+        </ChatProvider>
+      </ChatPanelProvider>
     </QueryClientProvider>
   )
 }

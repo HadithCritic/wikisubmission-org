@@ -2,17 +2,17 @@
 
 import { createContext, useContext, useState } from 'react'
 
-type AskState = 'closed' | 'open' | 'minimized'
+type ChatPanelState = 'closed' | 'open' | 'minimized'
 
-interface AskContextValue {
-  state: AskState
+interface ChatPanelContextValue {
+  state: ChatPanelState
   open: () => void
   close: () => void
   minimize: () => void
   toggle: () => void
 }
 
-const AskContext = createContext<AskContextValue>({
+const ChatPanelContext = createContext<ChatPanelContextValue>({
   state: 'closed',
   open: () => {},
   close: () => {},
@@ -20,12 +20,12 @@ const AskContext = createContext<AskContextValue>({
   toggle: () => {},
 })
 
-export const useAsk = () => useContext(AskContext)
+export const useChatPanel = () => useContext(ChatPanelContext)
 
-export function AskProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AskState>('closed')
+export function ChatPanelProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<ChatPanelState>('closed')
   return (
-    <AskContext.Provider
+    <ChatPanelContext.Provider
       value={{
         state,
         open: () => setState('open'),
@@ -36,6 +36,6 @@ export function AskProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-    </AskContext.Provider>
+    </ChatPanelContext.Provider>
   )
 }

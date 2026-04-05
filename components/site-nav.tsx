@@ -10,7 +10,7 @@ import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 // import { SignInButton, SignedIn, SignedOut, UserButton } from '' // Phase 3, but using supabase auth
 import { cn } from '@/lib/utils'
 import { useTranslations, useLocale } from 'next-intl'
-import { useAsk } from '@/components/ask-sidebar/ask-context'
+import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 
 const NAV_LINKS = [
   { label: 'home', href: '/' },
@@ -28,7 +28,7 @@ export function SiteNav() {
   const pathname = usePathname()
   const t = useTranslations('navbar')
   const locale = useLocale()
-  const { toggle: toggleAsk, state: askState } = useAsk()
+  const { toggle: toggleAsk, state: askState } = useChatPanel()
 
   return (
     <nav className="sticky top-0 z-50 w-full glass-nav bg-background/80 border-b border-border/40">

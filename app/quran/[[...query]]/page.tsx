@@ -403,26 +403,17 @@ export async function generateMetadata({
   if (parsed.type === 'range' && parsed.chapterNumber) {
     const title = `${queryText} | Quran | WikiSubmission`
     let verseText = ''
-    let chapterTitle = ''
     try {
-      const [chaptersRes, versesRes] = await Promise.all([
-        wsApiServer.GET('/chapters', {
-          params: { query: { lang: 'en' } },
-          next: { revalidate: 86400 },
-        }),
-        wsApiServer.GET('/quran', {
-          params: {
-            query: {
-              chapter_number_start: parsed.chapterNumber,
-              langs: ['en'],
-              verse_start: parsed.verseStart,
-              verse_end: parsed.verseEnd,
-            },
+      const versesRes = await wsApiServer.GET('/quran', {
+        params: {
+          query: {
+            chapter_number_start: parsed.chapterNumber,
+            langs: ['en'],
+            verse_start: parsed.verseStart,
+            verse_end: parsed.verseEnd,
           },
-        }),
-      ])
-      const ch = chaptersRes.data?.find((c) => c.chapter_number === parsed.chapterNumber)
-      if (ch?.title) chapterTitle = ch.title
+        },
+      })
       const verses = versesRes.data?.chapters?.[0]?.verses ?? []
       const joined = verses
         .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
