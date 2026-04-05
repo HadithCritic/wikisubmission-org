@@ -45,7 +45,7 @@ export default async function QuranLayout({
           <SiteNav />
           {query && (
             <header className="h-14 glass-nav bg-background/80 border-b border-border/40">
-              <div className="px-3 h-full flex items-center gap-2">
+              <div className="px-3 h-full flex flex-row items-center gap-2 w-full justify-between">
                 <QuranNavSheet
                   chapters={chaptersRes.data}
                   appendices={appendicesRes.data}
@@ -66,10 +66,11 @@ export default async function QuranLayout({
             pt-16 (64px) when no sub-header, pt-[120px] (64+56) when sub-header present. */}
         <div className={query ? 'pt-30' : 'pt-16'}>
           <LanguagesInit languages={languagesRes.data ?? []} />
-          <QuranNavInit chapters={chaptersRes.data ?? []} appendices={appendicesRes.data ?? []} />
-          <QuranScrollContainer>
-            {children}
-          </QuranScrollContainer>
+          <QuranNavInit
+            chapters={chaptersRes.data ?? []}
+            appendices={appendicesRes.data ?? []}
+          />
+          <QuranScrollContainer>{children}</QuranScrollContainer>
           <SiteFooter />
           <MetricsCollector />
           <QuranPlayer />

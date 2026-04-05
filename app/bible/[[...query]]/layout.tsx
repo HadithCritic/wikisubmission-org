@@ -22,15 +22,17 @@ export default async function BibleLayout({
         <SiteNav />
         {hasQuery && (
           <header className="h-14 glass-nav bg-background/80 border-b border-border/40">
-            <div className="px-3 h-full flex items-center gap-2">
+            <div className="px-3 h-full flex-row flex items-center gap-2 w-full justify-between">
               <BibleNavSheet />
               <Suspense>
                 <BibleSearchBar className="flex-1 min-w-0" />
               </Suspense>
-              <div className="flex gap-2 shrink-0">
-                <BibleModeSelector />
+              <div className="flex flex-row gap-2">
+                <div className="flex gap-2 shrink-0">
+                  <BibleModeSelector />
+                </div>
+                <BibleSettings />
               </div>
-              <BibleSettings />
             </div>
           </header>
         )}

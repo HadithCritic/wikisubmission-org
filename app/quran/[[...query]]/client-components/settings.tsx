@@ -130,7 +130,7 @@ export default function QuranSettings() {
           <SettingsIcon />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-72" align="end">
+      <DropdownMenuContent className="w-80" align="end">
         {/* Zoom */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
           <ZoomInIcon className="size-4" />
@@ -140,13 +140,15 @@ export default function QuranSettings() {
         <div className="px-3 py-2">
           <div className="flex gap-1.5">
             {ZOOM_LEVELS.map((level) => {
-              const labelKey = `zoom${level.charAt(0).toUpperCase()}${level.slice(1)}` as
-                | 'zoomCompact'
-                | 'zoomNormal'
-                | 'zoomComfortable'
-                | 'zoomWide'
-                | 'zoomFull'
-              const isActive = (quranPreferences.zoomLevel ?? 'comfortable') === level
+              const labelKey =
+                `zoom${level.charAt(0).toUpperCase()}${level.slice(1)}` as
+                  | 'zoomCompact'
+                  | 'zoomNormal'
+                  | 'zoomComfortable'
+                  | 'zoomWide'
+                  | 'zoomFull'
+              const isActive =
+                (quranPreferences.zoomLevel ?? 'comfortable') === level
               return (
                 <button
                   key={level}
@@ -245,7 +247,8 @@ export default function QuranSettings() {
               label={t('arabic')}
               description="Original Arabic text"
               checked={
-                quranPreferences.arabic || quranPreferences.displayMode === 'word'
+                quranPreferences.arabic ||
+                quranPreferences.displayMode === 'word'
               }
               disabled={quranPreferences.displayMode === 'word'}
               onCheckedChange={(checked) =>
@@ -337,7 +340,6 @@ export default function QuranSettings() {
             />
           )}
         </div>
-
       </DropdownMenuContent>
     </DropdownMenu>
   )

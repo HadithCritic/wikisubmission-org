@@ -18,6 +18,7 @@ import { Switch } from '@/components/ui/switch'
 import { useBiblePreferences } from '@/hooks/use-bible-preferences'
 import { ZOOM_LEVELS } from '@/lib/quran-zoom'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 function SettingTile({
   icon,
@@ -38,16 +39,23 @@ function SettingTile({
         <span className="text-muted-foreground mt-0.5 shrink-0">{icon}</span>
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-sm font-medium leading-none">{label}</span>
-          <span className="text-xs text-muted-foreground leading-snug">{description}</span>
+          <span className="text-xs text-muted-foreground leading-snug">
+            {description}
+          </span>
         </div>
       </div>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} className="shrink-0" />
+      <Switch
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        className="shrink-0"
+      />
     </div>
   )
 }
 
 export default function BibleSettings() {
   const prefs = useBiblePreferences()
+  const t = useTranslations('settings')
 
   return (
     <DropdownMenu modal={false}>
@@ -56,28 +64,30 @@ export default function BibleSettings() {
           <SettingsIcon />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-72" align="end">
+      <DropdownMenuContent className="w-80" align="end">
         {/* Zoom */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
           <ZoomInIcon className="size-4" />
-          <strong>Zoom</strong>
+          <strong>{t('zoom')}</strong>
         </DropdownMenuLabel>
 
-        <div className="px-3 py-2">
-          <div className="flex gap-1.5">
+        <div className="px-3 py-2 w-80">
+          <div className="flex gap-1.5 flex-wrap">
             {ZOOM_LEVELS.map((level) => {
-              const labels: Record<string, string> = {
-                compact: 'Compact',
-                normal: 'Normal',
-                comfortable: 'Comfortable',
-                wide: 'Wide',
-                full: 'Full',
-              }
+              const labelKey =
+                `zoom${level.charAt(0).toUpperCase()}${level.slice(1)}` as
+                  | 'zoomCompact'
+                  | 'zoomNormal'
+                  | 'zoomComfortable'
+                  | 'zoomWide'
+                  | 'zoomFull'
               const isActive = (prefs.zoomLevel ?? 'comfortable') === level
               return (
                 <button
                   key={level}
-                  onClick={() => prefs.setPreferences({ ...prefs, zoomLevel: level })}
+                  onClick={() =>
+                    prefs.setPreferences({ ...prefs, zoomLevel: level })
+                  }
                   className={cn(
                     'flex-1 px-1.5 py-1 rounded-lg text-xs font-medium transition-all border',
                     isActive
@@ -85,7 +95,7 @@ export default function BibleSettings() {
                       : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
                   )}
                 >
-                  {labels[level]}
+                  {t(labelKey)}
                 </button>
               )
             })}
@@ -95,7 +105,7 @@ export default function BibleSettings() {
         {/* Footnotes */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
           <BookOpenTextIcon className="size-4" />
-          <strong>Footnotes</strong>
+          <strong>{t('footnotes')}</strong>
         </DropdownMenuLabel>
 
         <div className="space-y-0.5 pb-1">
@@ -122,14 +132,14 @@ export default function BibleSettings() {
         {/* Language */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
           <LanguagesIcon className="size-4" />
-          <strong>Language</strong>
+          <strong>{t('language')}</strong>
         </DropdownMenuLabel>
         <div className="px-3 py-2">
           <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-            English
+            {t('english')}
           </span>
           <p className="text-[10px] text-muted-foreground mt-1.5 leading-snug">
-            More translations coming soon.
+            {t('more')}
           </p>
         </div>
       </DropdownMenuContent>

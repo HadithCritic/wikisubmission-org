@@ -7,7 +7,8 @@ import { getLocale } from 'next-intl/server'
 
 export const metadata = buildPageMetadata({
   title: 'WikiSubmission',
-  description: 'WikiSubmission is a faith-based nonprofit providing free and open-source tools for the Final Testament (Quran), Bible, and religious education.',
+  description:
+    'WikiSubmission is a faith-based nonprofit providing free and open-source tools for the Final Testament (Quran), Bible, and religious education.',
   url: '/',
 })
 import { FaApple, FaAndroid, FaDiscord, FaYoutube } from 'react-icons/fa'
@@ -61,7 +62,10 @@ export default async function Home() {
 
   let latestArticles: LatestArticle[] = []
   try {
-    latestArticles = await sanityServer.fetch<LatestArticle[]>(LATEST_ARTICLES_QUERY, { language })
+    latestArticles = await sanityServer.fetch<LatestArticle[]>(
+      LATEST_ARTICLES_QUERY,
+      { language }
+    )
   } catch {
     // non-critical — page renders without blog section
   }
@@ -168,7 +172,7 @@ export default async function Home() {
                 />
               </div>
               <h3 className="font-headline text-2xl font-bold">
-                {t('services.bible')} · Old &amp; New Testaments
+                {t('services.bible')}
               </h3>
               <p className="text-on-surface-variant text-sm leading-relaxed">
                 {t('services.bibleDesc')}
@@ -240,9 +244,14 @@ export default async function Home() {
         <section className="bg-surface-container-low py-24 px-6">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-baseline gap-6 mb-12">
-              <h2 className="font-headline text-3xl font-bold shrink-0">Blog</h2>
+              <h2 className="font-headline text-3xl font-bold shrink-0">
+                Blog
+              </h2>
               <div className="h-px flex-1 bg-border/40" />
-              <Link href="/blog" className="text-sm text-primary font-semibold hover:text-primary/80 transition-colors shrink-0 flex items-center gap-1">
+              <Link
+                href="/blog"
+                className="text-sm text-primary font-semibold hover:text-primary/80 transition-colors shrink-0 flex items-center gap-1"
+              >
                 View all <ArrowRight size={14} />
               </Link>
             </div>
@@ -270,12 +279,21 @@ export default async function Home() {
                         {post.category}
                       </span>
                     )}
-                    <h3 className="font-headline font-bold text-base leading-snug">{post.title}</h3>
+                    <h3 className="font-headline font-bold text-base leading-snug">
+                      {post.title}
+                    </h3>
                     {post.excerpt && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{post.excerpt}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                        {post.excerpt}
+                      </p>
                     )}
                     <span className="mt-auto pt-2 text-xs text-muted-foreground">
-                      {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                      {post.publishedAt
+                        ? new Date(post.publishedAt).toLocaleDateString(
+                            'en-US',
+                            { year: 'numeric', month: 'long', day: 'numeric' }
+                          )
+                        : ''}
                     </span>
                   </div>
                 </Link>
@@ -359,7 +377,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
     </div>
   )
 }

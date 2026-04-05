@@ -121,7 +121,9 @@
     "zoomNormal": "Normal",
     "zoomComfortable": "Comfortable",
     "zoomWide": "Wide",
-    "zoomFull": "Full"
+    "zoomFull": "Full",
+    "english": "English",
+    "more": "More translations coming soon."
   },
   "ramadan": {
     "heading": "Ramadan",
@@ -208,10 +210,10 @@
       "readNow": "Read now"
     },
     "services": {
-      "finalTestament": "Final Testament",
       "finalTestamentDesc": "Complete translation with word-by-word analysis, appendices, and search",
-      "bible": "The Bible",
       "bibleDesc": "Verse-by-verse with manuscript & theological footnotes",
+      "finalTestament": "The Final Testament",
+      "bible": "The Bible",
       "music": "Music",
       "musicDesc": "Glorification and melodies",
       "prayerTimes": "Prayer Times",
