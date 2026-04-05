@@ -51,9 +51,7 @@ function VersePreview({
       </Link>
       {tr?.s && <p className="text-xs text-violet-500 italic">{tr.s}</p>}
       {tr?.tx && (
-        <p className="text-base leading-relaxed">
-          <strong>[{verse.vk}]</strong> {tr.tx}
-        </p>
+        <p className="text-sm leading-relaxed">{tr.tx}</p>
       )}
       {tr?.f && (
         <p className="text-sm text-muted-foreground italic">
@@ -94,9 +92,7 @@ function BibleVersePreview({
         {bookDisplay} {cn}:{vn}
       </span>
       {tr?.tx && (
-        <p className="text-base leading-relaxed">
-          <strong>[{cn}:{vn}]</strong> {tr.tx}
-        </p>
+        <p className="text-sm leading-relaxed">{tr.tx}</p>
       )}
       {tr?.f && (
         <p className="text-sm text-muted-foreground italic">{tr.f}</p>
@@ -210,7 +206,7 @@ export function ScriptureRef({
         {label}
       </button>
 
-      <DialogContent className="max-w-lg rounded-3xl">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-2">
             {!isBible && history.length > 1 && (
