@@ -115,7 +115,7 @@ const WordByWordView = memo(
                       <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
                         <span className="text-[10px] font-bold text-violet-600">Root: {root}</span>
                       </div>
-                      <span className="text-base font-semibold text-foreground">{meaning}</span>
+<span className="text-base font-semibold text-foreground">{meaning}</span>
                     </DialogTitle>
                   </DialogHeader>
                   <div className="mt-3">
