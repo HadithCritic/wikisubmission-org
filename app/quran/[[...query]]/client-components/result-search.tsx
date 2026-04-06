@@ -22,6 +22,7 @@ import {
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
 import { QuranRefText } from '@/components/quran-ref-text'
+import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { HighlightText } from '@/components/highlight-text'
 import { useTranslations } from 'next-intl'
 
@@ -171,9 +172,9 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     setWordMatches([])
     setSearchTab('all')
 
-    if (/^\d+:\d+$/.test(searchQuery)) {
-      const [cn, vn] = searchQuery.split(':')
-      router.replace(`/quran/${cn}?verse=${vn}`, { scroll: false })
+    const singleRef = parseQuranRef(normalizeQuranInput(searchQuery))
+    if (singleRef && singleRef.vs === singleRef.ve) {
+      router.replace(`/quran/${singleRef.cn}?verse=${singleRef.vs}`, { scroll: false })
       return
     }
 

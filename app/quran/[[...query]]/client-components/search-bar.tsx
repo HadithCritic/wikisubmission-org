@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useQuranNavStore } from '@/hooks/use-quran-nav-store'
 import { CHAPTER_TRANSLITERATIONS } from '@/constants/quran-chapters'
+import { isQuranRefInput, normalizeQuranInput, parseQuranRef } from '@/lib/scripture-parser'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -32,27 +33,26 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
         replace(`${pathname}`)
         return
       }
-      // Comma-separated verse refs (e.g. "1:1,2:255-257") — navigate directly
+      // Comma-separated verse refs (e.g. "1:1,2:255-257" or "1 1,2 255-257")
+      // Normalize each part to canonical colon form before navigating.
       if (q.includes(',')) {
-        const parts = q.split(',').map((s) => s.trim())
-        const allValid = parts.every(
-          (p) => /^\d+:\d+$/.test(p) || /^\d+:\d+-\d+$/.test(p)
-        )
-        if (allValid) {
-          router.push(`/quran/${q}`)
+        const parts = q.split(',').map((s) => normalizeQuranInput(s.trim()))
+        if (parts.every((p) => parseQuranRef(p) !== null)) {
+          router.push(`/quran/${parts.join(',')}`)
           return
         }
       }
+      // Normalize single verse ref ("3 5" → "3:5") before placing in the URL
+      const normalized = normalizeQuranInput(q.trim())
       const params = new URLSearchParams(searchParams.toString())
-      params.set('q', decodeURIComponent(q))
+      params.set('q', decodeURIComponent(normalized))
       replace(`${pathname}?${params.toString()}`)
     },
     [pathname, replace, router, searchParams]
   )
 
-  // Autocomplete: skip verse-ref patterns
-  const isVerseRef = /^\d+:/.test(query)
-  const showDropdown = open && query.length >= 1 && !isVerseRef
+  // Autocomplete: skip verse-ref patterns (colon or space-separated)
+  const showDropdown = open && query.length >= 1 && !isQuranRefInput(query)
 
   const matchedChapters = showDropdown
     ? chapters

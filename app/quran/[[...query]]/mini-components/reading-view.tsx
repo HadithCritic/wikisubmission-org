@@ -16,7 +16,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
-import { useVerseFetch, parseQuranRef } from '@/hooks/use-verse-fetch'
+import { useVerseFetch } from '@/hooks/use-verse-fetch'
+import { parseQuranRef } from '@/lib/scripture-parser'
 import type { components } from '@/src/api/types.gen'
 
 type ApiVerseData = components['schemas']['VerseData']

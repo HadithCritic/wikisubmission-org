@@ -13,25 +13,21 @@ import { buildPageMetadata } from '@/constants/metadata'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import { VerseListResult } from './mini-components/verse-list-result'
 import { QuranAccordions } from './mini-components/quran-accordions'
+import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 
-// Detect query intent: chapter, verse, range, verse-list, or text search
+// Detect query intent: chapter, verse-list, or text search.
+// Single verse refs AND ranges both go to verse-list (VerseListResult).
+// Accepts both canonical "2:255" and space-separated "2 255" forms.
 function parseQueryType(q: string): {
-  type: 'chapter' | 'verse' | 'range' | 'search' | 'verse-list'
+  type: 'chapter' | 'verse-list' | 'search'
   chapterNumber?: number
-  verseStart?: number
-  verseEnd?: number
 } {
-  // Comma-separated verse refs: "1:4,1:1-5,2:45,2:12-133"
+  // Comma-separated verse refs: "1:4,1:1-5,2:45" or "1 4,1 1-5,2 45"
   if (q.includes(',')) {
-    const parts = q.split(',').map((s) => s.trim())
-    let valid = true
-    for (const part of parts) {
-      if (!/^(\d+):(\d+)$/.test(part) && !/^(\d+):(\d+)-(\d+)$/.test(part)) {
-        valid = false
-        break
-      }
+    const parts = q.split(',').map((s) => normalizeQuranInput(s.trim()))
+    if (parts.length > 0 && parts.every((p) => parseQuranRef(p) !== null)) {
+      return { type: 'verse-list' }
     }
-    if (valid && parts.length > 0) return { type: 'verse-list' }
   }
 
   // Pure chapter number: "1", "2", "114"
@@ -40,22 +36,8 @@ function parseQueryType(q: string): {
     if (n >= 1 && n <= 114) return { type: 'chapter', chapterNumber: n }
   }
 
-  // Verse ref: "2:255" — treat as a one-element verse list
-  const verseMatch = q.match(/^(\d+):(\d+)$/)
-  if (verseMatch) {
-    return { type: 'verse-list' }
-  }
-
-  // Same-chapter range: "2:255-257"
-  const rangeMatch = q.match(/^(\d+):(\d+)-(\d+)$/)
-  if (rangeMatch) {
-    return {
-      type: 'range',
-      chapterNumber: parseInt(rangeMatch[1]),
-      verseStart: parseInt(rangeMatch[2]),
-      verseEnd: parseInt(rangeMatch[3]),
-    }
-  }
+  // Single verse or verse range — both go to VerseListResult
+  if (parseQuranRef(q) !== null) return { type: 'verse-list' }
 
   return { type: 'search' }
 }
@@ -207,45 +189,7 @@ export default async function QuranPage({
     )
   }
 
-  // ── Range view: SSR specific verse range ─────────────────────────────────────
-  if (parsed.type === 'range' && parsed.chapterNumber) {
-    let data = null
-    try {
-      const result = await wsApiServer.GET('/quran', {
-        params: {
-          query: {
-            chapter_number_start: parsed.chapterNumber,
-            langs: ['en', 'ar'],
-            verse_start: parsed.verseStart,
-            verse_end: parsed.verseEnd,
-            include_words: true,
-            include_root: true,
-            include_meaning: true,
-            word_langs: ['ar', 'en', 'tl'],
-          },
-        },
-      })
-      data = result.data ?? null
-    } catch {
-      // SSR fetch failed — ChapterReader will load verses client-side
-    }
-
-    return (
-      <main>
-        <Suspense fallback={<Spinner />}>
-          <ChapterReader
-            chapterNumber={parsed.chapterNumber}
-            initialData={data}
-            initialVerse={verse}
-            rangeStart={parsed.verseStart}
-            rangeEnd={parsed.verseEnd}
-          />
-        </Suspense>
-      </main>
-    )
-  }
-
-  // ── Verse list: comma-separated refs like "1:4,1:1-5,2:45" ─────────────────
+  // ── Verse list: single refs, ranges, and comma-separated lists ──────────────
   if (parsed.type === 'verse-list') {
     let data = undefined
     let apiError = false
@@ -397,39 +341,6 @@ export async function generateMetadata({
       title,
       description,
       url: `/quran/${parsed.chapterNumber}`,
-      image: LOGO,
-      twitterCard: 'summary',
-    })
-  }
-
-  if (parsed.type === 'range' && parsed.chapterNumber) {
-    const title = `${queryText} | Quran | WikiSubmission`
-    let verseText = ''
-    try {
-      const versesRes = await wsApiServer.GET('/quran', {
-        params: {
-          query: {
-            chapter_number_start: parsed.chapterNumber,
-            langs: ['en'],
-            verse_start: parsed.verseStart,
-            verse_end: parsed.verseEnd,
-          },
-        },
-      })
-      const verses = versesRes.data?.chapters?.[0]?.verses ?? []
-      const joined = verses
-        .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
-        .join(' ')
-        .trim()
-      verseText = joined.length > 220 ? joined.slice(0, 217) + '...' : joined
-    } catch {}
-    const description = verseText
-      ? verseText
-      : `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament`
-    return buildPageMetadata({
-      title,
-      description,
-      url: `/quran/${queryText}`,
       image: LOGO,
       twitterCard: 'summary',
     })

@@ -12,12 +12,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import {
-  useVerseFetch,
-  useBibleFetch,
-  parseQuranRef,
-  parseBibleRef,
-} from '@/hooks/use-verse-fetch'
+import { useVerseFetch, useBibleFetch } from '@/hooks/use-verse-fetch'
+import { parseQuranRef, parseBibleRef } from '@/lib/scripture-parser'
 import { QuranRefText } from './quran-ref-text'
 import type { components } from '@/src/api/types.gen'
 import type { LangCode } from '@/hooks/use-quran-preferences'
