@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X, Sparkles } from 'lucide-react'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
-// import { SignInButton, SignedIn, SignedOut, UserButton } from '' // Phase 3, but using supabase auth
+import { NavAuthControls } from '@/components/nav-auth-controls'
 import { cn } from '@/lib/utils'
 import { useTranslations, useLocale } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
@@ -86,18 +86,7 @@ export function SiteNav() {
           >
             <Sparkles size={18} />
           </button>
-          {/* Phase 3: auth
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button className="hidden sm:flex h-9 items-center px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                Sign in
-              </button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          */}
+          <NavAuthControls />
           {/* Mobile hamburger */}
           <button
             className="md:hidden h-9 w-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
