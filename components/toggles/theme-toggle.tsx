@@ -15,13 +15,13 @@ export function ThemeToggle() {
   }, [])
 
   if (!mounted) {
-    return <div className="h-9 w-9 flex items-center justify-center border rounded-md" />
+    return <div className="h-9 w-9 flex items-center justify-center rounded-md" />
   }
 
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="relative h-9 w-9 flex items-center justify-center border rounded-md"
+      className="relative h-9 w-9 flex items-center justify-center rounded-md"
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

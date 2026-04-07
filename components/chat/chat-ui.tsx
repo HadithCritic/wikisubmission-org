@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { ArrowUp, Loader2, ChevronDown, Trash2 } from 'lucide-react'
 import Image from 'next/image'
-import { type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
+import React, { type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
 import { QuranRef } from '@/components/quran-ref'
 import type { Message } from './use-chat'
 
@@ -72,13 +72,16 @@ export function VerseChip({ sources, onNavigate }: { sources: string[]; onNaviga
   const refs = sources.filter((s) => /^\d+:\d+/.test(s))
   if (!refs.length) return null
   return (
-    <Link
-      href={`/quran?q=${refs.join(',')}`}
-      onClick={onNavigate}
-      className="mt-2.5 inline-flex items-center text-[11px] font-mono text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 px-2 py-0.5 rounded-md transition-colors"
-    >
-      {refs.join(', ')}
-    </Link>
+    <div className="mt-3">
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40">Sources</p>
+      <Link
+        href={`/quran?q=${refs.join(',')}`}
+        onClick={onNavigate}
+        className="inline-flex items-center text-[11px] font-mono text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 px-2 py-0.5 rounded-md transition-colors"
+      >
+        {refs.join(', ')}
+      </Link>
+    </div>
   )
 }
 
@@ -111,38 +114,39 @@ export function SuggestionCards({ onSelect }: { onSelect: (s: string) => void })
 export function MessageList({
   messages,
   onNavigate,
+  lastAnswerRef,
 }: {
   messages: Message[]
   onNavigate?: () => void
+  lastAnswerRef?: React.RefObject<HTMLDivElement | null>
 }) {
-  const bottomRef = useRef<HTMLDivElement>(null)
-  // scroll to bottom whenever messages change
-  // (caller is responsible for calling scrollIntoView if needed, or we do it here)
   return (
     <>
-      {messages.map((msg, i) => (
-        <div key={i} className="space-y-3">
-          {/* User bubble */}
-          <div className="flex justify-end">
-            <div className="max-w-[80%] bg-muted/50 text-foreground text-sm leading-relaxed px-3 py-1.5 rounded-2xl rounded-tr-sm">
-              {msg.question}
+      {messages.map((msg, i) => {
+        const isLast = i === messages.length - 1
+        return (
+          <div key={i} className="space-y-3">
+            {/* User bubble */}
+            <div className="flex justify-end">
+              <div className="max-w-[80%] bg-muted/50 text-foreground text-sm leading-relaxed px-3 py-1.5 rounded-2xl rounded-tr-sm">
+                {msg.question}
+              </div>
+            </div>
+
+            {/* AI response */}
+            <div ref={isLast ? lastAnswerRef : undefined} className="pr-4">
+              {msg.pending && <TypingDots />}
+              {msg.error && <p className="text-xs text-destructive">{msg.error}</p>}
+              {msg.answer && (
+                <>
+                  <AiAnswer text={msg.answer} />
+                  <VerseChip sources={msg.sources ?? []} onNavigate={onNavigate} />
+                </>
+              )}
             </div>
           </div>
-
-          {/* AI response */}
-          <div className="pr-4">
-            {msg.pending && <TypingDots />}
-            {msg.error && <p className="text-xs text-destructive">{msg.error}</p>}
-            {msg.answer && (
-              <>
-                <AiAnswer text={msg.answer} />
-                <VerseChip sources={msg.sources ?? []} onNavigate={onNavigate} />
-              </>
-            )}
-          </div>
-        </div>
-      ))}
-      <div ref={bottomRef} />
+        )
+      })}
     </>
   )
 }
@@ -164,7 +168,7 @@ export function ChatInput({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = () => {
-    if (input.trim().length < 2 || isPending) return
+    if (!input.trim() || isPending) return
     onSubmit(input)
     setInput('')
   }
@@ -221,7 +225,7 @@ export function ChatInput({
         />
         <button
           type="submit"
-          disabled={input.trim().length < 2 || isPending}
+          disabled={!input.trim() || isPending}
           className="shrink-0 size-9 flex items-center justify-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
         >
           {isPending
@@ -232,7 +236,7 @@ export function ChatInput({
       </form>
 
       <p className="text-[10px] text-muted-foreground/40 text-center">
-        May contain inaccuracies — verify all information
+       AI may make mistakes. Verify all information.
       </p>
     </div>
   )

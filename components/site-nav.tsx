@@ -21,6 +21,7 @@ const NAV_LINKS = [
   { label: 'archive', href: '/archive' },
   { label: 'music', href: '/music' },
   { label: 'blog', href: '/blog' },
+  { label: 'chat', href: '/chat' },
 ]
 
 export function SiteNav() {
