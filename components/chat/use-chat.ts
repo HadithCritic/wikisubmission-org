@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 export interface Message {
   question: string
@@ -12,8 +12,13 @@ export interface Message {
 
 const MAX_LEN = 500
 
+function newConversationId(): string {
+  return Math.random().toString(36).slice(2, 8)
+}
+
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
+  const conversationIdRef = useRef<string | null>(null)
 
   const isPending = messages.at(-1)?.pending ?? false
 
@@ -22,6 +27,11 @@ export function useChat() {
     const trimmed = q.trim().slice(0, MAX_LEN)
     if (trimmed.length < 2) return
 
+    // Generate conversation_id on first message; reuse for all subsequent
+    if (!conversationIdRef.current) {
+      conversationIdRef.current = newConversationId()
+    }
+
     const idx = messages.length
     setMessages(prev => [...prev, { question: trimmed, pending: true }])
 
@@ -29,7 +39,7 @@ export function useChat() {
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: trimmed }),
+        body: JSON.stringify({ question: trimmed, conversation_id: conversationIdRef.current }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || `Error ${res.status}`)
@@ -51,7 +61,10 @@ export function useChat() {
     }
   }
 
-  const clear = () => setMessages([])
+  const clear = () => {
+    setMessages([])
+    conversationIdRef.current = null
+  }
 
   return { messages, submit, clear, isPending }
 }
