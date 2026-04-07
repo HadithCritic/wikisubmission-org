@@ -53,7 +53,7 @@ const WordByWordView = memo(
     [words]
   )
 
-  const { zoomLevel } = useQuranPreferences()
+  const { zoomLevel, text: showText, transliteration: showTransliteration } = useQuranPreferences()
   const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
   const isTouch = useIsTouch()
   const [activeWord, setActiveWord] = useState<{ arabic: string; root?: string; meaning: string } | null>(null)
@@ -65,6 +65,7 @@ const WordByWordView = memo(
         {sorted.map((w) => {
           const arabic = (w.tx as Record<string, string>)?.['ar']
           const english = (w.tx as Record<string, string>)?.['en'] ?? ''
+          const transliteration = (w.tx as Record<string, string>)?.['tl'] ?? ''
           const root = w.r
           const meaning = w.m ?? english
           const wordIndex = w.wi ?? 0
@@ -102,8 +103,8 @@ const WordByWordView = memo(
                   className="bg-popover/80 backdrop-blur-sm border-violet-600/20 px-4 py-2 rounded-xl"
                 >
                   <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
-                    <p className="font-arabic text-xl text-violet-600">{arabic}</p>
-                    <p className="text-xs font-bold text-foreground">{english}</p>
+                    <p className="text-xs font-bold text-foreground">{meaning}</p>
+                    {transliteration && <p className="text-xs text-muted-foreground italic">{transliteration}</p>}
                   </div>
                 </TooltipContent>
               </Tooltip>
@@ -202,14 +203,16 @@ const WordByWordView = memo(
                 <p className={`font-arabic ${arabicClass} leading-snug group-hover:text-violet-600 transition-colors`}>
                   {arabic}
                 </p>
-                <div className="flex flex-col items-center gap-0.5 pt-0.5" dir="ltr">
-                  {transliteration && (
-                    <p className="text-xs text-muted-foreground italic text-center">{transliteration}</p>
-                  )}
-                  <p className="text-xs text-foreground/70 font-medium text-center break-words max-w-[100px]">
+                {showText && meaning && (
+                  <p className="text-xs text-center leading-tight break-words max-w-[100px] text-foreground/70 font-medium" dir="ltr">
                     {meaning}
                   </p>
-                </div>
+                )}
+                {showTransliteration && transliteration && (
+                  <p className="text-xs text-center leading-tight break-words max-w-[100px] text-muted-foreground italic" dir="ltr">
+                    {transliteration}
+                  </p>
+                )}
               </div>
             </DialogTrigger>
 

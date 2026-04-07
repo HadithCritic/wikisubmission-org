@@ -35,6 +35,7 @@ export type UseVerseSearchReturn = {
 }
 
 export const SEARCH_LIMIT = 20
+export const LOAD_MORE_LIMIT = 50
 
 // ─── Internal state ───────────────────────────────────────────────────────────
 
@@ -76,14 +77,14 @@ export function useVerseSearch(): UseVerseSearchReturn {
   }
 
   const fetchPage = useCallback(
-    async (query: string, opts: VerseSearchOptions, offset: number) => {
+    async (query: string, opts: VerseSearchOptions, offset: number, limit = SEARCH_LIMIT) => {
       const langs = buildLangs(opts)
       // Strict mode: phrase search by wrapping in quotes
       const q = opts.strict && query.includes(' ') ? `"${query}"` : query
 
       const { data, error } = await wsApi.GET('/search', {
         params: {
-          query: { q, langs, scope: 'verses', limit: SEARCH_LIMIT, offset },
+          query: { q, langs, scope: 'verses', limit, offset },
         },
       })
 
@@ -121,13 +122,14 @@ export function useVerseSearch(): UseVerseSearchReturn {
     const { lastQuery, lastOpts, offset } = state
     if (!lastQuery || !lastOpts) return
 
-    const nextOffset = offset + SEARCH_LIMIT
+    const nextOffset = offset + LOAD_MORE_LIMIT
     setState((prev) => ({ ...prev, loading: true, error: null }))
 
     const { data: nextPage, error } = await fetchPage(
       lastQuery,
       lastOpts,
-      nextOffset
+      nextOffset,
+      LOAD_MORE_LIMIT
     )
 
     if (error || !nextPage) {

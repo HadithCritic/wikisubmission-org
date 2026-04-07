@@ -66,11 +66,10 @@ export const useQuranPreferences = create(
       setPreferences: (preferences: QuranPreferences) => set(preferences),
     }),
     {
-      name: 'quran-preferences-v4',
+      name: 'quran-preferences-v6',
       storage: createJSONStorage(() => localStorage),
-      version: 4,
+      version: 6,
       migrate: (state, version) => {
-        // Migrate from v3: preserve all existing prefs, add new zoomLevel default
         if (version < 4) {
           return { ...(state as QuranPreferences), zoomLevel: 'comfortable' as ZoomLevel }
         }
