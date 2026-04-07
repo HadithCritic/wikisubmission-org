@@ -54,6 +54,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   const question =
     typeof body?.question === 'string' ? body.question.trim().slice(0, MAX_QUESTION_LEN) : ''
+  const conversationId =
+    typeof body?.conversation_id === 'string' ? body.conversation_id : undefined
 
   if (question.length < MIN_QUESTION_LEN) {
     return NextResponse.json({ error: 'Question is required.' }, { status: 400 })
@@ -73,7 +75,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, ...(conversationId && { conversation_id: conversationId }) }),
   })
 
   if (!upstream.ok) {
