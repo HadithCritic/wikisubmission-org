@@ -4,9 +4,10 @@
  */
 export function HighlightText({ text }: { text?: string | null }) {
   if (!text) return null
+  const normalized = text.replace(/(<b>)+/g, '<b>').replace(/(<\/b>)+/g, '</b>')
   return (
     <>
-      {text.split(/(<b>.*?<\/b>)/g).map((part, i) =>
+      {normalized.split(/(<b>.*?<\/b>)/g).map((part, i) =>
         part.startsWith('<b>') && part.endsWith('</b>') ? (
           <mark
             key={i}
