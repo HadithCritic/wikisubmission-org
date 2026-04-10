@@ -6,14 +6,11 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
-import { ArrowRightIcon, ArrowUpRightIcon, ChevronRight, SearchIcon } from 'lucide-react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import { ArrowRightIcon, ChevronRight, SearchIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { ZOOM_WIDTH_CLASS, ZOOM_FONT } from '@/lib/quran-zoom'
+import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import {
   useVerseSearch,
   type ChapterResult,
@@ -21,14 +18,19 @@ import {
 } from '@/hooks/use-verse-search'
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
-import { QuranRefText } from '@/components/quran-ref-text'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
-import { HighlightText } from '@/components/highlight-text'
+import { VerseCard } from '../mini-components/verse-card'
 import { useTranslations } from 'next-intl'
 
 // ─── SearchResultChapter ──────────────────────────────────────────────────────
 
-function SearchResultChapter({ chapter, primaryCode }: { chapter: ChapterResult; primaryCode: string }) {
+function SearchResultChapter({
+  chapter,
+  primaryCode,
+}: {
+  chapter: ChapterResult
+  primaryCode: string
+}) {
   const t = useTranslations('quran')
   const title =
     chapter.titles?.[primaryCode] ??
@@ -54,79 +56,25 @@ function SearchResultChapter({ chapter, primaryCode }: { chapter: ChapterResult;
 function SearchResultVerse({
   verse,
   primaryCode,
-  showArabic,
-  showSubtitles,
-  showFootnotes,
-  showText,
+  optsKey,
 }: {
   verse: VerseResult
   primaryCode: string
-  showArabic: boolean
-  showSubtitles: boolean
-  showFootnotes: boolean
-  showText: boolean
+  optsKey: string
 }) {
-  const { zoomLevel } = useQuranPreferences()
-  const zoomFont = ZOOM_FONT[zoomLevel ?? 'comfortable']
   const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
   const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
-  const arTr = verse.tr?.['ar']
-
-  // hl is either the full text with <b> highlights, or a shorter snippet.
-  const hlStripped = tr?.hl?.replace(/<\/?b>/g, '') ?? ''
-  const hlIsFullText = !!tr?.hl && !!tr?.tx && hlStripped.length >= tr.tx.length * 0.9
 
   return (
-    <div className="bg-muted/30 backdrop-blur-sm rounded-2xl border border-border/40 px-5 py-4 space-y-3">
-
-      {/* Subtitle */}
-      {showSubtitles && tr?.s && (
-        <p className="text-violet-600 text-xs font-semibold text-center tracking-wide">
-          <HighlightText text={tr.s} />
-        </p>
-      )}
-
-      {/* Verse key + open link */}
-      <Link
-        href={`/quran/${chNum}?verse=${vNum}`}
-        target="_blank"
-        className="group flex items-center gap-1.5 w-fit"
-      >
-        <div className="flex items-center gap-0.5 border px-2 py-0.5 bg-muted/40 rounded-full group-hover:bg-violet-600/10 group-hover:border-violet-600/20 transition-colors">
-          <span className="text-sm font-semibold tabular-nums">{chNum}</span>
-          <span className="text-muted-foreground text-sm">:</span>
-          <span className="text-sm font-semibold text-primary/80 tabular-nums">{vNum}</span>
-        </div>
-        <ArrowUpRightIcon className="size-3.5 text-muted-foreground group-hover:text-violet-600 transition-colors" />
-      </Link>
-
-      {/* Translation */}
-      {showText && (tr?.tx || tr?.hl) && (
-        <div className="space-y-2">
-          <p className={`${zoomFont.translation} leading-relaxed text-foreground/90`}>
-            {hlIsFullText ? <HighlightText text={tr!.hl} /> : tr?.tx}
-          </p>
-          {tr?.hl && !hlIsFullText && (
-            <p className="text-sm text-muted-foreground italic border-l-2 border-violet-600/30 pl-3">
-              <HighlightText text={tr.hl} />
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Footnote */}
-      {showFootnotes && tr?.f && (
-        <p className="text-sm text-muted-foreground leading-relaxed italic border-t border-border/30 pt-3">
-          <QuranRefText text={tr.f} from={verse.vk ?? ''} />
-        </p>
-      )}
-
-      {/* Arabic */}
-      {showArabic && arTr?.tx && (
-        <p dir="rtl" className={`font-arabic ${zoomFont.arabic} leading-loose text-foreground/90 text-right border-t border-border/30 pt-3`}>
-          {arTr.tx}
-        </p>
-      )}
+    <div className="bg-muted/30 backdrop-blur-sm rounded-2xl border border-border/40 overflow-hidden">
+      <VerseCard
+        verse={verse}
+        isLast={true}
+        optsKey={optsKey}
+        showAudio={false}
+        verseHref={`/quran/${chNum}?verse=${vNum}`}
+        searchHighlight={tr?.hl ?? undefined}
+      />
     </div>
   )
 }
@@ -137,14 +85,12 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const searchQuery = decodeURIComponent(props.query)
-  const strict = searchParams.get('strict') === 'true'
   const forceTab = searchParams.get('tab')
 
   const prefs = useQuranPreferences()
   const verseSearch = useVerseSearch()
   const t = useTranslations('search')
   const tQuran = useTranslations('quran')
-  const tSettings = useTranslations('settings')
   const tCommon = useTranslations('common')
 
   const [searchTab, setSearchTab] = useState<'all' | 'words'>('all')
@@ -152,19 +98,14 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const [wordLoading, setWordLoading] = useState(false)
 
   const lastQueryRef = useRef<string | null>(null)
-  const lastStrictRef = useRef<string | null>(null)
   const didInitRef = useRef(false)
+
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.zoomLevel ?? 'comfortable'}-${prefs.arabic}-${prefs.wordByWord}`
 
   // ── Trigger search ────────────────────────────────────────────────────────
   useEffect(() => {
-    const currentStrict = searchParams.get('strict')
-    if (
-      searchQuery === lastQueryRef.current &&
-      currentStrict === lastStrictRef.current
-    ) return
-
+    if (searchQuery === lastQueryRef.current) return
     lastQueryRef.current = searchQuery
-    lastStrictRef.current = currentStrict
 
     if (!searchQuery) return
 
@@ -174,7 +115,9 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
     const singleRef = parseQuranRef(normalizeQuranInput(searchQuery))
     if (singleRef && singleRef.vs === singleRef.ve) {
-      router.replace(`/quran/${singleRef.cn}?verse=${singleRef.vs}`, { scroll: false })
+      router.replace(`/quran/${singleRef.cn}?verse=${singleRef.vs}`, {
+        scroll: false,
+      })
       return
     }
 
@@ -182,10 +125,9 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       primaryLang: prefs.primaryLanguage,
       secondaryLang: prefs.secondaryLanguage,
       includeArabic: prefs.arabic,
-      strict,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, searchParams])
+  }, [searchQuery])
 
   // ── Word search ───────────────────────────────────────────────────────────
   const runWordByWordQuery = useCallback(async () => {
@@ -215,7 +157,10 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       setWordMatches(result.data.filter((i) => i.hit === 'word_by_word'))
     } else if (result.status === 'error') {
       const msg = decodeURIComponent(result.error ?? '')
-      if (!msg.toLowerCase().includes('index') && !msg.toLowerCase().includes('disabled')) {
+      if (
+        !msg.toLowerCase().includes('index') &&
+        !msg.toLowerCase().includes('disabled')
+      ) {
         toast.error(msg)
       }
     } else {
@@ -236,9 +181,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   }, [forceTab, runWordByWordQuery])
 
   // ── Derived ───────────────────────────────────────────────────────────────
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
-  const allVerses = verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+  const allVerses =
+    verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
 
   if (verseSearch.loading && !verseSearch.data) {
     return (
@@ -249,19 +196,26 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   }
 
   if (verseSearch.error) {
-    return <p className="text-sm text-muted-foreground py-8 text-center">{verseSearch.error}</p>
+    return (
+      <p className="text-sm text-muted-foreground py-8 text-center">
+        {verseSearch.error}
+      </p>
+    )
   }
 
   if (!verseSearch.data) return null
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className={`space-y-5 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}>
-
+    <div
+      className={`space-y-5 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
+    >
       {/* Header */}
       <div className="flex items-baseline gap-3 bg-muted/30 border border-border/40 rounded-2xl px-5 py-4">
         <h2 className="text-xl font-semibold">{searchQuery}</h2>
-        <span className="text-sm text-muted-foreground">{verseSearch.total} results</span>
+        <span className="text-sm text-muted-foreground">
+          {verseSearch.total} results
+        </span>
       </div>
 
       <Tabs
@@ -271,16 +225,17 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           setSearchTab(tab)
           const params = new URLSearchParams(searchParams.toString())
           params.set('tab', tab)
-          router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
+          router.replace(`${window.location.pathname}?${params.toString()}`, {
+            scroll: false,
+          })
           if (tab === 'words') runWordByWordQuery()
         }}
         className="space-y-4"
       >
         {/* ── Toolbar ──────────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-4 bg-muted/30 border border-border/40 rounded-2xl px-4 py-3">
-
           {/* Tabs */}
-          <TabsList className="h-8 [&>*]:text-xs gap-0.5">
+          <TabsList className="h-8 *:text-xs gap-0.5">
             <TabsTrigger value="all" className="h-7">
               {t('resultsTab', { count: verseSearch.total })}
             </TabsTrigger>
@@ -288,66 +243,25 @@ export default function SearchResult({ props }: { props: { query: string } }) {
               <SearchIcon className="size-3" />
               {t('wordSearch')}
               {wordMatches.length > 0 && (
-                <span>({wordMatches.length > 2999 ? '3k+' : wordMatches.length})</span>
+                <span>
+                  ({wordMatches.length > 2999 ? '3k+' : wordMatches.length})
+                </span>
               )}
             </TabsTrigger>
           </TabsList>
-
-          {/* Filters row */}
-          <div className="flex items-center gap-5 text-xs">
-            {/* Display toggles */}
-            <div className="flex items-center gap-4">
-              {[
-                { id: 'f-text', label: t('text'), key: 'text' as const },
-                { id: 'f-sub', label: tSettings('subtitles'), key: 'subtitles' as const },
-                { id: 'f-fn', label: tSettings('footnotes'), key: 'footnotes' as const },
-              ].map(({ id, label, key }) => (
-                <div key={id} className="flex items-center gap-1.5">
-                  <Checkbox
-                    id={id}
-                    checked={prefs[key]}
-                    onCheckedChange={(v) => prefs.setPreferences({ ...prefs, [key]: !!v })}
-                    className="size-3.5"
-                  />
-                  <Label htmlFor={id} className="text-xs cursor-pointer select-none text-muted-foreground">
-                    {label}
-                  </Label>
-                </div>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div className="w-px h-4 bg-border/60 hidden sm:block" />
-
-            {/* Strict mode */}
-            <div className="flex items-center gap-1.5">
-              <Switch
-                id="strict-mode"
-                checked={strict}
-                disabled={searchQuery.split(' ').length <= 1}
-                onCheckedChange={(checked) => {
-                  const params = new URLSearchParams(searchParams.toString())
-                  if (checked) params.set('strict', 'true')
-                  else params.delete('strict')
-                  router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false })
-                }}
-                className="scale-75 origin-left"
-              />
-              <Label htmlFor="strict-mode" className="text-xs cursor-pointer select-none text-muted-foreground">
-                {t('strictSearch')}
-              </Label>
-            </div>
-          </div>
         </div>
 
         {/* ── All results ───────────────────────────────────────────────────── */}
         <TabsContent value="all" className="space-y-4 mt-0">
-
           {/* Chapter title matches */}
           {titleMatches.length > 0 && (
             <div className="space-y-2">
               {titleMatches.map((ch) => (
-                <SearchResultChapter key={`title:${ch.cn}`} chapter={ch} primaryCode={primaryCode} />
+                <SearchResultChapter
+                  key={`title:${ch.cn}`}
+                  chapter={ch}
+                  primaryCode={primaryCode}
+                />
               ))}
             </div>
           )}
@@ -359,10 +273,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 key={verse.vk ?? index}
                 verse={verse}
                 primaryCode={primaryCode}
-                showText={prefs.text}
-                showSubtitles={prefs.subtitles}
-                showFootnotes={prefs.footnotes}
-                showArabic={prefs.arabic}
+                optsKey={optsKey}
               />
             ))}
           </div>
@@ -381,11 +292,16 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 onClick={() => {
                   const y = window.scrollY
                   verseSearch.loadMore().then(() => {
-                    requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'instant' }))
+                    requestAnimationFrame(() =>
+                      window.scrollTo({ top: y, behavior: 'instant' })
+                    )
                   })
                 }}
               >
-                {tCommon('loadMore', { shown: verseSearch.loadedCount, total: verseSearch.total })}
+                {tCommon('loadMore', {
+                  shown: verseSearch.loadedCount,
+                  total: verseSearch.total,
+                })}
               </Button>
             </div>
           )}
@@ -434,7 +350,9 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           {wordMatches.length > 0 && (
             <div className="space-y-3">
               {Array.from(
-                new Map(wordMatches.map((item) => [item.root_word, item])).values()
+                new Map(
+                  wordMatches.map((item) => [item.root_word, item])
+                ).values()
               ).map((item) => (
                 <section
                   key={item.root_word}
@@ -442,16 +360,22 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 >
                   <div className="flex items-baseline gap-3">
                     <p className="text-lg font-arabic">{item.arabic}</p>
-                    <p className="text-sm text-muted-foreground">{item.transliterated}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.transliterated}
+                    </p>
                   </div>
                   <div className="space-y-1.5 text-sm">
                     <p>
-                      <span className="text-muted-foreground">{tQuran('rootWord')}: </span>
+                      <span className="text-muted-foreground">
+                        {tQuran('rootWord')}:{' '}
+                      </span>
                       <span className="font-medium">{item.root_word}</span>
                     </p>
                     {item.meanings && (
                       <p>
-                        <span className="text-muted-foreground">{tQuran('meanings')}: </span>
+                        <span className="text-muted-foreground">
+                          {tQuran('meanings')}:{' '}
+                        </span>
                         <span>{item.meanings}</span>
                       </p>
                     )}
@@ -459,13 +383,19 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                   <div className="flex flex-wrap gap-1 pt-1 border-t border-border/30">
                     <span className="text-xs text-muted-foreground self-center mr-1">
                       {tQuran('occurrences', {
-                        count: wordMatches.filter((r) => r.root_word === item.root_word).length,
-                      })}:
+                        count: wordMatches.filter(
+                          (r) => r.root_word === item.root_word
+                        ).length,
+                      })}
+                      :
                     </span>
                     {wordMatches
                       .filter((r) => r.root_word === item.root_word)
                       .map((r) => (
-                        <QuranRef key={`root:${r.verse_id}:${r.word_index}`} reference={r.verse_id} />
+                        <QuranRef
+                          key={`root:${r.verse_id}:${r.word_index}`}
+                          reference={r.verse_id}
+                        />
                       ))}
                   </div>
                 </section>
