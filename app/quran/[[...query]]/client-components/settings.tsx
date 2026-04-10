@@ -240,6 +240,22 @@ export default function QuranSettings() {
             </div>
           )}
 
+          {/* Translation — hidden in reading mode (handled by reading language selector) */}
+          {quranPreferences.displayMode !== 'reading' && (
+            <SettingTile
+              icon={<TextIcon className="size-3.5" />}
+              label="Translation"
+              description="Verse translation text"
+              checked={quranPreferences.text}
+              onCheckedChange={(checked) =>
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  text: checked,
+                })
+              }
+            />
+          )}
+
           {/* Arabic — hidden in reading mode (handled by reading language selector) */}
           {quranPreferences.displayMode !== 'reading' && (
             <SettingTile
@@ -255,22 +271,6 @@ export default function QuranSettings() {
                 quranPreferences.setPreferences({
                   ...quranPreferences,
                   arabic: checked,
-                })
-              }
-            />
-          )}
-
-          {/* Translation — hidden in reading mode (handled by reading language selector) */}
-          {quranPreferences.displayMode !== 'reading' && (
-            <SettingTile
-              icon={<TextIcon className="size-3.5" />}
-              label="Translation"
-              description="Verse translation text"
-              checked={quranPreferences.text}
-              onCheckedChange={(checked) =>
-                quranPreferences.setPreferences({
-                  ...quranPreferences,
-                  text: checked,
                 })
               }
             />
@@ -292,8 +292,8 @@ export default function QuranSettings() {
             />
           )}
 
-          {/* Footnotes — verse + reading modes */}
-          {quranPreferences.displayMode !== 'word' && (
+          {/* Footnotes — all modes */}
+          {quranPreferences.displayMode !== 'reading' && (
             <SettingTile
               icon={<BookOpenTextIcon className="size-3.5" />}
               label={t('footnotes')}

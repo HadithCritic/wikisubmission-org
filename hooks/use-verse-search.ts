@@ -16,8 +16,6 @@ export type VerseSearchOptions = {
   primaryLang: LangCode
   secondaryLang?: LangCode
   includeArabic: boolean
-  /** Wraps multi-word queries in quotes for phrase search */
-  strict: boolean
 }
 
 export type UseVerseSearchReturn = {
@@ -78,8 +76,7 @@ export function useVerseSearch(): UseVerseSearchReturn {
   const fetchPage = useCallback(
     async (query: string, opts: VerseSearchOptions, offset: number) => {
       const langs = buildLangs(opts)
-      // Strict mode: phrase search by wrapping in quotes
-      const q = opts.strict && query.includes(' ') ? `"${query}"` : query
+      const q = query
 
       const { data, error } = await wsApi.GET('/search', {
         params: {
