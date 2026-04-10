@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Copy, Check } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { VerseCard } from './verse-card'
+import { buildVersesText, buildSegmentMarkdown } from '@/lib/quran-copy'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -76,15 +77,12 @@ function SegmentBlock({
   const [copied, setCopied] = useState(false)
 
   const handleCopySegment = useCallback(() => {
-    const lines: string[] = []
-    for (const verse of verses) {
-      const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
-      const arTr = verse.tr?.['ar']
-      lines.push(`[${verse.vk}]`)
-      if (tr?.tx) lines.push(tr.tx)
-      if (prefs.arabic && arTr?.tx) lines.push(arTr.tx)
-    }
-    navigator.clipboard.writeText(lines.join('\n'))
+    const text = buildVersesText(verses, {
+      primaryCode,
+      includeText: true,
+      includeArabic: prefs.arabic,
+    })
+    navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
   }, [verses, primaryCode, prefs.arabic])
@@ -155,49 +153,37 @@ export function VerseListResult({
   const [copiedAll, setCopiedAll] = useState(false)
 
   // Build lookup: cn → (verseNumber → VerseData) and cn → titles
-  const byChapter = new Map<number, Map<number, VerseData>>()
-  const chapterTitles = new Map<number, string>()
-  for (const ch of data?.chapters ?? []) {
-    const m = new Map<number, VerseData>()
-    for (const v of ch.verses ?? []) {
-      const vNum = parseInt((v.vk ?? '').split(':')[1] ?? '0', 10)
-      if (!isNaN(vNum)) m.set(vNum, v)
+  const { byChapter, chapterTitles } = useMemo(() => {
+    const byChapter = new Map<number, Map<number, VerseData>>()
+    const chapterTitles = new Map<number, string>()
+    for (const ch of data?.chapters ?? []) {
+      const m = new Map<number, VerseData>()
+      for (const v of ch.verses ?? []) {
+        const vNum = parseInt((v.vk ?? '').split(':')[1] ?? '0', 10)
+        if (!isNaN(vNum)) m.set(vNum, v)
+      }
+      byChapter.set(ch.cn ?? 0, m)
+      chapterTitles.set(ch.cn ?? 0, ch.titles?.['en'] ?? `Chapter ${ch.cn}`)
     }
-    byChapter.set(ch.cn ?? 0, m)
-    chapterTitles.set(ch.cn ?? 0, ch.titles?.['en'] ?? `Chapter ${ch.cn}`)
-  }
+    return { byChapter, chapterTitles }
+  }, [data])
 
-  const segments = parseSegments(queryText)
+  const segments = useMemo(() => parseSegments(queryText), [queryText])
 
   const handleCopyAllMarkdown = useCallback(() => {
-    const parts: string[] = []
-    for (const seg of segments) {
-      const verses = getSegmentVerses(seg, byChapter)
-      if (verses.length === 0) continue
-      const title = chapterTitles.get(seg.cn) ?? `Chapter ${seg.cn}`
-      parts.push(`## ${segmentLabel(seg)} — ${title}`)
-      parts.push('')
-      for (const verse of verses) {
-        const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
-        const arTr = verse.tr?.['ar']
-        parts.push(`**[${verse.vk}]**`)
-        if (prefs.text && tr?.tx) parts.push(tr.tx)
-        if (prefs.arabic && arTr?.tx) parts.push(arTr.tx)
-        parts.push('')
-      }
-    }
-    navigator.clipboard.writeText(parts.join('\n').trimEnd())
+    const opts = { primaryCode, includeText: prefs.text, includeArabic: prefs.arabic }
+    const parts = segments
+      .map((seg) => {
+        const verses = getSegmentVerses(seg, byChapter)
+        if (verses.length === 0) return null
+        const title = chapterTitles.get(seg.cn) ?? `Chapter ${seg.cn}`
+        return buildSegmentMarkdown(segmentLabel(seg), title, verses, opts)
+      })
+      .filter(Boolean)
+    navigator.clipboard.writeText(parts.join('\n\n'))
     setCopiedAll(true)
     setTimeout(() => setCopiedAll(false), 1500)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    segments,
-    byChapter,
-    chapterTitles,
-    primaryCode,
-    prefs.text,
-    prefs.arabic,
-  ])
+  }, [segments, byChapter, chapterTitles, primaryCode, prefs.text, prefs.arabic])
 
   if (apiError || !data) {
     return (

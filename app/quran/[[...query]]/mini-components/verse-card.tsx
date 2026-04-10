@@ -11,6 +11,7 @@ import {
   type QuranVerse,
 } from '@/lib/quran-audio-context'
 import { RootWordOccurrences } from './root-word-occurrences'
+import { buildVerseLine } from '@/lib/quran-copy'
 import {
   Play,
   Pause,
@@ -420,22 +421,19 @@ export const VerseCard = memo(
     )
 
     const handleCopy = useCallback(() => {
-      const parts: string[] = [`[${verseId}]`]
-      if (prefs.text && tr?.tx) parts.push(tr.tx)
-      if (secondaryTr?.tx) parts.push(secondaryTr.tx)
-      if ((prefs.arabic || prefs.wordByWord) && arTr?.tx) parts.push(arTr.tx)
-      navigator.clipboard.writeText(parts.join('\n'))
+      const text = buildVerseLine(verse, {
+        primaryCode,
+        includeText: prefs.text,
+        includeArabic: prefs.arabic || prefs.wordByWord,
+        secondaryCode:
+          prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
+            ? prefs.secondaryLanguage
+            : undefined,
+      })
+      navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
-    }, [
-      verseId,
-      prefs.text,
-      prefs.arabic,
-      prefs.wordByWord,
-      tr,
-      secondaryTr,
-      arTr,
-    ])
+    }, [verse, primaryCode, prefs.text, prefs.arabic, prefs.wordByWord, prefs.secondaryLanguage])
 
     const handlePlay = useCallback(() => {
       if (isCurrentAudio) {
