@@ -209,6 +209,16 @@ export function ChapterReader({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoomLevel])
 
+  // Switching between verse and word layouts changes card heights dramatically.
+  // Re-measure after the DOM updates so cached virtual item sizes don't overlap.
+  useEffect(() => {
+    if (displayMode === 'reading') return
+    const rafId = requestAnimationFrame(() => {
+      virtualizer.measure()
+    })
+    return () => cancelAnimationFrame(rafId)
+  }, [displayMode, prefs.wordByWord, reader.verses, virtualizer])
+
   const virtualItems = virtualizer.getVirtualItems()
   const lastVirtualIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
   const firstVirtualIndex = virtualItems[0]?.index ?? 0
@@ -558,6 +568,7 @@ export function ChapterReader({
         <div
           ref={listRef}
           className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden"
+          key={optsKey}
           style={{
             position: 'relative',
             height: Math.max(virtualizer.getTotalSize(), 300),

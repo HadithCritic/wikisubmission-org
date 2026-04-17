@@ -74,7 +74,8 @@ const WordByWordView = memo(
     const [activeWord, setActiveWord] = useState<{
       arabic: string
       root?: string
-      meaning: string
+      english: string
+      transliteration?: string
     } | null>(null)
     const [dialogWord, setDialogWord] = useState<{
       arabic: string
@@ -103,7 +104,12 @@ const WordByWordView = memo(
                   className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer active:scale-95 text-foreground/90`}
                   onClick={(e) => {
                     e.stopPropagation()
-                    setActiveWord({ arabic, root: root ?? undefined, meaning })
+                    setActiveWord({
+                      arabic,
+                      root: root ?? undefined,
+                      english,
+                      transliteration: transliteration ?? undefined,
+                    })
                   }}
                 >
                   {arabic}
@@ -185,7 +191,7 @@ const WordByWordView = memo(
                     setDialogWord({
                       arabic: activeWord.arabic,
                       root: activeWord.root,
-                      meaning: activeWord.meaning,
+                      meaning: activeWord.english,
                     })
                     setActiveWord(null)
                   }
@@ -194,9 +200,16 @@ const WordByWordView = memo(
                 <p className="font-arabic text-3xl text-violet-600">
                   {activeWord.arabic}
                 </p>
-                <p className="text-sm font-bold text-foreground">
-                  {activeWord.meaning}
-                </p>
+                {activeWord.english && (
+                  <p className="text-sm font-bold text-foreground text-center">
+                    {activeWord.english}
+                  </p>
+                )}
+                {activeWord.transliteration && (
+                  <p className="text-xs text-muted-foreground italic text-center">
+                    {activeWord.transliteration}
+                  </p>
+                )}
                 {activeWord.root && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Tap to see occurrences →
@@ -253,7 +266,7 @@ const WordByWordView = memo(
     return (
       <div
         dir="rtl"
-        className="flex flex-wrap justify-start gap-y-8 gap-x-2 py-4"
+        className="flex flex-wrap justify-start gap-y-4 gap-x-1.5 py-3"
       >
         {sorted.map((w) => {
           const arabic = (w.tx as Record<string, string>)?.['ar']
@@ -265,14 +278,14 @@ const WordByWordView = memo(
           return (
             <Dialog key={wordIndex}>
               <DialogTrigger asChild>
-                <div className="group flex flex-col items-center gap-2 px-3 py-2 cursor-pointer transition-all hover:bg-muted/50 rounded-2xl border border-transparent hover:border-violet-600/20">
+                <div className="group flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all hover:bg-muted/50 rounded-xl border border-transparent hover:border-violet-600/20">
                   <p
                     className={`font-arabic ${arabicClass} leading-snug group-hover:text-violet-600 transition-colors`}
                   >
                     {arabic}
                   </p>
                   <div
-                    className="flex flex-col items-center gap-0.5 pt-0.5"
+                    className="flex flex-col items-center gap-0.5"
                     dir="ltr"
                   >
                     {showTransliteration && transliteration && (
@@ -280,7 +293,7 @@ const WordByWordView = memo(
                         {transliteration}
                       </p>
                     )}
-                    <p className="text-xs text-foreground/70 font-medium text-center wrap-break-words max-w-25">
+                    <p className="text-xs text-foreground/70 font-medium text-center wrap-break-words max-w-22">
                       {meaning}
                     </p>
                   </div>
