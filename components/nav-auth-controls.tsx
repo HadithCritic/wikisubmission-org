@@ -16,7 +16,13 @@ import { useAuth } from '@/hooks/use-auth'
 import { UserAvatar } from '@/components/user-avatar'
 import { signOut } from '@/app/actions/auth'
 
-export function NavAuthControls() {
+export function NavAuthControls({
+  showMobileSignIn = false,
+  onAction,
+}: {
+  showMobileSignIn?: boolean
+  onAction?: () => void
+} = {}) {
   const { user, loading } = useAuth()
   const router = useRouter()
 
@@ -26,8 +32,12 @@ export function NavAuthControls() {
 
   if (!user) {
     return (
-      <Link href="/login">
-        <Button variant="ghost" size="sm" className="hidden sm:flex h-8 px-3 text-sm">
+      <Link href="/login" onClick={onAction}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={showMobileSignIn ? 'h-9 w-full justify-start px-3 text-sm' : 'hidden sm:flex h-8 px-3 text-sm'}
+        >
           Sign in
         </Button>
       </Link>
@@ -47,6 +57,7 @@ export function NavAuthControls() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          type="button"
           className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
           aria-label="Account menu"
         >
