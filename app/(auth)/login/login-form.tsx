@@ -8,14 +8,25 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { signInWithEmail, signInWithOAuth } from '@/app/actions/auth'
+import { normalizeNextPath } from '@/lib/auth/redirect'
+import { cn } from '@/lib/utils'
 
-const OAUTH_ENABLED = process.env.NEXT_PUBLIC_SUPABASE_OAUTH_ENABLED === 'true'
+type LoginFormProps = {
+  availableOAuthProviders: Array<'google' | 'apple'>
+}
 
-export default function LoginForm() {
+const OAUTH_PROVIDER_LABELS = {
+  google: 'Google',
+  apple: 'Apple',
+} as const
+
+export default function LoginForm({ availableOAuthProviders }: LoginFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') ?? '/'
+  const next = normalizeNextPath(searchParams.get('next'))
   const errorParam = searchParams.get('error')
+  const signupHref =
+    next === '/' ? '/signup' : `/signup?next=${encodeURIComponent(next)}`
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,6 +40,15 @@ export default function LoginForm() {
         router.push(next)
         router.refresh()
       } else {
+        toast.error(result.error ?? 'Sign in failed')
+      }
+    })
+  }
+
+  const handleOAuth = (provider: 'google' | 'apple') => {
+    startTransition(async () => {
+      const result = await signInWithOAuth(provider, next)
+      if (!result.success) {
         toast.error(result.error ?? 'Sign in failed')
       }
     })
@@ -81,7 +101,7 @@ export default function LoginForm() {
         </Button>
       </form>
 
-      {OAUTH_ENABLED && (
+      {availableOAuthProviders.length > 0 && (
         <>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -91,28 +111,30 @@ export default function LoginForm() {
               <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              onClick={() => signInWithOAuth('google')}
-              disabled={pending}
-            >
-              Google
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => signInWithOAuth('github')}
-              disabled={pending}
-            >
-              GitHub
-            </Button>
+          <div
+            className={cn(
+              'grid gap-3',
+              availableOAuthProviders.length > 1 ? 'grid-cols-2' : 'grid-cols-1'
+            )}
+          >
+            {availableOAuthProviders.map((provider) => (
+              <Button
+                key={provider}
+                type="button"
+                variant="outline"
+                onClick={() => handleOAuth(provider)}
+                disabled={pending}
+              >
+                Continue with {OAUTH_PROVIDER_LABELS[provider]}
+              </Button>
+            ))}
           </div>
         </>
       )}
 
       <p className="text-center text-sm text-muted-foreground">
         No account?{' '}
-        <Link href="/signup" className="text-primary hover:underline font-medium">
+        <Link href={signupHref} className="text-primary hover:underline font-medium">
           Sign up
         </Link>
       </p>

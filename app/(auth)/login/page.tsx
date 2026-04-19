@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import { getAvailableOAuthProviders } from '@/lib/auth/oauth'
 import LoginForm from './login-form'
 
 export const metadata: Metadata = {
@@ -8,9 +9,11 @@ export const metadata: Metadata = {
 }
 
 export default function LoginPage() {
+  const availableOAuthProviders = getAvailableOAuthProviders()
+
   return (
     <Suspense>
-      <LoginForm />
+      <LoginForm availableOAuthProviders={availableOAuthProviders} />
     </Suspense>
   )
 }

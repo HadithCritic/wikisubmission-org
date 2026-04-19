@@ -1,8 +1,11 @@
 'use server'
 
-import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { normalizeNextPath } from '@/lib/auth/redirect'
+import { isOAuthProviderEnabled, type OAuthProvider } from '@/lib/auth/oauth'
+import { getAuthDisplayName, syncUserToBackend } from '@/lib/auth/user-sync'
+import { redirect } from 'next/navigation'
 
 export type AuthResult = { success: boolean; error?: string }
 
@@ -24,9 +27,11 @@ export async function signInWithEmail(
 export async function signUpWithEmail(
   email: string,
   password: string,
-  displayName?: string
+  displayName?: string,
+  nextPath?: string
 ): Promise<AuthResult> {
   const supabase = await createSupabaseServerClient()
+  const safeNextPath = normalizeNextPath(nextPath)
 
   const emailConfirmEnabled = process.env.SUPABASE_EMAIL_CONFIRM === 'true'
 
@@ -36,7 +41,7 @@ export async function signUpWithEmail(
     options: {
       data: { display_name: displayName },
       emailRedirectTo: emailConfirmEnabled
-        ? `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback`
+        ? `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback?next=${encodeURIComponent(safeNextPath)}`
         : undefined,
     },
   })
@@ -48,7 +53,7 @@ export async function signUpWithEmail(
     await syncUserToBackend(data.session?.access_token, {
       supabase_uid: data.user.id,
       email: data.user.email ?? email,
-      display_name: displayName,
+      display_name: displayName ?? getAuthDisplayName(data.user),
     })
   }
 
@@ -59,23 +64,33 @@ export async function signUpWithEmail(
 // ── OAuth ─────────────────────────────────────────────────────────────────────
 
 export async function signInWithOAuth(
-  provider: 'google' | 'github'
-): Promise<void> {
-  const oauthEnabled = process.env.SUPABASE_OAUTH_ENABLED === 'true'
-  if (!oauthEnabled) {
-    // Silently ignore — UI should already hide OAuth buttons when disabled
-    return
+  provider: OAuthProvider,
+  nextPath?: string
+): Promise<AuthResult> {
+  const safeNextPath = normalizeNextPath(nextPath)
+
+  if (!isOAuthProviderEnabled(provider)) {
+    return {
+      success: false,
+      error: `${provider === 'apple' ? 'Apple' : 'Google'} sign-in is not available.`,
+    }
   }
 
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback?next=${encodeURIComponent(safeNextPath)}`,
     },
   })
 
-  if (error || !data.url) return
+  if (error || !data.url) {
+    return {
+      success: false,
+      error: error?.message ?? 'Unable to start sign-in.',
+    }
+  }
+
   redirect(data.url)
 }
 
@@ -94,26 +109,4 @@ export async function getCurrentUser() {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   return user
-}
-
-// ── Internal: sync to ws-backend ─────────────────────────────────────────────
-
-async function syncUserToBackend(
-  token: string | undefined,
-  payload: { supabase_uid: string; email: string; display_name?: string }
-): Promise<void> {
-  if (!token) return
-  try {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(3000),
-    })
-  } catch {
-    // best-effort — user can log in even if sync fails
-  }
 }

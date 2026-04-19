@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
+import { getAvailableOAuthProviders } from '@/lib/auth/oauth'
 import SignupForm from './signup-form'
 
 export const metadata: Metadata = {
@@ -7,5 +9,11 @@ export const metadata: Metadata = {
 }
 
 export default function SignupPage() {
-  return <SignupForm />
+  const availableOAuthProviders = getAvailableOAuthProviders()
+
+  return (
+    <Suspense>
+      <SignupForm availableOAuthProviders={availableOAuthProviders} />
+    </Suspense>
+  )
 }
