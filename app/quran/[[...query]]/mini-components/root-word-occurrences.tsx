@@ -71,12 +71,23 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
           },
         },
       })
-      .then(({ data }) => {
-        setOccurrences(data ? flattenWords(data) : [])
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('[RootWordOccurrences] API error for root', rootWord, error)
+          setOccurrences([])
+          setLoading(false)
+          return
+        }
+        const results = data ? flattenWords(data) : []
+        if (results.length === 0) {
+          console.warn('[RootWordOccurrences] No results for root:', rootWord, 'response:', data)
+        }
+        setOccurrences(results)
         setTotal(data?.info?.total ?? 0)
         setLoading(false)
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('[RootWordOccurrences] Network error for root', rootWord, err)
         setOccurrences([])
         setLoading(false)
       })
