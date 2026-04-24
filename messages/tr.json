@@ -72,7 +72,22 @@
     "modeVerse": "Ayet",
     "modeWordByWord": "Kelime kelime",
     "modeReading": "Okuma",
-    "versesRange": "Ayetler {start}–{end}"
+    "versesRange": "Ayetler {start}–{end}",
+    "copy": {
+      "aria": "Ayeti kopyala",
+      "more": "Diğer kopyalama seçenekleri",
+      "copy": "Kopyala",
+      "full_verse_text": "Ayetin tamamını kopyala",
+      "word_by_word_text": "Kelime kelime kopyala",
+      "full_verse_image": "Resim olarak kopyala",
+      "word_by_word_image": "Kelime kelime resim olarak kopyala",
+      "selected": "{count} seçildi",
+      "cancel": "İptal",
+      "done_text": "Panoya kopyalandı",
+      "done_image": "Resim kopyalandı",
+      "error_text": "Kopyalanamadı",
+      "error_image": "Resim kopyalanamadı"
+    }
   },
   "search": {
     "placeholder": "Kuran'da ara…",

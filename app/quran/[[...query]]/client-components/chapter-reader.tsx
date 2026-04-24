@@ -28,6 +28,8 @@ import {
 import { VerseCard, toQuranVerse } from '../mini-components/verse-card'
 import { VerseMinimap } from '../mini-components/verse-minimap'
 import { ReadingView } from '../mini-components/reading-view'
+import { MultiSelectBar } from '../mini-components/multi-select-bar'
+import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useTranslations } from 'next-intl'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import {
@@ -432,6 +434,11 @@ export function ChapterReader({
   const zoomLevel = prefs.zoomLevel ?? 'comfortable'
   const { getDirection } = useLanguagesStore()
   const reader = useChapterReader(chapterNumber, initialData, rangeStart, rangeEnd)
+  // Selection is session-only and should not persist across chapter changes.
+  const clearSelection = useVerseSelection((s) => s.clear)
+  useEffect(() => {
+    clearSelection()
+  }, [chapterNumber, clearSelection])
   const t = useTranslations('quran')
   const tCommon = useTranslations('common')
   // State context: subscribe to currentVerse/isPlaying/isBuffering to compute
@@ -701,6 +708,8 @@ export function ChapterReader({
           {reader.error}
         </p>
       )}
+
+      <MultiSelectBar />
     </div>
   )
 }

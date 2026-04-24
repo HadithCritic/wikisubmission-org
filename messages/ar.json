@@ -72,7 +72,22 @@
     "modeVerse": "آية",
     "modeWordByWord": "كلمة بكلمة",
     "modeReading": "قراءة",
-    "versesRange": "الآيات {start}–{end}"
+    "versesRange": "الآيات {start}–{end}",
+    "copy": {
+      "aria": "نسخ الآية",
+      "more": "المزيد من خيارات النسخ",
+      "copy": "نسخ",
+      "full_verse_text": "نسخ الآية كاملة",
+      "word_by_word_text": "نسخ كلمة بكلمة",
+      "full_verse_image": "نسخ كصورة",
+      "word_by_word_image": "نسخ كلمة بكلمة كصورة",
+      "selected": "تم اختيار {count}",
+      "cancel": "إلغاء",
+      "done_text": "تم النسخ إلى الحافظة",
+      "done_image": "تم نسخ الصورة",
+      "error_text": "تعذّر النسخ",
+      "error_image": "تعذّر نسخ الصورة"
+    }
   },
   "search": {
     "placeholder": "ابحث في القرآن…",

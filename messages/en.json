@@ -72,7 +72,22 @@
     "modeVerse": "Verse",
     "modeWordByWord": "Word by Word",
     "modeReading": "Reading",
-    "versesRange": "Verses {start}–{end}"
+    "versesRange": "Verses {start}–{end}",
+    "copy": {
+      "aria": "Copy verse",
+      "more": "More copy options",
+      "copy": "Copy",
+      "full_verse_text": "Copy full verse",
+      "word_by_word_text": "Copy word by word",
+      "full_verse_image": "Copy as image",
+      "word_by_word_image": "Copy word-by-word as image",
+      "selected": "{count} selected",
+      "cancel": "Cancel",
+      "done_text": "Copied to clipboard",
+      "done_image": "Image copied",
+      "error_text": "Could not copy",
+      "error_image": "Could not copy image"
+    }
   },
   "search": {
     "placeholder": "Search the Quran…",

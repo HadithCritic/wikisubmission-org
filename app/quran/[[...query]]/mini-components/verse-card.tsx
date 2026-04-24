@@ -1,23 +1,22 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState } from 'react'
+import { memo, useMemo, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useIsTouch } from '@/hooks/use-is-touch'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
+import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import {
   useQuranPlayerCallbacks,
   type QuranVerse,
 } from '@/lib/quran-audio-context'
 import { RootWordOccurrences } from './root-word-occurrences'
-import { buildVerseLine } from '@/lib/quran-copy'
+import { CopyButton } from './copy-button'
 import {
   Play,
   Pause,
   Loader2,
-  Copy,
-  Check,
   ArrowUpRight,
   Bookmark,
   StickyNote,
@@ -430,37 +429,111 @@ export const VerseCard = memo(
       return result
     }, [searchHighlight, tr])
 
-    const [copied, setCopied] = useState(false)
-
     const audioVerse = useMemo(
       () => ({ verse_id: verseId, ws_quran_text: {} }) satisfies QuranVerse,
       [verseId]
     )
 
-    const handleCopy = useCallback(() => {
-      const text = buildVerseLine(verse, {
-        primaryCode,
-        includeText: prefs.text,
-        includeArabic: prefs.arabic,
-        includeWordByWord: prefs.wordByWord,
-        includeTransliteration: prefs.transliteration,
-        secondaryCode:
-          prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
-            ? prefs.secondaryLanguage
-            : undefined,
-      })
-      navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    }, [
-      verse,
-      primaryCode,
-      prefs.text,
-      prefs.arabic,
-      prefs.wordByWord,
-      prefs.transliteration,
-      prefs.secondaryLanguage,
-    ])
+    // ─── Multi-select (long-press / shift-click) ───────────────────────────
+    const selectionActive = useVerseSelection((s) => s.active)
+    const isSelected = useVerseSelection((s) =>
+      verseId ? s.selected.has(verseId) : false
+    )
+    const activateSelection = useVerseSelection((s) => s.activate)
+    const toggleSelection = useVerseSelection((s) => s.toggle)
+    const longPressRef = useRef<{
+      timer: number | null
+      startX: number
+      startY: number
+      fired: boolean
+    }>({ timer: null, startX: 0, startY: 0, fired: false })
+
+    const cancelLongPress = useCallback(() => {
+      const ref = longPressRef.current
+      if (ref.timer !== null) {
+        window.clearTimeout(ref.timer)
+        ref.timer = null
+      }
+    }, [])
+
+    useEffect(() => cancelLongPress, [cancelLongPress])
+
+    const onCardPointerDown = useCallback(
+      (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!verseId) return
+        // Ignore interactions that start on a button/link — those have their own behavior.
+        const target = e.target as HTMLElement
+        if (target.closest('button, a, [role="menuitem"], [data-slot="dropdown-menu-trigger"]'))
+          return
+
+        // Shift-click (desktop): toggle selection without starting a timer.
+        if (e.shiftKey && e.pointerType === 'mouse') {
+          e.preventDefault()
+          toggleSelection(verse)
+          return
+        }
+
+        // While in selection mode, a plain tap toggles.
+        if (selectionActive) {
+          e.preventDefault()
+          toggleSelection(verse)
+          return
+        }
+
+        // Otherwise start a long-press timer.
+        const ref = longPressRef.current
+        ref.startX = e.clientX
+        ref.startY = e.clientY
+        ref.fired = false
+        cancelLongPress()
+        ref.timer = window.setTimeout(() => {
+          ref.fired = true
+          activateSelection(verse)
+          if ('vibrate' in navigator) {
+            try {
+              navigator.vibrate(30)
+            } catch {
+              // ignore
+            }
+          }
+        }, 500)
+      },
+      [verse, verseId, selectionActive, toggleSelection, activateSelection, cancelLongPress]
+    )
+
+    const onCardPointerMove = useCallback(
+      (e: React.PointerEvent<HTMLDivElement>) => {
+        const ref = longPressRef.current
+        if (ref.timer === null) return
+        const dx = e.clientX - ref.startX
+        const dy = e.clientY - ref.startY
+        if (dx * dx + dy * dy > 100) cancelLongPress()
+      },
+      [cancelLongPress]
+    )
+
+    const onCardPointerEnd = useCallback(() => {
+      cancelLongPress()
+    }, [cancelLongPress])
+
+    const onCardClickCapture = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        // Suppress `verseHref` Link navigation (and any other clicks) once a
+        // long-press or shift-click has activated selection.
+        if (longPressRef.current.fired || selectionActive) {
+          const target = e.target as HTMLElement
+          // Still allow the copy/audio buttons to work.
+          if (
+            !target.closest('button, [role="menuitem"], [data-slot="dropdown-menu-trigger"]')
+          ) {
+            e.preventDefault()
+            e.stopPropagation()
+          }
+          longPressRef.current.fired = false
+        }
+      },
+      [selectionActive]
+    )
 
     const handlePlay = useCallback(() => {
       if (isCurrentAudio) {
@@ -474,9 +547,16 @@ export const VerseCard = memo(
     return (
       <div
         id={verseId}
-        className={`transition-colors duration-500 ${
-          isScrollTarget || isCurrentAudio ? 'bg-primary/10' : ''
-        }`}
+        onPointerDown={onCardPointerDown}
+        onPointerMove={onCardPointerMove}
+        onPointerUp={onCardPointerEnd}
+        onPointerCancel={onCardPointerEnd}
+        onClickCapture={onCardClickCapture}
+        className={`relative transition-colors duration-500 ${
+          isSelected ? 'bg-primary/10 ring-2 ring-primary ring-inset' : ''
+        } ${
+          !isSelected && (isScrollTarget || isCurrentAudio) ? 'bg-primary/10' : ''
+        } ${selectionActive ? 'cursor-pointer select-none' : ''}`}
       >
         <div className="px-6 py-4 sm:px-8 sm:py-5 space-y-2">
           {/* Subtitle */}
@@ -532,18 +612,7 @@ export const VerseCard = memo(
                 </Button>
               )}
               {showCopyButton && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
+                <CopyButton verse={verse} searchHighlight={searchHighlight} />
               )}
               {showAudio && (
                 <Button

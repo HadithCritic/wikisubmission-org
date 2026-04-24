@@ -20,6 +20,8 @@ import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { VerseCard } from '../mini-components/verse-card'
+import { MultiSelectBar } from '../mini-components/multi-select-bar'
+import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useTranslations } from 'next-intl'
 
 // ─── SearchResultChapter ──────────────────────────────────────────────────────
@@ -99,6 +101,12 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   const lastQueryRef = useRef<string | null>(null)
   const didInitRef = useRef(false)
+
+  // Clear any active multi-select when the search query changes.
+  const clearSelection = useVerseSelection((s) => s.clear)
+  useEffect(() => {
+    clearSelection()
+  }, [searchQuery, clearSelection])
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.zoomLevel ?? 'comfortable'}-${prefs.arabic}-${prefs.wordByWord}`
 
@@ -406,6 +414,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           )}
         </TabsContent>
       </Tabs>
+
+      <MultiSelectBar />
     </div>
   )
 }

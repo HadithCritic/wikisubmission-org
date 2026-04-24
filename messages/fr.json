@@ -72,7 +72,22 @@
     "modeVerse": "Verset",
     "modeWordByWord": "Mot par mot",
     "modeReading": "Lecture",
-    "versesRange": "Versets {start}–{end}"
+    "versesRange": "Versets {start}–{end}",
+    "copy": {
+      "aria": "Copier le verset",
+      "more": "Plus d'options de copie",
+      "copy": "Copier",
+      "full_verse_text": "Copier le verset entier",
+      "word_by_word_text": "Copier mot par mot",
+      "full_verse_image": "Copier en tant qu'image",
+      "word_by_word_image": "Copier mot par mot en image",
+      "selected": "{count} sélectionné(s)",
+      "cancel": "Annuler",
+      "done_text": "Copié dans le presse-papiers",
+      "done_image": "Image copiée",
+      "error_text": "Impossible de copier",
+      "error_image": "Impossible de copier l'image"
+    }
   },
   "search": {
     "placeholder": "Rechercher dans le Coran…",
