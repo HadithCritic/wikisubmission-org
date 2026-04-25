@@ -1,15 +1,29 @@
+'use client'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { F, SectionDivider } from './shared'
 
-const PRAYERS: [string, string, boolean][] = [
-  ['Fajr', '05:12', false],
-  ['Dhuhr', '12:30', false],
-  ['Asr', '15:42', true],
-  ['Maghrib', '18:15', false],
-  ['Isha', '19:48', false],
+const PRAYER_TIMES: { time: string; active: boolean }[] = [
+  { time: '05:12', active: false },
+  { time: '12:30', active: false },
+  { time: '15:42', active: true },
+  { time: '18:15', active: false },
+  { time: '19:48', active: false },
 ]
 
 export function PracticesSection() {
+  const t = useTranslations('homePage.practices')
+  const PRAYER_NAMES = [
+    t('fajr'),
+    t('dhuhr'),
+    t('asr'),
+    t('maghrib'),
+    t('isha'),
+  ]
+  const activeIdx = PRAYER_TIMES.findIndex((p) => p.active)
+  const activeName = activeIdx >= 0 ? PRAYER_NAMES[activeIdx] : ''
+  const activeTime = activeIdx >= 0 ? PRAYER_TIMES[activeIdx].time : ''
+
   return (
     <section
       style={{
@@ -22,7 +36,11 @@ export function PracticesSection() {
         className="px-4 sm:px-6 md:px-10"
         style={{ maxWidth: 1240, margin: '0 auto' }}
       >
-        <SectionDivider num="IV" title="Practices" sub="Daily observance" />
+        <SectionDivider
+          num={t('dividerNum')}
+          title={t('dividerTitle')}
+          sub={t('dividerSub')}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 20 }}>
           {/* Prayer tile */}
@@ -48,19 +66,19 @@ export function PracticesSection() {
                 color: 'var(--ed-fg-muted)',
               }}
             >
-              <span>The Contact Prayers</span>
+              <span>{t('prayerKicker')}</span>
               <span>
-                Next ·{' '}
+                {t('prayerNext')} ·{' '}
                 <strong style={{ color: 'var(--ed-accent)', fontWeight: 600 }}>
-                  Asr · 15:42
+                  {activeName} · {activeTime}
                 </strong>
               </span>
             </div>
 
             <div className="grid grid-cols-5 gap-2">
-              {PRAYERS.map(([name, time, active]) => (
+              {PRAYER_TIMES.map(({ time, active }, i) => (
                 <div
-                  key={name}
+                  key={i}
                   style={{
                     padding: '12px 8px',
                     border: '1px solid var(--ed-rule)',
@@ -81,7 +99,7 @@ export function PracticesSection() {
                       color: active ? 'var(--ed-accent)' : 'var(--ed-fg-muted)',
                     }}
                   >
-                    {name}
+                    {PRAYER_NAMES[i]}
                   </div>
                   <div
                     style={{
@@ -108,9 +126,7 @@ export function PracticesSection() {
                 margin: 0,
               }}
             >
-              Five daily contacts with God — observed at their proper
-              astronomical times. The second pillar of Submission, alongside
-              belief itself.
+              {t('prayerDesc')}
             </p>
           </Link>
 
@@ -137,12 +153,12 @@ export function PracticesSection() {
                 color: 'var(--ed-fg-muted)',
               }}
             >
-              <span>The Obligatory Charity</span>
+              <span>{t('zakatKicker')}</span>
               <span>
                 <strong style={{ color: 'var(--ed-accent)', fontWeight: 600 }}>
                   2.5%
                 </strong>{' '}
-                · on income
+                · {t('zakatRateLabel')}
               </span>
             </div>
 
@@ -159,10 +175,7 @@ export function PracticesSection() {
                 paddingLeft: 18,
               }}
             >
-              &ldquo;Charities shall go to the poor, the needy, the workers who
-              collect them, the new converts, to free the slaves, to those
-              burdened by sudden expenses, in the cause of GOD, and to the
-              traveling alien.&rdquo;
+              {t('zakatQuote')}
               <span
                 style={{
                   display: 'block',
@@ -175,7 +188,7 @@ export function PracticesSection() {
                   marginTop: 12,
                 }}
               >
-                — Quran 9:60
+                {t('zakatRef')}
               </span>
             </blockquote>
 
@@ -188,9 +201,7 @@ export function PracticesSection() {
                 margin: 0,
               }}
             >
-              A 2.5% charity on every income, paid the moment you receive it —
-              to the eight categories God has specified. No threshold, no lunar
-              year.
+              {t('zakatDesc')}
             </p>
           </Link>
         </div>

@@ -1,4 +1,6 @@
+'use client'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { F, SectionDivider, Arrow } from './shared'
 
 type CardData = {
@@ -9,9 +11,12 @@ type CardData = {
   tags: string[]
   visual: React.ReactNode
   visualAlt?: boolean
+  ctaLabel: string
 }
 
 export function ScriptureSection() {
+  const t = useTranslations('homePage.scripture')
+
   return (
     <section
       style={{
@@ -23,7 +28,11 @@ export function ScriptureSection() {
         className="px-4 sm:px-6 md:px-10"
         style={{ maxWidth: 1240, margin: '0 auto' }}
       >
-        <SectionDivider num="I" title="Scripture" sub="Primary Texts" />
+        <SectionDivider
+          num={t('dividerNum')}
+          title={t('dividerTitle')}
+          sub={t('dividerSub')}
+        />
 
         <div
           style={{ gap: 20 }}
@@ -31,10 +40,11 @@ export function ScriptureSection() {
         >
           <FeaturedCard
             href="/quran"
-            title="The Quran"
-            titleAlt="· the Final Testament"
-            desc="Authorized English version, translated from the Original by Rashad Khalifa, Ph.D — with the full Arabic, verse-by-verse footnotes, and the mathematical structure intact."
-            tags={['114 suras', '·', '6,346 verses', '·', 'EN · AR · FR · TR']}
+            title={t('quranTitle')}
+            titleAlt={t('quranTitleAlt')}
+            desc={t('quranDesc')}
+            tags={t('quranTags').split(' · ')}
+            ctaLabel={t('openReader')}
             visual={
               <div style={{ position: 'relative', width: 180, height: 240 }}>
                 <div
@@ -84,10 +94,11 @@ export function ScriptureSection() {
 
           <FeaturedCard
             href="/bible"
-            title="The Bible"
-            titleAlt="· Old & New Testaments"
-            desc="The full Old and New Testaments, read in the light of the Final Testament — with cross-references and commentary."
-            tags={['66 books', '·', '31,102 verses', '·', 'KJV · ESV']}
+            title={t('bibleTitle')}
+            titleAlt={t('bibleTitleAlt')}
+            desc={t('bibleDesc')}
+            tags={t('bibleTags').split(' · ')}
+            ctaLabel={t('openReader')}
             visualAlt
             visual={
               <div style={{ position: 'relative', width: 180, height: 240 }}>
@@ -150,6 +161,7 @@ function FeaturedCard({
   tags,
   visual,
   visualAlt,
+  ctaLabel,
 }: CardData) {
   return (
     <Link
@@ -212,11 +224,14 @@ function FeaturedCard({
           }}
         >
           {tags.map((tag, i) => (
-            <span key={i}>{tag}</span>
+            <span key={i}>
+              {i > 0 ? <span style={{ marginRight: 10 }}>·</span> : null}
+              {tag}
+            </span>
           ))}
         </div>
         <div className="ed-cta" style={{ marginTop: 'auto', fontSize: 14 }}>
-          Open the reader <Arrow />
+          {ctaLabel} <Arrow />
         </div>
       </div>
 

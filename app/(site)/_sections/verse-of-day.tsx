@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { F, SectionDivider, Arrow } from './shared'
 
 type Verse = {
@@ -18,98 +19,97 @@ type Tab = {
   verses: Verse[]
 }
 
-const TABS: Tab[] = [
-  {
-    key: 'quran',
-    label: 'Quran',
-    sub: 'Final Testament',
-    verses: [
-      {
-        ref: '2:62',
-        title: 'One Religion',
-        english:
-          'Surely, those who believe, those who are Jewish, the Christians, and the converts; anyone who believes in GOD, believes in the Last Day, and leads a righteous life, will receive their recompense from their Lord.',
-        footnote: 'Repeated verbatim in Sura 5, verse 69.',
-      },
-      {
-        ref: '3:19',
-        title: 'Submission',
-        english: 'The only religion approved by GOD is Submission.',
-        footnote: 'The Arabic word "Islam" literally means "Submission."',
-      },
-      {
-        ref: '25:1',
-        title: 'The Criterion',
-        english:
-          'Most blessed is the One who revealed the Statute Book to His servant, so he can serve as a warner to the whole world.',
-        footnote: 'Al-Furqān — the decisive scripture.',
-      },
-    ],
-  },
-  {
-    key: 'ot',
-    label: 'Old Testament',
-    sub: 'Tanakh',
-    verses: [
-      {
-        ref: 'Deuteronomy 6:4',
-        title: 'The Shema',
-        english: 'Hear, O Israel: The LORD our God, the LORD is one.',
-        footnote: 'Cited by Jesus as the first commandment.',
-      },
-      {
-        ref: 'Isaiah 42:8',
-        title: 'His Glory',
-        english:
-          'I am the LORD: that is my name: and my glory will I not give to another.',
-        footnote: 'One of the clearest monotheistic declarations in the Tanakh.',
-      },
-      {
-        ref: 'Micah 6:8',
-        title: 'What He Requires',
-        english:
-          'To do justly, and to love mercy, and to walk humbly with thy God.',
-        footnote: 'A distilled ethics of monotheism.',
-      },
-    ],
-  },
-  {
-    key: 'nt',
-    label: 'New Testament',
-    sub: 'Gospels & Letters',
-    verses: [
-      {
-        ref: 'Mark 12:29',
-        title: 'The First Commandment',
-        english:
-          'The first of all the commandments is, Hear, O Israel; The Lord our God is one Lord.',
-        footnote: 'Jesus quoting Deuteronomy 6:4.',
-      },
-      {
-        ref: 'John 17:3',
-        title: 'Eternal Life',
-        english:
-          'And this is life eternal, that they might know thee the only true God.',
-        footnote: 'Spoken by Jesus in prayer to the Father.',
-      },
-      {
-        ref: 'James 2:19',
-        title: 'Belief in One',
-        english: 'Thou believest that there is one God; thou doest well.',
-      },
-    ],
-  },
-]
-
 const ROTATE_MS = 7000
 
 export function VerseOfTheDaySection() {
+  const t = useTranslations('homePage.verseOfDay')
+
+  const TABS: Tab[] = useMemo(
+    () => [
+      {
+        key: 'quran',
+        label: t('tabQuran'),
+        sub: t('tabQuranSub'),
+        verses: [
+          {
+            ref: '2:62',
+            title: t('quran1Title'),
+            english: t('quran1Text'),
+            footnote: t('quran1Footnote'),
+          },
+          {
+            ref: '3:19',
+            title: t('quran2Title'),
+            english: t('quran2Text'),
+            footnote: t('quran2Footnote'),
+          },
+          {
+            ref: '25:1',
+            title: t('quran3Title'),
+            english: t('quran3Text'),
+            footnote: t('quran3Footnote'),
+          },
+        ],
+      },
+      {
+        key: 'ot',
+        label: t('tabOt'),
+        sub: t('tabOtSub'),
+        verses: [
+          {
+            ref: 'Deuteronomy 6:4',
+            title: t('ot1Title'),
+            english: t('ot1Text'),
+            footnote: t('ot1Footnote'),
+          },
+          {
+            ref: 'Isaiah 42:8',
+            title: t('ot2Title'),
+            english: t('ot2Text'),
+            footnote: t('ot2Footnote'),
+          },
+          {
+            ref: 'Micah 6:8',
+            title: t('ot3Title'),
+            english: t('ot3Text'),
+            footnote: t('ot3Footnote'),
+          },
+        ],
+      },
+      {
+        key: 'nt',
+        label: t('tabNt'),
+        sub: t('tabNtSub'),
+        verses: [
+          {
+            ref: 'Mark 12:29',
+            title: t('nt1Title'),
+            english: t('nt1Text'),
+            footnote: t('nt1Footnote'),
+          },
+          {
+            ref: 'John 17:3',
+            title: t('nt2Title'),
+            english: t('nt2Text'),
+            footnote: t('nt2Footnote'),
+          },
+          {
+            ref: 'James 2:19',
+            title: t('nt3Title'),
+            english: t('nt3Text'),
+          },
+        ],
+      },
+    ],
+    [t]
+  )
+
   const [tabKey, setTabKey] = useState<Tab['key']>('quran')
   const [idx, setIdx] = useState(0)
 
   const current = useMemo(
-    () => TABS.find((t) => t.key === tabKey) ?? TABS[0],
-    [tabKey]
+    () => TABS.find((tab) => tab.key === tabKey) ?? TABS[0],
+    [tabKey, TABS]
   )
 
   useEffect(() => {
@@ -118,10 +118,10 @@ export function VerseOfTheDaySection() {
   }, [tabKey])
 
   useEffect(() => {
-    const t = setInterval(() => {
+    const tm = setInterval(() => {
       setIdx((p) => (p + 1) % current.verses.length)
     }, ROTATE_MS)
-    return () => clearInterval(t)
+    return () => clearInterval(tm)
   }, [current.verses.length])
 
   const v = current.verses[idx]
@@ -139,9 +139,9 @@ export function VerseOfTheDaySection() {
         style={{ maxWidth: 1240, margin: '0 auto' }}
       >
         <SectionDivider
-          num="III"
-          title="Verse of the day"
-          sub="Daily rotation"
+          num={t('dividerNum')}
+          title={t('dividerTitle')}
+          sub={t('dividerSub')}
         />
 
         <div
@@ -152,7 +152,6 @@ export function VerseOfTheDaySection() {
             overflow: 'hidden',
           }}
         >
-          {/* Header: tabs + date */}
           <div
             className="flex items-center justify-between gap-3 flex-wrap"
             style={{
@@ -169,7 +168,7 @@ export function VerseOfTheDaySection() {
                 color: 'var(--ed-fg-muted)',
               }}
             >
-              Today · {current.sub}
+              {t('todayLabel')} · {current.sub}
             </div>
             <div
               role="tablist"
@@ -181,12 +180,12 @@ export function VerseOfTheDaySection() {
                 borderRadius: 2,
               }}
             >
-              {TABS.map((t) => (
+              {TABS.map((tab) => (
                 <button
-                  key={t.key}
+                  key={tab.key}
                   role="tab"
-                  aria-selected={tabKey === t.key}
-                  onClick={() => setTabKey(t.key)}
+                  aria-selected={tabKey === tab.key}
+                  onClick={() => setTabKey(tab.key)}
                   type="button"
                   style={{
                     fontFamily: F.mono,
@@ -196,21 +195,22 @@ export function VerseOfTheDaySection() {
                     padding: '6px 12px',
                     border: 'none',
                     background:
-                      tabKey === t.key ? 'var(--ed-fg)' : 'transparent',
+                      tabKey === tab.key ? 'var(--ed-fg)' : 'transparent',
                     color:
-                      tabKey === t.key ? 'var(--ed-bg)' : 'var(--ed-fg-muted)',
+                      tabKey === tab.key
+                        ? 'var(--ed-bg)'
+                        : 'var(--ed-fg-muted)',
                     cursor: 'pointer',
                     borderRadius: 2,
                     transition: 'all 150ms',
                   }}
                 >
-                  {t.label}
+                  {tab.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Body */}
           <div
             style={{
               padding: 'clamp(28px, 5vw, 48px) clamp(20px, 4vw, 40px)',
@@ -298,14 +298,13 @@ export function VerseOfTheDaySection() {
                     marginRight: 10,
                   }}
                 >
-                  Footnote —
+                  {t('footnoteLabel')}
                 </span>
                 {v.footnote}
               </div>
             )}
           </div>
 
-          {/* Actions */}
           <div
             className="flex items-center justify-between gap-3 flex-wrap"
             style={{
@@ -320,21 +319,18 @@ export function VerseOfTheDaySection() {
                 className="ed-btn-primary"
                 style={{ fontFamily: F.serif, padding: '10px 18px' }}
               >
-                Continue to chapter
+                {t('continueChapter')}
                 <Arrow />
               </Link>
             </div>
 
-            <div
-              aria-label="Rotation"
-              style={{ display: 'flex', gap: 6 }}
-            >
+            <div aria-label={t('rotationLabel')} style={{ display: 'flex', gap: 6 }}>
               {current.verses.map((_, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setIdx(i)}
-                  aria-label={`Verse ${i + 1}`}
+                  aria-label={t('verseAria', { n: i + 1 })}
                   aria-current={i === idx ? 'true' : undefined}
                   style={{
                     width: i === idx ? 20 : 8,

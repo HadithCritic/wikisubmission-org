@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, Arrow } from './shared'
 
@@ -35,6 +36,7 @@ function Stat({ k, label }: { k: string; label: string }) {
 
 export function HeroManifesto() {
   const { toggle: toggleAsk } = useChatPanel()
+  const t = useTranslations('homePage.hero')
 
   return (
     <section
@@ -56,7 +58,6 @@ export function HeroManifesto() {
         }}
         className="grid grid-cols-[1.3fr_1fr] max-md:grid-cols-1"
       >
-        {/* Headline — Happiness is Submission to God */}
         <h1
           style={{
             fontFamily: F.display,
@@ -67,7 +68,7 @@ export function HeroManifesto() {
             color: 'var(--ed-fg)',
           }}
         >
-          <span style={{ display: 'block' }}>Happiness is</span>
+          <span style={{ display: 'block' }}>{t('headline1')}</span>
           <span
             style={{
               display: 'block',
@@ -75,14 +76,13 @@ export function HeroManifesto() {
               color: 'var(--ed-fg-muted)',
             }}
           >
-            Submission
+            {t('headline2')}
           </span>
           <span style={{ display: 'block', color: 'var(--ed-accent)' }}>
-            to God.
+            {t('headline3')}
           </span>
         </h1>
 
-        {/* Aside — verse 2:62 "those who believe…" */}
         <aside
           style={{
             borderLeft: '1px solid var(--ed-rule)',
@@ -101,7 +101,7 @@ export function HeroManifesto() {
               marginBottom: 10,
             }}
           >
-            Quran · 2:62 &amp; 5:69
+            {t('verseKicker')}
           </div>
           <p
             style={{
@@ -112,15 +112,10 @@ export function HeroManifesto() {
               margin: 0,
             }}
           >
-            Surely, those who believe, those who are Jewish, the Christians, and
-            the converts; anyone who (1) believes in GOD, and (2) believes in
-            the Last Day, and (3) leads a righteous life, will receive their
-            recompense from their Lord. They have nothing to fear, nor will
-            they grieve.
+            {t('verse')}
           </p>
         </aside>
 
-        {/* Lede */}
         <p
           style={{
             fontFamily: F.serif,
@@ -130,13 +125,9 @@ export function HeroManifesto() {
             maxWidth: '54ch',
           }}
         >
-          You are invited to join a unified religion for all people — Submission
-          to God alone. WikiSubmission is a free, open-source home for the
-          Final Testament, the Bible, and the mathematical miracle of&nbsp;19 —
-          tools for every person who seeks God directly, without intermediary.
+          {t('lede')}
         </p>
 
-        {/* CTAs */}
         <div
           style={{
             gridColumn: '1 / -1',
@@ -150,7 +141,7 @@ export function HeroManifesto() {
             className="ed-btn-primary"
             style={{ fontFamily: F.serif }}
           >
-            Read the Final Testament
+            {t('ctaPrimary')}
             <Arrow />
           </Link>
           <button
@@ -159,11 +150,10 @@ export function HeroManifesto() {
             className="ed-btn-ghost"
             style={{ fontFamily: F.serif }}
           >
-            Try SubmissionAI
+            {t('ctaSecondary')}
           </button>
         </div>
 
-        {/* Stats row */}
         <div
           style={{
             gridColumn: '1 / -1',
@@ -174,14 +164,13 @@ export function HeroManifesto() {
             flexWrap: 'wrap',
           }}
         >
-          <Stat k="114" label="chapters" />
-          <Stat k="6,346" label="verses" />
-          <Stat k="4" label="languages" />
-          <Stat k="free" label="always" />
+          <Stat k={t('stat1k')} label={t('stat1label')} />
+          <Stat k={t('stat2k')} label={t('stat2label')} />
+          <Stat k={t('stat3k')} label={t('stat3label')} />
+          <Stat k={t('stat4k')} label={t('stat4label')} />
         </div>
       </div>
 
-      {/* Background ornament */}
       <div
         aria-hidden
         style={{

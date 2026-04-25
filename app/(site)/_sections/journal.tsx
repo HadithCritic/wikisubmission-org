@@ -1,5 +1,7 @@
+'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { F, SectionDivider, Arrow } from './shared'
 
 type Article = {
@@ -13,6 +15,7 @@ type Article = {
 }
 
 export function JournalSection({ articles }: { articles: Article[] }) {
+  const t = useTranslations('homePage.journal')
   if (articles.length === 0) return null
 
   return (
@@ -26,7 +29,11 @@ export function JournalSection({ articles }: { articles: Article[] }) {
         className="px-4 sm:px-6 md:px-10"
         style={{ maxWidth: 1240, margin: '0 auto' }}
       >
-        <SectionDivider num="V" title="The Journal" sub="Recent writing" />
+        <SectionDivider
+          num={t('dividerNum')}
+          title={t('dividerTitle')}
+          sub={t('dividerSub')}
+        />
 
         <div
           style={{ gap: 24 }}
@@ -150,7 +157,7 @@ export function JournalSection({ articles }: { articles: Article[] }) {
 
         {/* All writing link */}
         <Link href="/blog" className="ed-cta" style={{ marginTop: 40, display: 'inline-flex' }}>
-          All writing <Arrow />
+          {t('allWriting')} <Arrow />
         </Link>
       </div>
     </section>

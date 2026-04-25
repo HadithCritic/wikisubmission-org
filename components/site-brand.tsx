@@ -7,6 +7,7 @@ import gsap from 'gsap'
 
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
+  mono: 'var(--font-jetbrains), ui-monospace, monospace',
 }
 
 type SiteBrandProps = {
@@ -28,16 +29,17 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
     const submission = root.querySelector('[data-brand-submission]')
 
     gsap
-      .timeline({ defaults: { ease: 'back.out(2.2)' } })
-      .to(mark, { scale: 1.18, rotate: -5, duration: 0.16 })
-      .to(wiki, { y: -2, scale: 1.06, duration: 0.16 }, '<0.03')
-      .to(submission, { y: 2, scale: 1.03, duration: 0.16 }, '<0.04')
+      .timeline({ defaults: { ease: 'power2.out' } })
+      .to(mark, { rotate: -8, scale: 1.08, duration: 0.18 })
+      .to(wiki, { y: -1, duration: 0.16 }, '<')
+      .to(submission, { letterSpacing: '0.005em', duration: 0.16 }, '<')
       .to([mark, wiki, submission], {
+        rotate: 0,
         scale: 1,
         y: 0,
-        rotate: 0,
-        duration: 0.22,
-        ease: 'power2.out',
+        letterSpacing: '-0.025em',
+        duration: 0.28,
+        ease: 'power3.out',
       })
   }, [])
 
@@ -53,21 +55,29 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
 
     playedIntroRef.current = true
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '[data-brand-mark]',
-        { opacity: 0, scale: 0.82, rotate: -12 },
-        { opacity: 1, scale: 1, rotate: 0, duration: 0.42, ease: 'back.out(2)' }
-      )
-      gsap.fromTo(
-        '[data-brand-wiki]',
-        { opacity: 0, x: -8 },
-        { opacity: 1, x: 0, duration: 0.32, ease: 'power2.out', delay: 0.08 }
-      )
-      gsap.fromTo(
-        '[data-brand-submission]',
-        { opacity: 0, x: 8 },
-        { opacity: 1, x: 0, duration: 0.32, ease: 'power2.out', delay: 0.16 }
-      )
+      gsap.set('[data-brand-wiki]', { yPercent: 110, opacity: 0 })
+      gsap.set('[data-brand-submission]', { x: -14, opacity: 0 })
+      gsap.set('[data-brand-mark]', { opacity: 0, scale: 0.7, rotate: -14 })
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+
+      tl.to('[data-brand-mark]', {
+        opacity: 1,
+        scale: 1,
+        rotate: 0,
+        duration: 0.5,
+        ease: 'back.out(1.6)',
+      })
+        .to(
+          '[data-brand-submission]',
+          { opacity: 1, x: 0, duration: 0.5 },
+          '-=0.3'
+        )
+        .to(
+          '[data-brand-wiki]',
+          { opacity: 1, yPercent: 0, duration: 0.55, ease: 'power3.out' },
+          '-=0.25'
+        )
     }, root)
 
     return () => ctx.revert()
@@ -86,29 +96,76 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
         display: 'inline-flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: 12,
         direction: 'ltr',
         unicodeBidi: 'isolate',
-        fontFamily: F.display,
-        fontSize: 23,
-        fontWeight: 600,
-        letterSpacing: '-0.025em',
         color: 'var(--ed-fg)',
-        lineHeight: 1,
         textDecoration: 'none',
+        lineHeight: 1,
       }}
     >
-      <span data-brand-mark style={{ display: 'inline-flex', transformOrigin: '50% 55%' }}>
-        <Image src="/brand-assets/logo-transparent.png" alt="" width={28} height={28} />
+      <span
+        data-brand-mark
+        style={{
+          display: 'inline-flex',
+          transformOrigin: '50% 55%',
+          willChange: 'transform',
+        }}
+      >
+        <Image
+          src="/brand-assets/logo-transparent.png"
+          alt=""
+          width={30}
+          height={30}
+        />
       </span>
+
       <span
         aria-hidden="true"
-        className="max-[380px]:hidden sm:inline whitespace-nowrap"
+        className="max-[380px]:hidden sm:inline-flex"
+        style={{
+          display: 'inline-flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: 2,
+          lineHeight: 1,
+        }}
       >
-        <span data-brand-wiki style={{ display: 'inline-block' }}>
-          Wiki
+        <span
+          style={{
+            display: 'inline-block',
+            overflow: 'hidden',
+            lineHeight: 1,
+            paddingBottom: 1,
+          }}
+        >
+          <span
+            data-brand-wiki
+            style={{
+              display: 'inline-block',
+              fontFamily: F.mono,
+              fontSize: 9.5,
+              letterSpacing: '0.28em',
+              textTransform: 'uppercase',
+              color: 'var(--ed-fg-muted)',
+              willChange: 'transform, opacity',
+            }}
+          >
+            Wiki
+          </span>
         </span>
-        <span data-brand-submission style={{ display: 'inline-block' }}>
+        <span
+          data-brand-submission
+          style={{
+            display: 'inline-block',
+            fontFamily: F.display,
+            fontSize: 22,
+            fontWeight: 600,
+            letterSpacing: '-0.025em',
+            color: 'var(--ed-fg)',
+            willChange: 'transform, opacity',
+          }}
+        >
           Submission
         </span>
       </span>

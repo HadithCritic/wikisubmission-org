@@ -42,7 +42,7 @@ export default function MusicClient() {
   useEffect(() => {
     if (currentTrack) {
       const artistName = currentTrack.artist?.name || 'Unknown Artist'
-      const title = `${currentTrack.title} by ${artistName} | Music (Zikr) | WikiSubmission`
+      const title = `${currentTrack.title} by ${artistName} | Zikr | WikiSubmission`
       const description = `Listen to ${currentTrack.title} by ${artistName} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`
 
       document.title = title
@@ -66,7 +66,7 @@ export default function MusicClient() {
       updateMeta('twitter:description', description)
       updateMeta('twitter:image', currentTrack.artist?.image_url)
     } else if (!isLoading) {
-      document.title = 'Music (Zikr) | WikiSubmission'
+      document.title = 'Zikr | WikiSubmission'
     }
   }, [currentTrack, isLoading])
 
