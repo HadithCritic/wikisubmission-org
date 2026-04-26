@@ -1,4 +1,6 @@
+'use client'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { F, SectionDivider, Arrow } from './shared'
 
 function Fact({ k, v, note }: { k: string; v: string; note: string }) {
@@ -51,6 +53,7 @@ function Fact({ k, v, note }: { k: string; v: string; note: string }) {
 }
 
 export function MiracleSection() {
+  const t = useTranslations('homePage.miracle')
   return (
     <section
       className="px-4 sm:px-6 md:px-10"
@@ -61,7 +64,11 @@ export function MiracleSection() {
         margin: '0 auto',
       }}
     >
-      <SectionDivider num="II" title="The Miracle" sub="A physical proof" />
+      <SectionDivider
+        num={t('dividerNum')}
+        title={t('dividerTitle')}
+        sub={t('dividerSub')}
+      />
 
       <div
         style={{ gap: 72, alignItems: 'stretch' }}
@@ -101,7 +108,7 @@ export function MiracleSection() {
                 color: 'var(--ed-fg)',
               }}
             >
-              Over it is nineteen.
+              {t('heading')}
             </h3>
             <p
               style={{
@@ -113,7 +120,7 @@ export function MiracleSection() {
                 marginBottom: 20,
               }}
             >
-              Sura 74, verse 30
+              {t('ref')}
             </p>
             <p
               style={{
@@ -125,12 +132,10 @@ export function MiracleSection() {
                 maxWidth: '44ch',
               }}
             >
-              The Quran is mathematically composed — every chapter, every
-              Bismillah, every letter count interlocked through the number
-              nineteen. It could not have been authored by a human.
+              {t('desc')}
             </p>
             <Link href="/miracle" className="ed-cta">
-              See the evidence <Arrow />
+              {t('cta')} <Arrow />
             </Link>
           </div>
         </div>
@@ -146,10 +151,10 @@ export function MiracleSection() {
           }}
         >
           {[
-            { k: '114', v: 'chapters', note: '= 19 × 6' },
-            { k: '6,346', v: 'numbered verses', note: 'digit sum = 19' },
-            { k: '19', v: 'letters in Bismillah', note: 'opens the Quran' },
-            { k: '1,974', v: 'years gap', note: 'to decoded year' },
+            { k: t('fact1k'), v: t('fact1v'), note: t('fact1note') },
+            { k: t('fact2k'), v: t('fact2v'), note: t('fact2note') },
+            { k: t('fact3k'), v: t('fact3v'), note: t('fact3note') },
+            { k: t('fact4k'), v: t('fact4v'), note: t('fact4note') },
           ].map((f, i) => (
             <div
               key={i}

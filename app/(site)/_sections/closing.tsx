@@ -1,8 +1,12 @@
+'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { F, Arrow } from './shared'
 
 export function ClosingSection() {
+  const t = useTranslations('homePage.closing')
+
   return (
     <section
       className="px-4 sm:px-6 md:px-10"
@@ -24,7 +28,6 @@ export function ClosingSection() {
           textAlign: 'center',
         }}
       >
-        {/* Logo mark */}
         <div style={{ width: 80 }}>
           <Image
             src="/brand-assets/logo-transparent.png"
@@ -35,7 +38,6 @@ export function ClosingSection() {
           />
         </div>
 
-        {/* Quote */}
         <h2
           style={{
             fontFamily: F.display,
@@ -47,8 +49,7 @@ export function ClosingSection() {
             color: 'var(--ed-bg)',
           }}
         >
-          &ldquo;Say, I am instructed to worship God,{' '}
-          <em>devoting</em>{' '}my religion absolutely to Him alone.&rdquo;
+          {t('quote')}
         </h2>
 
         <div
@@ -60,10 +61,9 @@ export function ClosingSection() {
             opacity: 0.6,
           }}
         >
-          — 39:11
+          {t('ref')}
         </div>
 
-        {/* CTAs */}
         <div
           style={{
             display: 'flex',
@@ -78,7 +78,7 @@ export function ClosingSection() {
             className="ed-btn-inv"
             style={{ fontFamily: F.serif }}
           >
-            Start at chapter 1
+            {t('ctaPrimary')}
             <Arrow />
           </Link>
           <Link
@@ -86,7 +86,7 @@ export function ClosingSection() {
             className="ed-btn-ghost-inv"
             style={{ fontFamily: F.serif }}
           >
-            Support the mission
+            {t('ctaSecondary')}
           </Link>
         </div>
       </div>

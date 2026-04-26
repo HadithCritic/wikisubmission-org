@@ -1,6 +1,8 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, Arrow } from './shared'
 
 function Stat({ k, label }: { k: string; label: string }) {
@@ -33,6 +35,9 @@ function Stat({ k, label }: { k: string; label: string }) {
 }
 
 export function HeroManifesto() {
+  const { toggle: toggleAsk } = useChatPanel()
+  const t = useTranslations('homePage.hero')
+
   return (
     <section
       className="px-4 sm:px-6 md:px-10"
@@ -53,7 +58,6 @@ export function HeroManifesto() {
         }}
         className="grid grid-cols-[1.3fr_1fr] max-md:grid-cols-1"
       >
-        {/* Headline */}
         <h1
           style={{
             fontFamily: F.display,
@@ -64,7 +68,7 @@ export function HeroManifesto() {
             color: 'var(--ed-fg)',
           }}
         >
-          <span style={{ display: 'block' }}>Wisdom</span>
+          <span style={{ display: 'block' }}>{t('headline1')}</span>
           <span
             style={{
               display: 'block',
@@ -72,15 +76,14 @@ export function HeroManifesto() {
               color: 'var(--ed-fg-muted)',
             }}
           >
-            for all
+            {t('headline2')}
           </span>
           <span style={{ display: 'block', color: 'var(--ed-accent)' }}>
-            <em>nations.</em>
+            {t('headline3')}
           </span>
         </h1>
 
-        {/* Arabic verse — right column */}
-        <div
+        <aside
           style={{
             borderLeft: '1px solid var(--ed-rule)',
             paddingLeft: 32,
@@ -89,48 +92,42 @@ export function HeroManifesto() {
           className="max-md:border-l-0 max-md:border-t max-md:pl-0 max-md:pt-6"
         >
           <div
-            dir="rtl"
             style={{
-              fontFamily: F.arabic,
-              fontSize: 'clamp(18px, 5vw, 26px)',
-              lineHeight: 1.85,
-              color: 'var(--ed-fg)',
-              textAlign: 'right',
-            }}
-          >
-            ﴿ تَبَارَكَ الَّذِي نَزَّلَ الْفُرْقَانَ عَلَىٰ عَبْدِهِ لِيَكُونَ لِلْعَالَمِينَ نَذِيرًا ﴾
-          </div>
-          <div
-            style={{
-              marginTop: 14,
               fontFamily: F.mono,
               fontSize: 10.5,
-              textTransform: 'uppercase' as const,
+              textTransform: 'uppercase',
               letterSpacing: '0.16em',
-              color: 'var(--ed-fg-muted)',
-              textAlign: 'right',
+              color: 'var(--ed-accent)',
+              marginBottom: 10,
             }}
           >
-            Sura 25 · verse 1
+            {t('verseKicker')}
           </div>
-        </div>
+          <p
+            style={{
+              fontFamily: F.serif,
+              fontSize: 'clamp(14px, 3.6vw, 15px)',
+              lineHeight: 1.65,
+              color: 'var(--ed-fg-muted)',
+              margin: 0,
+            }}
+          >
+            {t('verse')}
+          </p>
+        </aside>
 
-        {/* Lede */}
         <p
           style={{
             fontFamily: F.serif,
             fontSize: 'clamp(16px, 4.2vw, 18px)',
             lineHeight: 1.6,
             color: 'var(--ed-fg-muted)',
-            maxWidth: '52ch',
+            maxWidth: '54ch',
           }}
         >
-          WikiSubmission is a free, open-source home for the Final Testament,
-          the Bible, and the mathematical miracle of&nbsp;19 — tools for every
-          person who seeks God directly, without intermediary.
+          {t('lede')}
         </p>
 
-        {/* CTAs */}
         <div
           style={{
             gridColumn: '1 / -1',
@@ -144,19 +141,19 @@ export function HeroManifesto() {
             className="ed-btn-primary"
             style={{ fontFamily: F.serif }}
           >
-            Read the Final Testament
+            {t('ctaPrimary')}
             <Arrow />
           </Link>
-          <Link
-            href="/miracle"
+          <button
+            type="button"
+            onClick={toggleAsk}
             className="ed-btn-ghost"
             style={{ fontFamily: F.serif }}
           >
-            The miracle of 19
-          </Link>
+            {t('ctaSecondary')}
+          </button>
         </div>
 
-        {/* Stats row */}
         <div
           style={{
             gridColumn: '1 / -1',
@@ -167,14 +164,13 @@ export function HeroManifesto() {
             flexWrap: 'wrap',
           }}
         >
-          <Stat k="114" label="chapters" />
-          <Stat k="6,346" label="verses" />
-          <Stat k="4" label="languages" />
-          <Stat k="free" label="always" />
+          <Stat k={t('stat1k')} label={t('stat1label')} />
+          <Stat k={t('stat2k')} label={t('stat2label')} />
+          <Stat k={t('stat3k')} label={t('stat3label')} />
+          <Stat k={t('stat4k')} label={t('stat4label')} />
         </div>
       </div>
 
-      {/* Background ornament */}
       <div
         aria-hidden
         style={{
