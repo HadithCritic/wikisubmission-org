@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useMemo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useMemo, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
@@ -434,24 +434,17 @@ export const VerseCard = memo(
       [verseId]
     )
 
-    // ─── Multi-select (long-press on touch / double-click on desktop) ──────
+    // ─── Multi-select (explicitly entered from the copy menu) ──────────────
     const selectionActive = useVerseSelection((s) => s.active)
     const isSelected = useVerseSelection((s) =>
       verseId ? s.selected.has(verseId) : false
     )
-    const activateSelection = useVerseSelection((s) => s.activate)
     const toggleSelection = useVerseSelection((s) => s.toggle)
-    const longPressRef = useRef<{
-      timer: number | null
-      startX: number
-      startY: number
-      fired: boolean
-    }>({ timer: null, startX: 0, startY: 0, fired: false })
 
-    // Skip selection gestures when the interaction starts on an interactive
+    // Skip selection handling when the interaction starts on an interactive
     // control (audio/copy/bookmark buttons, dropdown triggers, or menu items).
     // Links (the verse-key pill) are intentionally NOT skipped — users should
-    // be able to long-press anywhere on the card.
+    // be able to select that verse while multi-select mode is active.
     const isInteractiveTarget = (el: EventTarget | null) => {
       const node = el as HTMLElement | null
       return !!node?.closest(
@@ -459,101 +452,25 @@ export const VerseCard = memo(
       )
     }
 
-    const cancelLongPress = useCallback(() => {
-      const ref = longPressRef.current
-      if (ref.timer !== null) {
-        window.clearTimeout(ref.timer)
-        ref.timer = null
-      }
-    }, [])
-
-    useEffect(() => cancelLongPress, [cancelLongPress])
-
-    const onCardPointerDown = useCallback(
-      (e: React.PointerEvent<HTMLDivElement>) => {
-        if (!verseId) return
-        if (isInteractiveTarget(e.target)) return
-
-        // While in selection mode, a plain tap toggles.
-        if (selectionActive) {
-          toggleSelection(verse)
-          longPressRef.current.fired = true
-          return
-        }
-
-        // Start a long-press timer. Activates selection after 500ms unless
-        // the pointer is released, moves too far, or gets cancelled first.
-        const ref = longPressRef.current
-        ref.startX = e.clientX
-        ref.startY = e.clientY
-        ref.fired = false
-        cancelLongPress()
-        ref.timer = window.setTimeout(() => {
-          ref.timer = null
-          ref.fired = true
-          activateSelection(verse)
-          if ('vibrate' in navigator) {
-            try {
-              navigator.vibrate(30)
-            } catch {
-              // ignore
-            }
-          }
-        }, 500)
-      },
-      [verse, verseId, selectionActive, toggleSelection, activateSelection, cancelLongPress]
-    )
-
-    const onCardPointerMove = useCallback(
-      (e: React.PointerEvent<HTMLDivElement>) => {
-        const ref = longPressRef.current
-        if (ref.timer === null) return
-        const dx = e.clientX - ref.startX
-        const dy = e.clientY - ref.startY
-        if (dx * dx + dy * dy > 100) cancelLongPress()
-      },
-      [cancelLongPress]
-    )
-
-    const onCardPointerEnd = useCallback(() => {
-      cancelLongPress()
-    }, [cancelLongPress])
-
-    const onCardDoubleClick = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!verseId) return
-        if (isInteractiveTarget(e.target)) return
-        e.preventDefault()
-        e.stopPropagation()
-        toggleSelection(verse)
-        longPressRef.current.fired = true
-      },
-      [verse, verseId, toggleSelection]
-    )
-
     const onCardContextMenu = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
-        // Suppress the mobile/desktop context menu while a long-press is
-        // active or selection is on — it fights the gesture.
-        if (longPressRef.current.fired || selectionActive) e.preventDefault()
+        // Suppress the context menu while selection mode is active; card taps
+        // should only toggle membership until the user exits the mode.
+        if (selectionActive) e.preventDefault()
       },
       [selectionActive]
     )
 
     const onCardClickCapture = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
-        // Suppress `verseHref` Link navigation once selection is active or a
-        // long-press/double-click has just fired. The buttons (copy/audio)
-        // remain fully interactive.
-        if (longPressRef.current.fired || selectionActive) {
-          if (!isInteractiveTarget(e.target)) {
-            e.preventDefault()
-            e.stopPropagation()
-          }
-          longPressRef.current.fired = false
+        if (!selectionActive || !verseId) return
+        if (!isInteractiveTarget(e.target)) {
+          e.preventDefault()
+          e.stopPropagation()
+          toggleSelection(verse)
         }
       },
-      [selectionActive]
+      [selectionActive, verseId, verse, toggleSelection]
     )
 
     const handlePlay = useCallback(() => {
@@ -568,14 +485,9 @@ export const VerseCard = memo(
     return (
       <div
         id={verseId}
-        onPointerDown={onCardPointerDown}
-        onPointerMove={onCardPointerMove}
-        onPointerUp={onCardPointerEnd}
-        onPointerCancel={onCardPointerEnd}
-        onDoubleClick={onCardDoubleClick}
         onContextMenu={onCardContextMenu}
         onClickCapture={onCardClickCapture}
-        style={{ WebkitTouchCallout: 'none', WebkitUserSelect: selectionActive ? 'none' : undefined }}
+        style={{ WebkitUserSelect: selectionActive ? 'none' : undefined }}
         className={`relative transition-colors duration-500 ${
           isSelected ? 'bg-primary/10 ring-2 ring-primary ring-inset' : ''
         } ${

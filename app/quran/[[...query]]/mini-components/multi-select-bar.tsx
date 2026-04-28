@@ -9,6 +9,7 @@ import {
   FileText,
   Image as ImageIcon,
   ListTree,
+  Loader2,
   X,
 } from 'lucide-react'
 import {
@@ -33,6 +34,9 @@ export function MultiSelectBar() {
   const ordered = useVerseSelection((s) => s.ordered)
   const prefs = useQuranPreferences()
   const [imageSupported, setImageSupported] = useState(false)
+  const [pendingKind, setPendingKind] = useState<CopyKind | null>(null)
+  const isPending = pendingKind !== null
+  const imagePending = pendingKind?.endsWith('image') ?? false
 
   useEffect(() => {
     // Feature-detection runs after hydration to keep SSR and client markup in sync.
@@ -52,8 +56,10 @@ export function MultiSelectBar() {
 
   const runCopy = useCallback(
     async (kind: CopyKind) => {
+      if (pendingKind) return
       const verses = ordered()
       if (verses.length === 0) return
+      setPendingKind(kind)
       const primaryCode =
         prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
       const secondaryCode =
@@ -68,32 +74,39 @@ export function MultiSelectBar() {
         includeTransliteration: prefs.transliteration,
         includeFootnotes: prefs.footnotes,
       }
+      let copied = false
       try {
         if (kind === 'full-text') {
           await navigator.clipboard.writeText(
             buildMultiVerseMarkdown(verses, 'full', copyPrefs)
           )
           toast.success(t('done_text'))
+          copied = true
         } else if (kind === 'wbw-text') {
           await navigator.clipboard.writeText(
             buildMultiVerseMarkdown(verses, 'wbw', copyPrefs)
           )
           toast.success(t('done_text'))
+          copied = true
         } else if (kind === 'full-image') {
           await copyVersesImage(verses, 'full', { prefs: copyPrefs })
           toast.success(t('done_image'))
+          copied = true
         } else if (kind === 'wbw-image') {
           await copyVersesImage(verses, 'wbw', { prefs: copyPrefs })
           toast.success(t('done_image'))
+          copied = true
         }
-        clear()
       } catch {
         toast.error(
           kind.endsWith('image') ? t('error_image') : t('error_text')
         )
+      } finally {
+        setPendingKind(null)
       }
+      if (copied) clear()
     },
-    [ordered, prefs, clear, t]
+    [ordered, prefs, clear, t, pendingKind]
   )
 
   if (!active) return null
@@ -112,15 +125,21 @@ export function MultiSelectBar() {
           <button
             type="button"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-primary-foreground bg-primary hover:opacity-90 transition-opacity rounded-r-none"
+            disabled={isPending}
             onClick={() => runCopy('full-text')}
           >
-            <Copy className="w-3.5 h-3.5" />
+            {imagePending ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
             <span>{t('copy')}</span>
           </button>
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={t('more')}
               className="h-7.5 flex items-center justify-center px-1.5 rounded-full rounded-l-none bg-primary text-primary-foreground hover:opacity-90 transition-opacity border-l border-primary-foreground/20"
+              disabled={isPending}
             >
               <ChevronDown className="w-3.5 h-3.5" />
             </DropdownMenuTrigger>
@@ -130,22 +149,34 @@ export function MultiSelectBar() {
               sideOffset={8}
               className="min-w-56"
             >
-              <DropdownMenuItem onSelect={() => runCopy('full-text')}>
+              <DropdownMenuItem
+                disabled={isPending}
+                onSelect={() => runCopy('full-text')}
+              >
                 <FileText className="w-4 h-4" />
                 <span>{t('full_verse_text')}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => runCopy('wbw-text')}>
+              <DropdownMenuItem
+                disabled={isPending}
+                onSelect={() => runCopy('wbw-text')}
+              >
                 <ListTree className="w-4 h-4" />
                 <span>{t('word_by_word_text')}</span>
               </DropdownMenuItem>
               {imageSupported && (
                 <>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => runCopy('full-image')}>
+                  <DropdownMenuItem
+                    disabled={isPending}
+                    onSelect={() => runCopy('full-image')}
+                  >
                     <ImageIcon className="w-4 h-4" />
                     <span>{t('full_verse_image')}</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => runCopy('wbw-image')}>
+                  <DropdownMenuItem
+                    disabled={isPending}
+                    onSelect={() => runCopy('wbw-image')}
+                  >
                     <ImageIcon className="w-4 h-4" />
                     <span>{t('word_by_word_image')}</span>
                   </DropdownMenuItem>
@@ -159,6 +190,7 @@ export function MultiSelectBar() {
           type="button"
           aria-label={t('cancel')}
           className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:bg-muted transition-colors"
+          disabled={isPending}
           onClick={clear}
         >
           <X className="w-4 h-4" />

@@ -79,6 +79,7 @@
       "copy": "Kopyala",
       "full_verse_text": "Ayetin tamamını kopyala",
       "word_by_word_text": "Kelime kelime kopyala",
+      "select_multiple": "Birden fazla seç",
       "full_verse_image": "Resim olarak kopyala",
       "word_by_word_image": "Kelime kelime resim olarak kopyala",
       "selected": "{count} seçildi",

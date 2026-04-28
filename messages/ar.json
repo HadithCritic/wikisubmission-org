@@ -79,6 +79,7 @@
       "copy": "نسخ",
       "full_verse_text": "نسخ الآية كاملة",
       "word_by_word_text": "نسخ كلمة بكلمة",
+      "select_multiple": "اختيار عدة آيات",
       "full_verse_image": "نسخ كصورة",
       "word_by_word_image": "نسخ كلمة بكلمة كصورة",
       "selected": "تم اختيار {count}",

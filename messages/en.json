@@ -79,6 +79,7 @@
       "copy": "Copy",
       "full_verse_text": "Copy full verse",
       "word_by_word_text": "Copy word by word",
+      "select_multiple": "Select multiple",
       "full_verse_image": "Copy as image",
       "word_by_word_image": "Copy word-by-word as image",
       "selected": "{count} selected",

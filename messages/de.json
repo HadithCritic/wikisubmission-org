@@ -79,6 +79,7 @@
       "copy": "Kopieren",
       "full_verse_text": "Ganzen Vers kopieren",
       "word_by_word_text": "Wort für Wort kopieren",
+      "select_multiple": "Mehrere auswählen",
       "full_verse_image": "Als Bild kopieren",
       "word_by_word_image": "Wort-für-Wort als Bild kopieren",
       "selected": "{count} ausgewählt",

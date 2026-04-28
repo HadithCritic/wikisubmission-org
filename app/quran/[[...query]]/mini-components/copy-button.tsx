@@ -10,6 +10,8 @@ import {
   FileText,
   Image as ImageIcon,
   ListTree,
+  Loader2,
+  SquareCheck,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -29,6 +31,7 @@ import {
   copyVerseImage,
   type CopyImageOptions,
 } from '@/lib/quran-copy-image'
+import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -80,8 +83,12 @@ export function CopyButton({
 }: CopyButtonProps) {
   const t = useTranslations('quran.copy')
   const [copied, setCopied] = useState(false)
+  const [pendingKind, setPendingKind] = useState<CopyKind | null>(null)
   const [imageSupported, setImageSupported] = useState(false)
+  const activateSelection = useVerseSelection((s) => s.activate)
   const { markdown, image } = usePrefsSnapshot()
+  const isPending = pendingKind !== null
+  const imagePending = pendingKind?.endsWith('image') ?? false
 
   useEffect(() => {
     // Feature-detection runs after hydration to keep SSR and client markup in sync.
@@ -96,6 +103,8 @@ export function CopyButton({
 
   const runCopy = useCallback(
     async (kind: CopyKind) => {
+      if (pendingKind) return
+      setPendingKind(kind)
       try {
         if (kind === 'full-text') {
           const md = buildVerseMarkdown(verse, {
@@ -133,10 +142,17 @@ export function CopyButton({
         toast.error(
           kind.endsWith('image') ? t('error_image') : t('error_text')
         )
+      } finally {
+        setPendingKind(null)
       }
     },
-    [verse, markdown, image, searchHighlight, flashCopied, t]
+    [verse, markdown, image, searchHighlight, flashCopied, t, pendingKind]
   )
+
+  const startMultiSelect = useCallback(() => {
+    if (isPending) return
+    activateSelection(verse)
+  }, [activateSelection, verse, isPending])
 
   const iconButtonBase =
     'h-8 flex items-center justify-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors'
@@ -147,9 +163,12 @@ export function CopyButton({
         type="button"
         aria-label={t('aria')}
         className={`${iconButtonBase} w-8 ${compact ? '' : 'rounded-r-none pr-1'}`}
+        disabled={isPending}
         onClick={() => runCopy('full-text')}
       >
-        {copied ? (
+        {imagePending ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : copied ? (
           <Check className="w-4 h-4 text-green-500" />
         ) : (
           <Copy className="w-4 h-4" />
@@ -161,26 +180,47 @@ export function CopyButton({
           <DropdownMenuTrigger
             aria-label={t('more')}
             className={`${iconButtonBase} w-5 rounded-l-none pl-0.5`}
+            disabled={isPending}
           >
             <ChevronDown className="w-3 h-3" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={6} className="min-w-56">
-            <DropdownMenuItem onSelect={() => runCopy('full-text')}>
+            <DropdownMenuItem
+              disabled={isPending}
+              onSelect={() => runCopy('full-text')}
+            >
               <FileText className="w-4 h-4" />
               <span>{t('full_verse_text')}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => runCopy('wbw-text')}>
+            <DropdownMenuItem
+              disabled={isPending}
+              onSelect={() => runCopy('wbw-text')}
+            >
               <ListTree className="w-4 h-4" />
               <span>{t('word_by_word_text')}</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              disabled={isPending}
+              onSelect={startMultiSelect}
+            >
+              <SquareCheck className="w-4 h-4" />
+              <span>{t('select_multiple')}</span>
             </DropdownMenuItem>
             {imageSupported && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => runCopy('full-image')}>
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => runCopy('full-image')}
+                >
                   <ImageIcon className="w-4 h-4" />
                   <span>{t('full_verse_image')}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => runCopy('wbw-image')}>
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => runCopy('wbw-image')}
+                >
                   <ImageIcon className="w-4 h-4" />
                   <span>{t('word_by_word_image')}</span>
                 </DropdownMenuItem>
