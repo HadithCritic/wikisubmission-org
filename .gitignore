@@ -44,7 +44,9 @@ next-env.d.ts
 messages/*.d.json.ts
 # clerk configuration (can include secrets)
 /.clerk/
+
 bun.lock
 CLAUDE.md
 hooks/use-verse-search.ts
 todo.md
+.claude*

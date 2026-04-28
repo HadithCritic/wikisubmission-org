@@ -41,7 +41,13 @@ export function useChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: trimmed, conversation_id: conversationIdRef.current }),
       })
-      const data = await res.json()
+      const raw = await res.text()
+      let data: { answer?: string; sources?: string[]; error?: string } = {}
+      try {
+        data = raw ? JSON.parse(raw) : {}
+      } catch {
+        throw new Error(res.ok ? 'AI service returned an invalid response.' : 'AI service is unavailable right now.')
+      }
       if (!res.ok) throw new Error(data.error || `Error ${res.status}`)
       setMessages(prev =>
         prev.map((m, i) =>
