@@ -21,6 +21,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { AblutionSlideshow } from './ablution-slideshow'
+import { F } from '../_sections/shared'
+
 
 type VerseData = components['schemas']['VerseData']
 
@@ -62,7 +64,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-4 mb-8">
       <div className="h-px w-8 bg-[var(--ed-accent)]" />
-      <span className="font-bold text-[11px] tracking-[0.25em] uppercase text-[var(--ed-accent)]">
+      <span 
+        className="font-bold text-[11px] tracking-[0.25em] uppercase text-[var(--ed-accent)]"
+        style={{ fontFamily: F.glacial }}
+      >
         {children}
       </span>
     </div>
@@ -80,11 +85,17 @@ function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
       <div className="block p-6 border-l-2 border-[var(--ed-accent)]/20 bg-[var(--ed-surface)]/10">
         <div className="flex items-center gap-2 mb-3">
           <BookOpen size={12} className="text-[var(--ed-accent)] opacity-60" />
-          <span className="font-bold text-[10px] tracking-widest uppercase text-[var(--ed-accent)]">
+          <span 
+            className="font-bold text-[10px] tracking-widest uppercase text-[var(--ed-accent)]"
+            style={{ fontFamily: F.glacial }}
+          >
             {verseKey}
           </span>
         </div>
-        <p className="text-sm md:text-base text-[var(--ed-fg-muted)] italic font-serif leading-relaxed opacity-70">
+        <p 
+          className="text-sm md:text-base text-[var(--ed-fg-muted)] italic leading-relaxed opacity-70"
+          style={{ fontFamily: F.serif }}
+        >
           &ldquo;{text}&rdquo;
         </p>
       </div>
@@ -140,10 +151,16 @@ export default function PracticesClient({
                 </div>
               </div>
 
-              <h1 className="text-6xl md:text-8xl font-bold text-[var(--ed-fg)] leading-[0.95] tracking-tighter uppercase">
+              <h1 
+                className="text-6xl md:text-8xl font-bold text-[var(--ed-fg)] leading-[0.95] tracking-tighter uppercase"
+                style={{ fontFamily: F.display }}
+              >
                 {t('heading')}
               </h1>
-              <p className="text-lg md:text-xl text-[var(--ed-fg-muted)] leading-relaxed max-w-2xl font-serif italic">
+              <p 
+                className="text-lg md:text-xl text-[var(--ed-fg-muted)] leading-relaxed max-w-2xl italic"
+                style={{ fontFamily: F.serif }}
+              >
                 {t('description')}
               </p>
             </motion.div>
@@ -157,10 +174,16 @@ export default function PracticesClient({
           <div className="lg:col-span-4 space-y-10">
             <div>
               <SectionLabel>{t('sectionPrayerLabel')}</SectionLabel>
-              <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-6">
+              <h2 
+                className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-6"
+                style={{ fontFamily: F.display }}
+              >
                 {t('prayerTimes')}
               </h2>
-              <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8 font-serif">
+              <p 
+                className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8"
+                style={{ fontFamily: F.serif }}
+              >
                 Establish the five daily contact prayers, precisely timed to the sun's position.
               </p>
             </div>
@@ -196,10 +219,16 @@ export default function PracticesClient({
             <div className="lg:col-span-5 order-1 lg:order-2 space-y-10">
               <div>
                 <SectionLabel>{t('sectionZakatLabel')}</SectionLabel>
-                <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-6">
+                <h2 
+                  className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-6"
+                  style={{ fontFamily: F.display }}
+                >
                   {t('zakat')}
                 </h2>
-                <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8 font-serif">
+                <p 
+                  className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8"
+                  style={{ fontFamily: F.serif }}
+                >
                   {t('zakatDescription')}
                 </p>
               </div>
@@ -223,7 +252,10 @@ export default function PracticesClient({
           <div className="mb-12">
             <SectionLabel>{t('sectionRamadanLabel')}</SectionLabel>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]">
+              <h2 
+                className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]"
+                style={{ fontFamily: F.display }}
+              >
                 {t('ramadan')}
               </h2>
               <div className="flex items-center gap-6">
@@ -232,12 +264,18 @@ export default function PracticesClient({
                   className="group inline-flex items-center gap-3 px-5 py-2 border border-[var(--ed-rule)] hover:bg-[var(--ed-accent)] hover:text-white hover:border-[var(--ed-accent)] transition-all"
                 >
                   <Calendar size={12} className="opacity-60 group-hover:opacity-100 transition-opacity" />
-                  <span className="font-bold text-[9px] uppercase tracking-[0.15em]">
+                  <span 
+                    className="font-bold text-[9px] uppercase tracking-[0.15em]"
+                    style={{ fontFamily: F.glacial }}
+                  >
                     Fasting Guide
                   </span>
                 </Link>
                 {daysUntilRamadan > 0 && (
-                  <div className="font-bold text-[10px] tracking-[0.15em] uppercase text-[var(--ed-accent)] flex items-center gap-2">
+                  <div 
+                    className="font-bold text-[10px] tracking-[0.15em] uppercase text-[var(--ed-accent)] flex items-center gap-2"
+                    style={{ fontFamily: F.glacial }}
+                  >
                     <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
                     T-minus {daysUntilRamadan} days
                   </div>
@@ -256,12 +294,18 @@ export default function PracticesClient({
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div className="flex-1">
             <SectionLabel>{t('knowledgeLabel')}</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]">
+            <h2 
+              className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]"
+              style={{ fontFamily: F.display }}
+            >
               {t('learnMore')}
             </h2>
           </div>
           <div className="h-px hidden md:block flex-1 mx-12 bg-[var(--ed-rule)]/30" />
-          <span className="font-bold text-[10px] tracking-[0.2em] uppercase text-[var(--ed-fg-muted)] opacity-30">
+          <span 
+            className="font-bold text-[10px] tracking-[0.2em] uppercase text-[var(--ed-fg-muted)] opacity-30"
+            style={{ fontFamily: F.glacial }}
+          >
             {t('comingSoon')}
           </span>
         </div>
@@ -278,8 +322,18 @@ export default function PracticesClient({
                     <card.icon size={22} />
                   </div>
                 </div>
-                <h3 className="text-xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-3">{card.title}</h3>
-                <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed font-serif transition-opacity">{card.description}</p>
+                <h3 
+                  className="text-xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-3"
+                  style={{ fontFamily: F.display }}
+                >
+                  {card.title}
+                </h3>
+                <p 
+                  className="text-xs text-[var(--ed-fg-muted)] leading-relaxed transition-opacity"
+                  style={{ fontFamily: F.serif }}
+                >
+                  {card.description}
+                </p>
               </div>
             </div>
           ))}
