@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import PrayerTimesClient from './prayer-times-client'
 import RamadanClient from './ramadan-client'
 import { ZakatCalculator } from '@/components/zakat-calculator'
+
 import type { components } from '@/src/api/types.gen'
 import { useTranslations } from 'next-intl'
 import {
@@ -15,8 +16,11 @@ import {
   ArrowUpRight,
   Sun,
   Moon,
-  Wallet
+  Wallet,
+  Link as LinkIcon
 } from 'lucide-react'
+import Link from 'next/link'
+import { AblutionSlideshow } from './ablution-slideshow'
 
 type VerseData = components['schemas']['VerseData']
 
@@ -56,9 +60,9 @@ function daysUntilNextRamadan(): number {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 mb-6">
-      <div className="h-px w-8 bg-[var(--ed-accent)]/40" />
-      <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-[var(--ed-accent)] opacity-60">
+    <div className="flex items-center gap-4 mb-8">
+      <div className="h-px w-8 bg-[var(--ed-accent)]" />
+      <span className="font-bold text-[11px] tracking-[0.25em] uppercase text-[var(--ed-accent)]">
         {children}
       </span>
     </div>
@@ -75,8 +79,8 @@ function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
     >
       <div className="block p-6 border-l-2 border-[var(--ed-accent)]/20 bg-[var(--ed-surface)]/10">
         <div className="flex items-center gap-2 mb-3">
-          <BookOpen size={12} className="text-[var(--ed-accent)] opacity-40" />
-          <span className="font-mono text-[9px] tracking-widest uppercase text-[var(--ed-accent)] opacity-50">
+          <BookOpen size={12} className="text-[var(--ed-accent)] opacity-60" />
+          <span className="font-bold text-[10px] tracking-widest uppercase text-[var(--ed-accent)]">
             {verseKey}
           </span>
         </div>
@@ -102,6 +106,7 @@ export default function PracticesClient({
   const daysUntilRamadan = useMemo(() => daysUntilNextRamadan(), [])
   const showRamadan = daysUntilRamadan <= 15
 
+
   const zakatText = zakatVerse?.tr?.['en']?.tx
   const prayerText = prayerVerse?.tr?.['en']?.tx
 
@@ -113,12 +118,13 @@ export default function PracticesClient({
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative bg-[var(--ed-bg)]">
+      <div className="relative z-10">
       {/* ── Minimalist Hero ─────────────────────────────────────────── */}
       <section className="relative border-b border-[var(--ed-rule)] overflow-hidden">
         {/* Subtle Background HUD Grid */}
-        <div className="absolute inset-0 z-0 bg-grid opacity-[0.02]" />
-
+        {/* Subtle Background HUD Grid */}
+        
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-20 md:pt-32 md:pb-28">
           <div className="max-w-3xl space-y-8">
             <motion.div
@@ -134,10 +140,10 @@ export default function PracticesClient({
                 </div>
               </div>
 
-              <h1 className="text-6xl md:text-8xl font-serif font-medium text-[var(--ed-fg)] leading-[0.95] tracking-tight">
+              <h1 className="text-6xl md:text-8xl font-bold text-[var(--ed-fg)] leading-[0.95] tracking-tighter uppercase">
                 {t('heading')}
               </h1>
-              <p className="text-lg md:text-xl text-[var(--ed-fg-muted)] leading-relaxed opacity-60">
+              <p className="text-lg md:text-xl text-[var(--ed-fg-muted)] leading-relaxed max-w-2xl font-serif italic">
                 {t('description')}
               </p>
             </motion.div>
@@ -150,111 +156,136 @@ export default function PracticesClient({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           <div className="lg:col-span-4 space-y-10">
             <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)] mb-6">
+              <SectionLabel>{t('sectionPrayerLabel')}</SectionLabel>
+              <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-6">
                 {t('prayerTimes')}
               </h2>
-              <div className="p-1 rounded-[32px] bg-gradient-to-br from-[var(--ed-rule)] to-transparent">
-                <div className="bg-[var(--ed-bg)] rounded-[31px] p-6 md:p-10 border border-[var(--ed-rule)]/50">
-                  <PrayerTimesClient />
-                </div>
-              </div>
+              <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8 font-serif">
+                Establish the five daily contact prayers, precisely timed to the sun's position.
+              </p>
+            </div>
+
+            {prayerText && (
+              <VerseQuote
+                verseKey="4:103"
+                text={prayerText}
+              />
+            )}
+          </div>
+
+          <div className="lg:col-span-8">
+            <div className="bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] p-6 md:p-10">
+              <PrayerTimesClient />
             </div>
           </div>
         </div>
       </section>
+
+
 
       {/* ── Zakat ─────────────────────────────────────────────────────── */}
       <section className="relative py-20 md:py-28 bg-[var(--ed-surface)]/10 border-y border-[var(--ed-rule)]">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <div className="lg:col-span-7 order-2 lg:order-1">
-              <div className="p-1 rounded-[32px] bg-gradient-to-br from-[var(--ed-rule)] to-transparent shadow-2xl">
-                <div className="bg-[var(--ed-bg)] rounded-[31px] p-6 md:p-10 border border-[var(--ed-rule)]/50">
-                  <ZakatCalculator />
-                </div>
+              <div className="bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] p-6 md:p-10">
+                <ZakatCalculator />
               </div>
             </div>
 
             <div className="lg:col-span-5 order-1 lg:order-2 space-y-10">
               <div>
                 <SectionLabel>{t('sectionZakatLabel')}</SectionLabel>
-                <h2 className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)] mb-6">
+                <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-6">
                   {t('zakat')}
                 </h2>
-                <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed opacity-60">
+                <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8 font-serif">
                   {t('zakatDescription')}
                 </p>
               </div>
 
-              {zakatText && (
-                <VerseQuote
-                  verseKey="2:215"
-                  text={zakatText}
-                />
-              )}
+              <VerseQuote
+                verseKey="2:215"
+                text={t('zakatQuote')}
+              />
             </div>
           </div>
         </div>
       </section>
 
+      {/* ── Ablution Slideshow ────────────────────────────────────────── */}
+      <AblutionSlideshow />
+
+
       {/* ── Ramadan ───────────────────────────────────────────────────── */}
       {showRamadan && (
-        <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
+        <section className="max-w-6xl mx-auto px-6 py-12 md:py-16">
           <div className="mb-12">
             <SectionLabel>{t('sectionRamadanLabel')}</SectionLabel>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <h2 className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)]">
+              <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]">
                 {t('ramadan')}
               </h2>
-              {daysUntilRamadan > 0 && (
-                <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--ed-accent)] opacity-50 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)] animate-pulse" />
-                  {t('ramadanCountdown', { days: daysUntilRamadan })}
-                </div>
-              )}
+              <div className="flex items-center gap-6">
+                <Link 
+                  href="/practices/ramadan"
+                  className="group inline-flex items-center gap-3 px-5 py-2 border border-[var(--ed-rule)] hover:bg-[var(--ed-accent)] hover:text-white hover:border-[var(--ed-accent)] transition-all"
+                >
+                  <Calendar size={12} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <span className="font-bold text-[9px] uppercase tracking-[0.15em]">
+                    Fasting Guide
+                  </span>
+                </Link>
+                {daysUntilRamadan > 0 && (
+                  <div className="font-bold text-[10px] tracking-[0.15em] uppercase text-[var(--ed-accent)] flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
+                    T-minus {daysUntilRamadan} days
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <div className="p-1 rounded-[32px] bg-gradient-to-br from-[var(--ed-rule)] to-transparent">
-            <div className="bg-[var(--ed-bg)] rounded-[31px] p-6 md:p-10 border border-[var(--ed-rule)]/50">
-              <RamadanClient />
-            </div>
+          <div className="bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] p-6 md:p-10">
+            <RamadanClient />
           </div>
         </section>
       )}
 
       {/* ── Knowledge Base ───────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <section className="max-w-6xl mx-auto px-6 py-12 md:py-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div className="flex-1">
             <SectionLabel>{t('knowledgeLabel')}</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)]">
+            <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]">
               {t('learnMore')}
             </h2>
           </div>
           <div className="h-px hidden md:block flex-1 mx-12 bg-[var(--ed-rule)]/30" />
-          <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-[var(--ed-fg-muted)] opacity-30">
+          <span className="font-bold text-[10px] tracking-[0.2em] uppercase text-[var(--ed-fg-muted)] opacity-30">
             {t('comingSoon')}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--ed-rule)] border border-[var(--ed-rule)] rounded-[24px] overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--ed-rule)] border border-[var(--ed-rule)] overflow-hidden">
           {LEARNING_CARDS.map((card, i) => (
             <div
               key={i}
-              className="group bg-[var(--ed-bg)] p-10 hover:bg-[var(--ed-surface)]/40 transition-all cursor-pointer relative"
+              className="group bg-[var(--ed-bg)] p-10 transition-all relative"
             >
-              <div className="flex items-start justify-between mb-12">
-                <div className="p-3 rounded-xl bg-[var(--ed-surface)] border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-accent)] group-hover:border-[var(--ed-accent)]/30 transition-all">
-                  <card.icon size={22} />
+              <div className="flex flex-col h-full">
+                <div className="flex items-start justify-between mb-12">
+                  <div className="p-3 bg-[var(--ed-surface)] border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-accent)] group-hover:border-[var(--ed-accent)]/30 transition-all">
+                    <card.icon size={22} />
+                  </div>
                 </div>
-                <ArrowUpRight size={16} className="text-[var(--ed-fg-muted)] opacity-0 group-hover:opacity-30 transition-opacity" />
+                <h3 className="text-xl font-bold uppercase tracking-tight text-[var(--ed-fg)] mb-3">{card.title}</h3>
+                <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed font-serif transition-opacity">{card.description}</p>
               </div>
-              <h3 className="text-xl font-serif font-medium text-[var(--ed-fg)] mb-3">{card.title}</h3>
-              <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed opacity-50 group-hover:opacity-70 transition-opacity">{card.description}</p>
             </div>
           ))}
         </div>
       </section>
+    </div>
     </div>
   )
 }
