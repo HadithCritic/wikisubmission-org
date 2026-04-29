@@ -182,10 +182,10 @@ export function AblutionSlideshow() {
                 Purification Ritual
               </span>
               <h2 
-                className="text-5xl md:text-7xl font-medium text-[var(--ed-fg)] leading-[0.85] tracking-tighter uppercase"
-                style={{ fontFamily: F.display }}
+                className="text-4xl md:text-6xl font-medium text-[var(--ed-fg)] leading-[1.1] tracking-tight"
+                style={{ fontFamily: F.serif }}
               >
-                THE <br />ABLUTION
+                The Ablution
               </h2>
             </div>
             <div className="flex items-center gap-6">
@@ -253,8 +253,8 @@ export function AblutionSlideshow() {
                         <div className="h-px flex-1 bg-[var(--ed-rule)]" />
                       </div>
                       <h3 
-                        className="text-3xl md:text-4xl font-bold text-[var(--ed-fg)] tracking-tight leading-tight text-center uppercase"
-                        style={{ fontFamily: F.display }}
+                        className="text-2xl md:text-3xl font-semibold text-[var(--ed-fg)] tracking-tight leading-tight text-center"
+                        style={{ fontFamily: F.serif }}
                       >
                         {step.title}
                       </h3>

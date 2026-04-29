@@ -172,8 +172,8 @@ function RamadanContent() {
               </span>
             </div>
             <h2 
-              className="text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]"
-              style={{ fontFamily: F.display }}
+              className="text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
+              style={{ fontFamily: F.serif }}
             >
               {t('schedule', { year: data.year })}
             </h2>
